@@ -184,8 +184,8 @@ int read_tensor(const char* file)
 		//printf("\n");
 		int num_fiber = count_fiber(pindex,nnz,nmode,ii);
 		double nnz_per_fiber = ((double) nnz)/num_fiber;
-		printf("Active number of fibers for mode %d is %d\n",(nmode - 1 + ii)%nmode , num_fiber);
-		printf("NNZ per fiber for mode %d is %lf\n",(nmode - 1 + ii)%nmode , nnz_per_fiber);
+		printf("%s Active number of fibers for mode %d is %d\n",file,(nmode - 1 + ii)%nmode , num_fiber);
+		printf("%s NNZ per fiber for mode %d is %lf\n",file,(nmode - 1 + ii)%nmode , nnz_per_fiber);
 	}
 	//if(strstr(buf, "symmetric") != NULL || strstr(buf, "Hermitian") != NULL) sflag = 1;
 
