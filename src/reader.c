@@ -115,6 +115,7 @@ int read_tensor(const char* file)
 	int size = sizestep;
 	int nmode = 0;
 	int nnz = 0;
+	int* mlen;
 	srand(time(NULL));
 	//int compare_nnz(const void *a, const void *b);
 
@@ -137,6 +138,9 @@ int read_tensor(const char* file)
 			num_mode = nmode;
 			index = (idx_t*) malloc(size*nmode*sizeof(idx_t));
 			pindex =(idx_t**)  malloc((size+1)*sizeof(idx_t*));
+			mlen = (int) malloc(nmode*sizeof(int));
+			for(i = 0; i<nmode ; i++)
+				mlen[i] = 0;
 			//pindex[0] = index;
 			
 		}
@@ -150,6 +154,10 @@ int read_tensor(const char* file)
 		for(i = 0; i<nmode ; i++)
 		{
 			index[nnz*nmode + i] = idx[i];
+			if(idx[i] + 1  > mlen[i])
+			{
+				mlen[i] = idx[i]+1
+			}
 		}
 
 		nnz ++;
@@ -158,6 +166,11 @@ int read_tensor(const char* file)
 
 	for(i = 0; i<size+1 ; i++)
 		pindex[i] = index + nmode*i;
+
+	printf("Tensor has dimensions ");
+	for(i = 0; i<nmode-1 ; i++)
+		printf("%dx",mlen[i]);
+	printf("%d and %d nnz\n",mlen[i],nnz);
 
 	for(ii = 0; ii < nmode; ii++)
 	{
