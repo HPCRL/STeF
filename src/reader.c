@@ -156,7 +156,7 @@ int read_tensor(const char* file)
 			index[nnz*nmode + i] = idx[i];
 			if(idx[i] + 1  > mlen[i])
 			{
-				mlen[i] = idx[i]+1
+				mlen[i] = idx[i]+1;
 			}
 		}
 
