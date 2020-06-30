@@ -137,7 +137,7 @@ int read_tensor(const char* file)
 			num_mode = nmode;
 			index = (idx_t*) malloc(size*nmode*sizeof(idx_t));
 			pindex =(idx_t**)  malloc((size+1)*sizeof(idx_t*));
-			pindex[0] = index;
+			//pindex[0] = index;
 			
 		}
 		else if(nnz == size)
@@ -153,8 +153,11 @@ int read_tensor(const char* file)
 		}
 
 		nnz ++;
-		pindex[nnz] = index + nnz*nmode;
+		//pindex[nnz] = index + nnz*nmode;
 	} // Reading is complete
+
+	for(i = 0; i<size+1 ; i++)
+		pindex[i] = index + nmode*i;
 
 	for(ii = 0; ii < nmode; ii++)
 	{
