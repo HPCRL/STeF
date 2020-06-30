@@ -172,7 +172,7 @@ int read_tensor(const char* file)
 		printf("%dx",mlen[i]);
 	printf("%d and %d nnz\n",mlen[i],nnz);
 
-	for(ii = 0; ii < nmode; ii++)
+	for(ii = 1; ii < nmode+1; ii++)
 	{
 		//for(i = 0; i<nnz ; i++)
 		//	printf("%ld ", (pindex[i] - pindex[0])/3 + 1);
