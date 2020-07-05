@@ -5,6 +5,48 @@
 
 int num_mode;
 int sort_shift;
+int* sort_order;
+
+int create_perm(int pern_num, int* order, int size)
+{
+	int it = size;
+	int n = size;
+	int i,j;
+	int remainder;
+	int avail = 1;
+	int next = pern_num;
+	
+	while(it > 0)
+	{
+		it --;
+		remainder = next % n;
+		next = next / n;
+		//printf("remainder %d\n",remainder);
+		i = 0;
+		while(0 <= remainder)
+		{
+			avail = 1;
+			for(j = n; j < size; j++)
+			{
+				if(order[j] == i)
+					avail = 0;
+			}
+			if(avail)				remainder --;
+			i ++;
+		}
+
+		n --;
+		order[it] = i-1;
+	}
+	/*
+	for(i = 0; i< size; i++)
+	{
+		printf("%d ",order[i] );
+	}
+	printf("is the order\n");
+	*/
+	return 0;
+}
 
 int compare_nnz(const void *a, const void *b)
 {
@@ -16,7 +58,8 @@ int compare_nnz(const void *a, const void *b)
 	//printf(" size %d\n", size);
 	for(ii=0 ; ii<size ; ii++)
 	{
-		i = (ii+shift) % size;
+		//i = (ii+shift) % size;
+		i = sort_order[ii];
 		if((*x)[i] < (*y)[i])
 			return -1;
 		else if ((*x)[i] > (*y)[i])
@@ -25,26 +68,63 @@ int compare_nnz(const void *a, const void *b)
 	return 1;
 }
 
-int count_fiber(idx_t** pindex, int nnz, int nmode, int shift)
+int count_fiber(idx_t** pindex, int nnz, int nmode, int shift, int* fiber_count, int* sort_order)
 {
 	int num_fiber = nnz;
 	int i,j,jj,diff;
 	
+	for(i = 0; i<nmode ; i++)
+	{
+		fiber_count[i] = 0;
+	}
+
 	for(i = 1; i<nnz; i++)
 	{
 		diff = 0;
 		for(jj=0;jj<nmode-1;jj++)
 		{
-			j = (jj+shift) % nmode;
+			//j = (jj+shift) % nmode;
+			j = sort_order[jj];
 			if(pindex[i][j] != pindex[i-1][j])
+			{
+				if(diff == 0)
+				{
+					fiber_count[jj] ++;
+				}
 				diff ++;
+			}
 		}
 		if (diff == 0)
 		{
 			num_fiber --;
 		}
 	}
+	fiber_count[0] ++;	
+	/*
+	printf("%d ",fiber_count[0] );
+	*/
+	for(i = 1; i < nmode - 1; i++)
+	{
+		fiber_count[i] += fiber_count[i-1];
+	//	printf("%d ",fiber_count[i] );
+	}
+	//printf("\n" );
+	
 	return num_fiber;
+}
+
+int printt(idx_t** pindex, int nnz, int nmode)
+{
+	int i,j;
+	for(i = 0; i< nnz ; i++)
+	{
+		for(j =0;j<nmode;j++)
+		{
+			printf("%d ",pindex[i][j]);
+		}
+		printf("\n");
+	}
+	return 0 ;
 }
 
 int readline(char* line, idx_t* idx, TYPE* val)
@@ -116,6 +196,7 @@ int read_tensor(const char* file)
 	int nmode = 0;
 	int nnz = 0;
 	int* mlen;
+	int * fiber_count;
 	srand(time(NULL));
 	//int compare_nnz(const void *a, const void *b);
 
@@ -172,23 +253,61 @@ int read_tensor(const char* file)
 		printf("%dx",mlen[i]);
 	printf("%d and %d nnz\n",mlen[i],nnz);
 
-	for(ii = 1; ii < nmode+1; ii++)
+	int nfac = 1;
+	for(i = 1; i <= nmode; i++)
+		nfac *= i;
+
+	sort_order = (int*) malloc(nmode*sizeof(int));
+	fiber_count = (int*) malloc(nmode*sizeof(int));
+	for(i = 1; i <= nfac; i++)
 	{
 		//for(i = 0; i<nnz ; i++)
 		//	printf("%ld ", (pindex[i] - pindex[0])/3 + 1);
 		//printf("\n");
-		sort_shift = ii;
+		//sort_shift = ii;
+		create_perm(i , sort_order , nmode);
 		qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
+
+		//printt(pindex,nnz,nmode);
 		//for(i = 0; i<nnz ; i++)
 		//	printf("%ld ", (pindex[i] - pindex[0])/3 + 1);
 		//printf("\n");
-		int num_fiber = count_fiber(pindex,nnz,nmode,ii);
+		int num_fiber = count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
 		double nnz_per_fiber = ((double) nnz)/num_fiber;
-		printf("%s Active number of fibers for mode %d is %d\n",file,(nmode - 1 + ii)%nmode , num_fiber);
-		printf("%s NNZ per fiber for mode %d is %lf\n",file,(nmode - 1 + ii)%nmode , nnz_per_fiber);
+		printf("%s Active number of fibers for modes ",file);
+		for(ii = 0; ii < nmode; ii++)
+		{
+			printf("%d ",sort_order[ii]);	
+		}
+		
+		printf("is ");
+
+		for(ii = 0; ii < nmode - 1; ii++)
+		{
+			printf("%d ",fiber_count[ii]);
+		}
+		printf("\n");
+
+		printf("%s NNZ per fiber for mode order ",file);
+		for(ii = 0; ii < nmode; ii++)
+		{
+			printf("%d ",sort_order[ii]);	
+		}
+		
+		printf("is ");
+
+		for(ii = 0; ii < nmode - 1; ii++)
+		{
+			printf("%lf ", ((double) nnz)/fiber_count[ii]);
+		}
+		printf("\n");
+			//%d is %lf\n",file,(nmode - 1 + ii)%nmode , nnz_per_fiber);
 	}
 	//if(strstr(buf, "symmetric") != NULL || strstr(buf, "Hermitian") != NULL) sflag = 1;
 
+	//nmode = 5;
+	
+	
 	return 0;
 }
 
