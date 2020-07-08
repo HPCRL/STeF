@@ -108,6 +108,7 @@ int count_fiber(idx_t** pindex, int nnz, int nmode, int shift, int* fiber_count,
 		fiber_count[i] += fiber_count[i-1];
 	//	printf("%d ",fiber_count[i] );
 	}
+	fiber_count[nmode-1] = nnz;
 	//printf("\n" );
 	
 	return num_fiber;
@@ -181,7 +182,213 @@ int readline(char* line, idx_t* idx, TYPE* val)
 	return m_id;
 }
 
-int read_tensor(const char* file)
+int print_stats(int* sort_order, int* fiber_count, const char* file, int nmode, int nnz)
+{
+	int i, ii;
+	
+	printf("%s Active number of fibers for modes ",file);
+	for(ii = 0; ii < nmode; ii++)
+	{
+		printf("%d ",sort_order[ii]);	
+	}
+	
+
+
+	printf("is ");
+
+	for(ii = 0; ii < nmode - 1; ii++)
+	{
+		printf("%d ",fiber_count[ii]);
+	}
+	printf("\n");
+
+
+	printf("%s NNZ per fiber for mode order ",file);
+	for(ii = 0; ii < nmode; ii++)
+	{
+		printf("%d ",sort_order[ii]);	
+	}
+	
+	printf("is ");
+
+	for(ii = 0; ii < nmode - 1; ii++)
+	{
+		printf("%lf ", ((double) nnz)/fiber_count[ii]);
+	}
+	printf("\n");
+
+	return 0;
+}
+
+int reorder_stat(int nmode, int nnz, idx_t** pindex, const char* file)
+{
+	int i,ii;
+	int nfac = 1;
+	int * fiber_count;
+	for(i = 1; i <= nmode; i++)
+		nfac *= i;
+
+	fiber_count = (int*) malloc(nmode*sizeof(int));
+	for(i = 1; i <= nfac; i++)
+	{
+
+		create_perm(i , sort_order , nmode);
+		qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
+
+		int num_fiber = count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
+		
+		print_stats(sort_order, fiber_count, file, nmode, nnz);
+			
+	}
+	return 0;
+}
+
+int order_modes(int* mlen, int nmode, int* sort_order)
+{
+	// Simple bubble sort of the mlem array and the result written in sort_order
+	int i, ii, ind, min;
+
+	int *sorted = (int* ) malloc(nmode*sizeof(int)) ;
+
+	ii = 0;
+	for(i = 0 ; i < nmode ; i++)
+	{
+		sort_order[i] = -1;
+		sorted[i] = -1;
+	}
+
+	while (ii < nmode)
+	{
+		min = -1;
+		for (i = 0 ; i<nmode ; i++)
+		{
+			if (sorted[i] == -1 && ( min == -1 || min > mlen[i]))
+			{
+				min = mlen[i];
+				ind = i;
+			}
+		}
+
+		sorted[ii] = ind;
+		sort_order[ind] = ii;
+		ii ++;
+	}
+
+	return 0;
+}
+
+
+int coo2csr(idx_t** pindex, int nnz, int nmode, int* fiber_count, struct tensor* res)
+{
+	struct tensor t;
+	int i, j , ii, ilen, plen, len, *ind, *dimlen;
+
+	plen = 0;
+	for(i = 0; i < nmode -1  ; i++)
+		plen += fiber_count[i] + 1 ;
+
+	ilen = plen +  nnz + 1;
+	plen ++;
+	t.inds = (idx_t* ) malloc(ilen*sizeof(idx_t));
+	t.ptr = (idx_t** ) malloc((nmode+1)*sizeof(idx_t*));
+	t.ind = (idx_t** ) malloc((nmode+1)*sizeof(idx_t*));
+	t.ptrs = (idx_t* ) malloc((plen)*sizeof(idx_t));
+
+	dimlen = (int* ) malloc(nmode*sizeof(int));
+	ind = (int* ) malloc(nmode*sizeof(int));
+
+	ii = 0;
+
+	for( i=0 ; i< plen ; i++)	
+	{
+		t.ptrs[i] = 0;
+	}
+
+	for( i=0 ; i<nmode-1 ; i++)
+	{
+		t.ptr[i] = t.ptrs + ii;
+		t.ind[i] = t.inds + ii;
+		ii += fiber_count[i] + 1;
+		
+	}
+	t.ptr[nmode - 1]  = t.ptr[nmode] = t.ptrs + ii ;
+	t.ind[nmode - 1] = t.inds + ii ;
+	ii += nnz + 1;
+	t.ind[nmode] = t.inds + ii ;
+
+
+	for( i=0 ; i<nmode ; i++)
+	{
+		t.inds[t.ptr[i][0]] = pindex[0][i];
+		ind[i] = 1;
+		dimlen[i] = 1;
+	}
+
+	for( i=1 ; i<nnz ; i++)
+	{
+		int diff = 0;
+		for(j = 0 ; j < nmode  ; j++)
+		{
+			if(pindex[i][j] != pindex[i-1][j] && diff == 0)
+			{
+				diff ++;
+				if(nmode > 0)
+				{
+					dimlen[j-1] ++; 
+				}
+			}
+			if(diff > 0)
+			{
+				int loc = t.ptr[j][ind[j]];
+				if(j < nmode-1)
+				{
+					t.ptr[j][ind[j]] = t.ptr[j][ind[j]-1] + dimlen[j];
+					dimlen[j] = 1;
+				}
+				t.ind[j][ind[j]] = pindex[i][j];
+				ind[j] ++;
+			}
+		}
+	}
+	for(i = 0 ; i<nmode - 1 ; i++)
+	{
+		t.ptr[i][ind[i]] = t.ptr[i][ind[i]-1] + dimlen[i];
+	}
+
+	for(i = 0 ; i<nmode  ; i++)
+	{
+		t.ind[i][ind[i]] = -1;
+	}
+
+	for(i = 0 ; i<nmode ; i++)
+		printf("%d ",ind[i]);
+
+	printf("\n");
+	printf("\n");
+
+	for(i = 0 ; i<nmode+1 ; i++)
+	{
+		printf("%ld\n", t.ptr[i] - t.ptr[0]);
+	}
+
+	printf("\n");
+
+	for(i = 0 ; i<nmode+1 ; i++)
+	{
+		printf("%ld\n", t.ind[i] - t.ind[0]);
+	}
+
+	printf("\n");
+
+	for(i = 0 ; i<ilen ; i++)
+		printf("%d %d %d \n", i, t.ptrs[i], t.inds[i]);
+	printf("\n");
+
+	*res = t;
+	return 0;
+}
+
+int read_tensor(const char* file, struct tensor* res)
 {
 	FILE *fp;
 	int *loc;
@@ -253,61 +460,21 @@ int read_tensor(const char* file)
 		printf("%dx",mlen[i]);
 	printf("%d and %d nnz\n",mlen[i],nnz);
 
-	int nfac = 1;
-	for(i = 1; i <= nmode; i++)
-		nfac *= i;
-
 	sort_order = (int*) malloc(nmode*sizeof(int));
 	fiber_count = (int*) malloc(nmode*sizeof(int));
-	for(i = 1; i <= nfac; i++)
-	{
-		//for(i = 0; i<nnz ; i++)
-		//	printf("%ld ", (pindex[i] - pindex[0])/3 + 1);
-		//printf("\n");
-		//sort_shift = ii;
-		create_perm(i , sort_order , nmode);
-		qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
 
-		//printt(pindex,nnz,nmode);
-		//for(i = 0; i<nnz ; i++)
-		//	printf("%ld ", (pindex[i] - pindex[0])/3 + 1);
-		//printf("\n");
-		int num_fiber = count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
-		double nnz_per_fiber = ((double) nnz)/num_fiber;
-		printf("%s Active number of fibers for modes ",file);
-		for(ii = 0; ii < nmode; ii++)
-		{
-			printf("%d ",sort_order[ii]);	
-		}
-		
-		printf("is ");
+	order_modes(mlen, nmode, sort_order);
+	qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
+	count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
 
-		for(ii = 0; ii < nmode - 1; ii++)
-		{
-			printf("%d ",fiber_count[ii]);
-		}
-		printf("\n");
+	print_stats(sort_order, fiber_count, file, nmode, nnz);
 
-		printf("%s NNZ per fiber for mode order ",file);
-		for(ii = 0; ii < nmode; ii++)
-		{
-			printf("%d ",sort_order[ii]);	
-		}
-		
-		printf("is ");
 
-		for(ii = 0; ii < nmode - 1; ii++)
-		{
-			printf("%lf ", ((double) nnz)/fiber_count[ii]);
-		}
-		printf("\n");
-			//%d is %lf\n",file,(nmode - 1 + ii)%nmode , nnz_per_fiber);
-	}
-	//if(strstr(buf, "symmetric") != NULL || strstr(buf, "Hermitian") != NULL) sflag = 1;
+	//reorder_stat(nmode, nnz,  pindex, file );
 
-	//nmode = 5;
-	
-	
+	struct tensor *t = (struct tensor *) malloc(sizeof(struct tensor));
+	coo2csr(pindex,nnz,nmode,fiber_count,t);
+	printt(pindex , nnz , nmode);
 	return 0;
 }
 
