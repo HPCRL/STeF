@@ -278,10 +278,11 @@ int order_modes(int* mlen, int nmode, int* sort_order)
 }
 
 
-int coo2csr(idx_t** pindex, int nnz, int nmode, int* fiber_count, struct tensor* res)
+int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* fiber_count, csf* res)
 {
-	struct tensor t;
-	int i, j , ii, ilen, plen, len, *ind, *dimlen;
+	csf t;
+	int i, j, jj , ii, ilen, plen, len, *ind, *dimlen;
+	
 
 	plen = 0;
 	for(i = 0; i < nmode -1  ; i++)
@@ -293,7 +294,7 @@ int coo2csr(idx_t** pindex, int nnz, int nmode, int* fiber_count, struct tensor*
 	t.ptr = (idx_t** ) malloc((nmode+1)*sizeof(idx_t*));
 	t.ind = (idx_t** ) malloc((nmode+1)*sizeof(idx_t*));
 	t.ptrs = (idx_t* ) malloc((plen)*sizeof(idx_t));
-
+	t.val = (TYPE* ) malloc(nnz*sizeof(TYPE));
 	dimlen = (int* ) malloc(nmode*sizeof(int));
 	ind = (int* ) malloc(nmode*sizeof(int));
 
@@ -327,26 +328,27 @@ int coo2csr(idx_t** pindex, int nnz, int nmode, int* fiber_count, struct tensor*
 	for( i=1 ; i<nnz ; i++)
 	{
 		int diff = 0;
-		for(j = 0 ; j < nmode  ; j++)
+		for(jj = 0 ; jj < nmode  ; jj++)
 		{
+			j = sort_order[jj];
 			if(pindex[i][j] != pindex[i-1][j] && diff == 0)
 			{
 				diff ++;
-				if(nmode > 0)
+				if(jj > 0)
 				{
-					dimlen[j-1] ++; 
+					dimlen[jj-1] ++; 
 				}
 			}
 			if(diff > 0)
 			{
-				int loc = t.ptr[j][ind[j]];
-				if(j < nmode-1)
+				int loc = t.ptr[jj][ind[jj]];
+				if(jj < nmode-1)
 				{
-					t.ptr[j][ind[j]] = t.ptr[j][ind[j]-1] + dimlen[j];
-					dimlen[j] = 1;
+					t.ptr[jj][ind[jj]] = t.ptr[jj][ind[jj]-1] + dimlen[jj];
+					dimlen[jj] = 1;
 				}
-				t.ind[j][ind[j]] = pindex[i][j];
-				ind[j] ++;
+				t.ind[jj][ind[jj]] = pindex[i][j];
+				ind[jj] ++;
 			}
 		}
 	}
@@ -357,11 +359,17 @@ int coo2csr(idx_t** pindex, int nnz, int nmode, int* fiber_count, struct tensor*
 
 	for(i = 0 ; i<nmode  ; i++)
 	{
-		t.ind[i][ind[i]] = -1;
+		t.ind[sort_order[i]][ind[sort_order[i]]] = -1;
+	}
+
+
+	for(i = 0 ; i<nnz ; i++)
+	{
+		t.val[i] = *( vals  + (pindex[i] - index)/nmode);
 	}
 
 	for(i = 0 ; i<nmode ; i++)
-		printf("%d ",ind[i]);
+		printf("ind %d\n",ind[i]);
 
 	printf("\n");
 	printf("\n");
@@ -381,14 +389,14 @@ int coo2csr(idx_t** pindex, int nnz, int nmode, int* fiber_count, struct tensor*
 	printf("\n");
 
 	for(i = 0 ; i<ilen ; i++)
-		printf("%d %d %d \n", i, t.ptrs[i], t.inds[i]);
+		printf("%d %d %d %lf\n", i, t.ptrs[i], t.inds[i], t.val[i]);
 	printf("\n");
 
 	*res = t;
 	return 0;
 }
 
-int read_tensor(const char* file, struct tensor* res)
+int read_tensor(const char* file, csf* res)
 {
 	FILE *fp;
 	int *loc;
@@ -404,6 +412,7 @@ int read_tensor(const char* file, struct tensor* res)
 	int nnz = 0;
 	int* mlen;
 	int * fiber_count;
+	TYPE* vals;
 	srand(time(NULL));
 	//int compare_nnz(const void *a, const void *b);
 
@@ -425,6 +434,7 @@ int read_tensor(const char* file, struct tensor* res)
 			nmode = mode_len;
 			num_mode = nmode;
 			index = (idx_t*) malloc(size*nmode*sizeof(idx_t));
+			vals = (TYPE*) malloc(size*sizeof(TYPE));
 			pindex =(idx_t**)  malloc((size+1)*sizeof(idx_t*));
 			mlen = (int*) malloc(nmode*sizeof(int));
 			for(i = 0; i<nmode ; i++)
@@ -437,6 +447,13 @@ int read_tensor(const char* file, struct tensor* res)
 			size += sizestep;
 			index = (idx_t*) realloc(index,size*nmode*sizeof(idx_t));
 			pindex = (idx_t**) realloc(pindex,(size+1)*sizeof(idx_t*));
+			vals = (TYPE*) realloc(vals,size*sizeof(TYPE));
+
+			if(index == NULL || pindex == NULL || vals == NULL)
+			{
+				printf("Insufficient memory when reading");
+				exit(1);
+			}
 		}
 
 		for(i = 0; i<nmode ; i++)
@@ -447,6 +464,7 @@ int read_tensor(const char* file, struct tensor* res)
 				mlen[i] = idx[i]+1;
 			}
 		}
+		vals[nnz] = val;
 
 		nnz ++;
 		//pindex[nnz] = index + nnz*nmode;
@@ -464,6 +482,9 @@ int read_tensor(const char* file, struct tensor* res)
 	fiber_count = (int*) malloc(nmode*sizeof(int));
 
 	order_modes(mlen, nmode, sort_order);
+	sort_order[0] = 2;
+	sort_order[1] = 0;
+	sort_order[2] = 1;
 	qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
 	count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
 
@@ -472,8 +493,8 @@ int read_tensor(const char* file, struct tensor* res)
 
 	//reorder_stat(nmode, nnz,  pindex, file );
 
-	struct tensor *t = (struct tensor *) malloc(sizeof(struct tensor));
-	coo2csr(pindex,nnz,nmode,fiber_count,t);
+	csf *t = (csf *) malloc(sizeof(csf));
+	coo2csr(pindex, index, vals, nnz,nmode,fiber_count,t);
 	printt(pindex , nnz , nmode);
 	return 0;
 }

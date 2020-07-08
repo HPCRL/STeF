@@ -2,7 +2,7 @@
 #define READER_H
 #include "../inc/util.h"
 
-struct tensor
+struct tensor_csf
 {
 	idx_t** ptr;
 	idx_t* ptrs;
@@ -11,6 +11,8 @@ struct tensor
 	TYPE* val;
 };
 
-int read_tensor(const char* file,  struct tensor* res=NULL);
+typedef struct tensor_csf csf;
+
+int read_tensor(const char* file,  csf* res=NULL);
 
 #endif
