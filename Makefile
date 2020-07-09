@@ -2,6 +2,8 @@ EXE_DIR = exe
 BIN_DIR = bin
 SRC_DIR = src
 OBJ_DIR = obj
+INC_DIR = inc
+
 DIRS = $(OBJ_DIR) $(BIN_DIR)
 
 CC = icpc
@@ -32,7 +34,7 @@ ${DIRS}:
 $(BIN_DIR)/%.exe: $(OBJ) $(EXE_DIR)/%.cpp
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS) $^  -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp 
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 clean: 

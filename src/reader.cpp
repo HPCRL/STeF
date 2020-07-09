@@ -114,7 +114,7 @@ int count_fiber(idx_t** pindex, int nnz, int nmode, int shift, int* fiber_count,
 	return num_fiber;
 }
 
-int printt(idx_t** pindex, int nnz, int nmode)
+int printt(idx_t** pindex, int nnz, int nmode, TYPE* vals)
 {
 	int i,j;
 	for(i = 0; i< nnz ; i++)
@@ -196,7 +196,7 @@ int print_stats(int* sort_order, int* fiber_count, const char* file, int nmode, 
 
 	printf("is ");
 
-	for(ii = 0; ii < nmode - 1; ii++)
+	for(ii = 0; ii < nmode ; ii++)
 	{
 		printf("%d ",fiber_count[ii]);
 	}
@@ -211,7 +211,7 @@ int print_stats(int* sort_order, int* fiber_count, const char* file, int nmode, 
 	
 	printf("is ");
 
-	for(ii = 0; ii < nmode - 1; ii++)
+	for(ii = 0; ii < nmode; ii++)
 	{
 		printf("%lf ", ((double) nnz)/fiber_count[ii]);
 	}
@@ -278,12 +278,12 @@ int order_modes(int* mlen, int nmode, int* sort_order)
 }
 
 
-int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* fiber_count, csf* res)
+int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* fiber_count, csf* res,int* mlen)
 {
 	csf t;
 	int i, j, jj , ii, ilen, plen, len, *ind, *dimlen;
 	
-
+	t = *res;
 	plen = 0;
 	for(i = 0; i < nmode -1  ; i++)
 		plen += fiber_count[i] + 1 ;
@@ -297,6 +297,7 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 	t.val = (TYPE* ) malloc(nnz*sizeof(TYPE));
 	dimlen = (int* ) malloc(nmode*sizeof(int));
 	ind = (int* ) malloc(nmode*sizeof(int));
+	t.fiber_count = (int* ) malloc(nmode*sizeof(int));
 
 	ii = 0;
 
@@ -362,37 +363,54 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 		t.ind[sort_order[i]][ind[sort_order[i]]] = -1;
 	}
 
+	for(i = 0 ; i<nmode  ; i++)
+	{
+		t.fiber_count[i] = ind[i];
+	}
 
 	for(i = 0 ; i<nnz ; i++)
 	{
 		t.val[i] = *( vals  + (pindex[i] - index)/nmode);
 	}
 
-	for(i = 0 ; i<nmode ; i++)
-		printf("ind %d\n",ind[i]);
-
-	printf("\n");
-	printf("\n");
-
-	for(i = 0 ; i<nmode+1 ; i++)
+	if(VERBOSE == VERBOSE_DEBUG)
 	{
-		printf("%ld\n", t.ptr[i] - t.ptr[0]);
+		for(i = 0 ; i<nmode ; i++)
+			printf("ind %d\n",ind[i]);
+	
+		printf("\n");
+		printf("\n");
+	
+		for(i = 0 ; i<nmode+1 ; i++)
+		{
+			printf("%ld\n", t.ptr[i] - t.ptr[0]);
+		}
+	
+		printf("\n");
+	
+		for(i = 0 ; i<nmode+1 ; i++)
+		{
+			printf("%ld\n", t.ind[i] - t.ind[0]);
+		}
+	
+		printf("\n");
+	
+		for(i = 0 ; i<ilen ; i++)
+			printf("%d %d %d %lf\n", i, t.ptrs[i], t.inds[i], t.val[i]);
+		printf("\n");
+	}
+	t.nmode = nmode;
+
+	t.mlen = (int*) malloc(nmode*sizeof(int));
+	for(i = 0; i<nmode ; i++)
+	{
+		t.mlen[i] = mlen[i];
 	}
 
-	printf("\n");
-
-	for(i = 0 ; i<nmode+1 ; i++)
-	{
-		printf("%ld\n", t.ind[i] - t.ind[0]);
-	}
-
-	printf("\n");
-
-	for(i = 0 ; i<ilen ; i++)
-		printf("%d %d %d %lf\n", i, t.ptrs[i], t.inds[i], t.val[i]);
-	printf("\n");
 
 	*res = t;
+
+
 	return 0;
 }
 
@@ -482,20 +500,36 @@ int read_tensor(const char* file, csf* res)
 	fiber_count = (int*) malloc(nmode*sizeof(int));
 
 	order_modes(mlen, nmode, sort_order);
-	sort_order[0] = 2;
-	sort_order[1] = 0;
-	sort_order[2] = 1;
+	/*
+	sort_order[0] = 0;
+	sort_order[1] = 1;
+	sort_order[2] = 2;
+	*/
 	qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
 	count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
 
-	print_stats(sort_order, fiber_count, file, nmode, nnz);
+	if(VERBOSE > VERBOSE_HIGH)
+		print_stats(sort_order, fiber_count, file, nmode, nnz);
 
 
 	//reorder_stat(nmode, nnz,  pindex, file );
 
-	csf *t = (csf *) malloc(sizeof(csf));
-	coo2csr(pindex, index, vals, nnz,nmode,fiber_count,t);
-	printt(pindex , nnz , nmode);
+	csf *t = res;
+	coo2csr(pindex, index, vals, nnz,nmode,fiber_count,t,mlen);
+	if(VERBOSE == VERBOSE_DEBUG)
+	{
+		printt(pindex , nnz , nmode, vals);
+
+		printf("nmode %d \n ",t->nmode);
+	}
+
+
+
+	free(index);
+	free(pindex);
+	free(vals);
+
+
 	return 0;
 }
 
