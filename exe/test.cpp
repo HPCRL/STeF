@@ -2,6 +2,7 @@
 
 int main(int argc, char** argv)
 {
-	read_tensor(argv[1]);
+	csf* t = (csf *) malloc(sizeof(csf));
+	read_tensor(argv[1],t);
 	return 0;
 }
