@@ -269,8 +269,8 @@ int order_modes(int* mlen, int nmode, int* sort_order)
 			}
 		}
 
-		sorted[ii] = ind;
-		sort_order[ind] = ii;
+		sorted[ind] = ii;
+		sort_order[ii] = ind;
 		ii ++;
 	}
 
