@@ -276,7 +276,12 @@ int order_modes(int* mlen, int nmode, int* sort_order)
 		ii ++;
 	}
 
-	mlen = len;
+	for(i = 0 ;i<nmode; i++)
+	{
+		mlen[i] = len[i];
+	}
+
+	
 	return 0;
 }
 
