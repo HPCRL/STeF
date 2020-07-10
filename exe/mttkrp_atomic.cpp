@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
 	printf("time for mode %d %lf \n",nmode-1,diff.count());
 
-	if(nmode == 3)
+	if(nmode == 3 && 0)
 	{
 		start = std::chrono::high_resolution_clock::now();
 		mttkrp_atomic3(t,nmode-1,r,mats);

@@ -6,6 +6,8 @@
 
 int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
 {
+
+
 	TYPE* partial_products;
 	int i,j,k,x,y,ind,nmode;
 	TYPE* vals;
@@ -16,8 +18,13 @@ int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
 	
 	matrix m;
 
+
 	for(i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
 		vals[i] = 0;
+
+	LIKWID_MARKER_INIT;
+	LIKWID_MARKER_THREADINIT;
+	LIKWID_MARKER_START("Compute");
 
 	for(i = 0 ; i < t->fiber_count[0] ; i++ )
 	{
@@ -49,6 +56,8 @@ int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
 	}
 
 	mats[nmode-1]->val = vals;
+	LIKWID_MARKER_STOP("Compute");
+	LIKWID_MARKER_CLOSE;
 	return 0;
 }
 
@@ -62,7 +71,9 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats)
 	}
 	*/
 
-	
+	LIKWID_MARKER_INIT;
+	LIKWID_MARKER_THREADINIT;
+	LIKWID_MARKER_START("Compute");
 
 	TYPE* partial_products, *vals;
 	int i,ii,it,nmode,nnz;
@@ -184,6 +195,9 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats)
 		}
 	}
 	mats[nmode-1]->val = vals;
+
+	LIKWID_MARKER_STOP("Compute");
+	LIKWID_MARKER_CLOSE;
 
 	return 0;
 }
