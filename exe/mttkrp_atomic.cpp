@@ -20,7 +20,14 @@ int main(int argc, char** argv)
 		mats[i] = create_matrix(t->mlen[i],r,i+1);
 	}
 
+	auto start = std::chrono::high_resolution_clock::now();
 	mttkrp_atomic(t,nmode-1,r,mats);
+	printf("here\n");
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> diff = end-start;
+
+	printf("time for mode %d %lf \n",nmode-1,diff.count());
+
 	for(i=0 ; i<nmode ; i++)
 	{
 		if(VERBOSE  == VERBOSE_DEBUG)

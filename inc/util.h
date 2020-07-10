@@ -5,8 +5,9 @@
 #include <ctype.h>
 #include <time.h> 
 #include <string.h>
+#include <chrono>
 
-#define OMP
+//#define OMP
 #ifdef OMP
 #include <omp.h>
 #endif
@@ -17,7 +18,7 @@
 
 
 
-#define VERBOSE VERBOSE_DEBUG
+#define VERBOSE VERBOSE_LOW
 
 
 enum verbosity

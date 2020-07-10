@@ -74,6 +74,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats)
 
 	#else
 		num_th = 1;
+		th = 0;
 	#endif
 
 	printf("num ths %d\n", num_th);
