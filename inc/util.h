@@ -29,7 +29,7 @@
 
 #define idx_t int
 #define MAX_MODE 10
-#define TYPE float
+#define TYPE double
 
 
 
