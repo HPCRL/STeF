@@ -9,9 +9,11 @@ int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
 	TYPE* partial_products;
 	int i,j,k,x,y,ind,nmode;
 	TYPE* vals;
+
+	nmode = t->nmode;
 	partial_products = (TYPE* ) malloc(nmode*r*sizeof(TYPE));
 	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-	nmode = t->nmode;
+	
 	matrix m;
 
 	for(i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
