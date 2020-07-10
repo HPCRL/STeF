@@ -243,13 +243,13 @@ int reorder_stat(int nmode, int nnz, idx_t** pindex, const char* file)
 	return 0;
 }
 
-int order_modes(int* mlen, int nmode, int* sort_order, int* mlen)
+int order_modes(int* mlen, int nmode, int* sort_order)
 {
 	// Simple bubble sort of the mlem array and the result written in sort_order
 	int i, ii, ind, min, *len;
 
 	int *sorted = (int* ) malloc(nmode*sizeof(int)) ;
-	int *len = (int* ) malloc(nmode*sizeof(int)) ;
+	len = (int* ) malloc(nmode*sizeof(int)) ;
 
 	ii = 0;
 	for(i = 0 ; i < nmode ; i++)
@@ -502,7 +502,7 @@ int read_tensor(const char* file, csf* res)
 	sort_order = (int*) malloc(nmode*sizeof(int));
 	fiber_count = (int*) malloc(nmode*sizeof(int));
 
-	order_modes(mlen, nmode, sort_order, mlen);
+	order_modes(mlen, nmode, sort_order);
 	/*
 	sort_order[0] = 0;
 	sort_order[1] = 1;
