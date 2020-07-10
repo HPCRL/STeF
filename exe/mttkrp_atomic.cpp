@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 
 	auto start = std::chrono::high_resolution_clock::now();
 	mttkrp_atomic(t,nmode-1,r,mats);
-	printf("here\n");
+	//printf("here\n");
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> diff = end-start;
 

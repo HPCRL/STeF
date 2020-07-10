@@ -38,8 +38,7 @@ int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
 				for(y = 0; y<r ; y++)
 				{
 					vals[kk*mats[mode]->dim2 + y] += partial_products[r + y] * t->val[k];
-					if (y == 0)
-						printf("%lf %lf %d %d\n", partial_products[r + y] * t->val[k] , vals[kk*mats[mode]->dim2 + y], kk*mats[mode]->dim2 + y, kk);
+					//if (y == 0)						printf("%lf %lf %d %d\n", partial_products[r + y] * t->val[k] , vals[kk*mats[mode]->dim2 + y], kk*mats[mode]->dim2 + y, kk);
 					//printf("%lf\n", t->val[k]);
 				}
 			}
@@ -76,6 +75,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats)
 		num_th = 1;
 		th = 0;
 	#endif
+
 
 	printf("num ths %d\n", num_th);
 	partial_products = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
@@ -114,7 +114,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats)
 	}
 
 	it = 1;
-	printf("%d\n",nnz);
+	//printf("%d\n",nnz);
 	#ifdef OMP
 	#pragma omp parallel
 	#endif
@@ -189,8 +189,8 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats)
 
 int mttkrp_atomic(csf* t, int mode, int r, matrix** mats)
 {
-	printf("here\n");
-	printf("%d %d \n", mode, t->nmode);
+	//printf("here\n");
+	//printf("%d %d \n", mode, t->nmode);
 	if (mode == (t->nmode)-1)
 	{
 		return mttkrp_atomic_last(t,mode,r,mats);
