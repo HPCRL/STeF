@@ -180,11 +180,19 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats)
 				}
 			}
 			// use partial products to update last mode
+			// Assign all access to a variable
+			int xx , yy;
+			xx = t->ind[nmode-1][it]*r;
+			yy = th*nmode*r +  (nmode-2) * r ;
+			TYPE* tval = t->val;
+			
+
+			#pragma omp simd
 			for(i=0 ; i<r ; i++)
 			{
 				// put a locking step here
 				// This should be atomic
-				vals[t->ind[nmode-1][it]*r + i]	+= partial_products[ th*nmode*r +  (nmode-2) * r + i] * t->val[it];
+				vals[xx + i]	+= partial_products[yy + i] * tval[it];
 				/*
 				if(i==0)
 					printf("%lf %lf %lf %d\n",  vals[t->ind[nmode-1][it]*r + i], partial_products[(nmode-2) * r + i], t->val[it], t->ind[nmode-1][it]);
