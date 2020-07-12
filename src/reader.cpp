@@ -135,6 +135,7 @@ int readline(char* line, idx_t* idx, TYPE* val)
 	char convert[50];
 	end = convert;
 	int isfloat = 0;
+	int valinit = 1;
 	*val = 0;
 	while(*(start) != '\0')
 	{
@@ -164,6 +165,7 @@ int readline(char* line, idx_t* idx, TYPE* val)
 			{
 				*val = atof(convert);
 				//printf("%lf %ld ",*val,start-line);
+				valinit = 0;
 			}
 			end = convert;
 		}
@@ -173,7 +175,7 @@ int readline(char* line, idx_t* idx, TYPE* val)
 
 
 
-	if (*val == 0) // last value of the read was the value of the nnz
+	if (valinit) // last value of the read was the value of the nnz
 	{
 		m_id --;
 		*val = (TYPE) idx[m_id];
@@ -281,7 +283,8 @@ int order_modes(int* mlen, int nmode, int* sort_order)
 		mlen[i] = len[i];
 	}
 
-	
+	rem(sorted);
+	rem(len);
 	return 0;
 }
 
@@ -290,7 +293,9 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 {
 	csf t;
 	int i, j, jj , ii, ilen, plen, len, *ind, *dimlen;
-	
+	long long total_space;
+	char* space_sign;
+
 	t = *res;
 	plen = 0;
 	for(i = 0; i < nmode -1  ; i++)
@@ -303,11 +308,44 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 	t.ind = (idx_t** ) malloc((nmode+1)*sizeof(idx_t*));
 	t.ptrs = (idx_t* ) malloc((plen)*sizeof(idx_t));
 	t.val = (TYPE* ) malloc(nnz*sizeof(TYPE));
+	t.modeid = (int* ) malloc(nmode*sizeof(int));
 	dimlen = (int* ) malloc(nmode*sizeof(int));
 	ind = (int* ) malloc(nmode*sizeof(int));
 	t.fiber_count = (int* ) malloc(nmode*sizeof(int));
 
 	ii = 0;
+
+	total_space = ilen*sizeof(idx_t);
+	total_space += 2*(nmode+1)*sizeof(idx_t*);
+	total_space += plen*sizeof(idx_t);
+	total_space += nnz*sizeof(idx_t);
+	total_space += 3*nmode*sizeof(idx_t);
+
+	if(total_space >= 1073741824)
+	{
+		// GB
+		space_sign = "GB";
+		total_space /= 1073741824;
+	}
+	else if(total_space >= 1048576)
+	{
+		// MB
+		space_sign = "MB";
+		total_space /= 1048576;
+	}
+	else if(total_space >= 1024)
+	{
+		// KB
+		space_sign = "KB";
+		total_space /= 1024;
+	}
+	else
+	{
+		// B
+		space_sign = "B";
+	}
+
+	printf("Total space requirement of the CSF is %ld%s \n",total_space,space_sign);
 
 	for( i=0 ; i< plen ; i++)	
 	{
@@ -414,11 +452,16 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 	{
 		t.mlen[i] = mlen[i];
 	}
+	for(i = 0; i<nmode ; i++)
+	{
+		t.modeid[i] = sort_order[i];
+	}
 
 
 	*res = t;
 
-
+	rem(dimlen);
+	rem(ind);
 	return 0;
 }
 
@@ -496,6 +539,8 @@ int read_tensor(const char* file, csf* res)
 		//pindex[nnz] = index + nnz*nmode;
 	} // Reading is complete
 
+
+	fclose(fp);
 	for(i = 0; i<size+1 ; i++)
 		pindex[i] = index + nmode*i;
 
@@ -533,10 +578,12 @@ int read_tensor(const char* file, csf* res)
 
 
 
-	free(index);
-	free(pindex);
-	free(vals);
-
+	rem(index);
+	rem(pindex);
+	rem(vals);
+	rem(sort_order);
+	rem(mlen)
+	rem(fiber_count);
 
 	return 0;
 }

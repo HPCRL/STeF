@@ -36,4 +36,11 @@ int print_matrix(matrix mat)
 	return 0; 
 }
 
+int free_matrix(matrix* mat)
+{
+	rem(mat->val);
+	rem(mat);
+	return 0;
+}
+
 #endif

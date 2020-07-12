@@ -6,8 +6,12 @@
 #include <time.h> 
 #include <string.h>
 #include <chrono>
+//#include <typeinfo>
 
 //#define OMP
+
+
+#define rem(X) if(X != NULL){free(X); X = NULL;}
 
 #ifdef LIKWID_PERFMON
 #include <likwid.h>
@@ -30,9 +34,6 @@
 #define idx_t int
 #define MAX_MODE 10
 #define TYPE double
-
-
-
 #define VERBOSE VERBOSE_LOW
 
 
