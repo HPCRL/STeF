@@ -101,7 +101,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	//printf("nmode is %d nnz is %d \n",nmode,nnz);
 	if(profile == mode)
 	{
-		printf("profiling mode %d\n",profile );
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 		LIKWID_MARKER_THREADINIT;
 		LIKWID_MARKER_START("Compute");
@@ -341,7 +341,7 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 
 	if(profile == mode)
 	{
-		printf("profiling mode %d\n",profile );
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 		LIKWID_MARKER_THREADINIT;
 		LIKWID_MARKER_START("Compute");
