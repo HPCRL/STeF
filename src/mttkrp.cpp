@@ -91,7 +91,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec)
 	inds = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
 	nnz = t->fiber_count[nmode-1];
 	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-	for(i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
+	for(i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
 		vals[i] = 0;
 	
 
@@ -177,13 +177,14 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec)
 					for(i = 0 ; i<r ; i++)
 					{
 						partial_products[th*nmode*r + i] = MAT(mats[0], t->ind[0][inds[nmode*th  +0]] ,i);
+						//printf("update %lf %lf \n, ",MAT(mats[0], t->ind[0][inds[nmode*th  +0]] ,i), partial_products[th*nmode*r + i]);
 					}
 					update ++;
 				}
 	
 	
 	
-				for(ii = update; ii<nmode-2; ii++)
+				for(ii = update; ii<nmode-1; ii++)
 				{
 					for(i = 0 ; i<r ; i++)
 					{
@@ -207,6 +208,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec)
 					// put a locking step here
 					// This should be atomic
 					vals[xx + i]	+= partial_products[yy + i] * tval;
+					//printf("last mode %lf %lf %lf \n",  vals[xx + i], partial_products[yy + i] , tval);
 				}
 				
 			}
@@ -219,7 +221,9 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec)
 				{
 					// put a locking step here
 					// This should be atomic
+
 					vals[xx + i]	+= partial_products[yy + i] * tval[i];
+
 				}
 				//printf("here %lf %lf %lf \n",vals[xx],partial_products[yy],tval[0]);
 			}
@@ -247,6 +251,8 @@ int mttkrp_fused_init(csf* t,int r)
 	if(t->intval == NULL)
 	{
 		t->intval = (TYPE**) malloc((t->nmode)*sizeof(TYPE));
+		t->intval[0] = NULL;
+		t->intval[(t->nmode)-1] = NULL;
 		for(i = 1; i < (t->nmode)-1 ; i++)
 		{
 			t->intval[i] = (TYPE*) malloc((t->fiber_count[i])*r*sizeof(TYPE));
@@ -426,7 +432,7 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats)
 
 				}
 
-				for(ii = update; ii <= nmode - 2; ii++)
+				for(ii = update; ii < nmode - 1; ii++)
 				{
 					for(i = 0 ; i<r ; i++)
 					{
@@ -565,6 +571,92 @@ int mttkrp_atomic(csf* t, int mode, int r, matrix** mats)
 	return 0;
 }
 
+int mttkrp_test(coo* dt, int mode, int r, matrix** mats)
+{
+	idx_t i,j,y;
+	idx_t nnz = dt -> nnz;
+	idx_t size = (mats[mode]->dim1)*(mats[mode]->dim2);
+	int nmode = dt -> nmode;
+	TYPE* vals = (TYPE* ) malloc(size*sizeof(TYPE));
+	TYPE* accum = (TYPE* ) malloc(r*sizeof(TYPE));
+	for(i=0; i<size ; i++)
+	{
+		vals[i] = 0;
+	}	
+
+	for(i=0; i<nnz ; i++)
+	{
+		for(y = 0; y<r ; y++)
+			accum[y] = dt -> val[i];  // Load Tensor values 
+		/*
+		printf("accum is %lf\n", accum[0]);
+		for(int m = 0; m < nmode ; m++)
+			printf("%d ", dt->ind[i*nmode + m] );
+		printf("\n");
+		*/
+
+		for(int m = 0; m < nmode ; m++)
+		{
+			if(m == mode )
+			{
+				continue;
+			}
+			else
+			{
+				idx_t mode_id = m;
+				idx_t* ptr = dt->ind + i*nmode;
+				idx_t row_id = ptr[ mode_id ];
+				//printf("row_id is %d mode_id is %d\n",row_id,mode_id);
+				
+				TYPE const * const restrict inrow = mats[m]->val + row_id*(mats[m]->dim2);
+				for(y=0 ; y<r ; y++)
+				{
+					accum[y] *= inrow[y]; // Multiply tensor with the dense matrix
+				}
+				//printf("accum is %lf\n", accum[0]);
+			}
+
+		}
+		idx_t mode_id = mode;
+		idx_t* ptr = dt->ind + i*nmode;
+		idx_t row_id = ptr[ mode_id ];
+		TYPE * inrow = vals + row_id*(mats[mode]->dim2);
+		for(y=0 ; y<r ; y++)
+		{
+			inrow[y] += accum[y]; // Multiply tensor with the dense matrix
+		}
+		//printf("accum is %lf inrow is %lf row is %d\n", accum[0],inrow[0],row_id);
+	}
+
+	int num_diff = 0;
+	TYPE sum_base= 0, sum_mat = 0;
+
+	for(i = 0 ; i<mats[mode]->dim1; i++)
+	{
+		for(j = 0 ; j<r ; j++)
+		{
+			idx_t pos = (i * mats[mode]->dim2) + j;
+			TYPE old_val = mats[mode]-> val [pos];
+			TYPE new_val = vals[pos];
+			sum_base += new_val;
+			sum_mat += old_val;
+
+			TYPE diff = old_val - new_val;
+			if(diff < 0 )
+				diff = -diff;
+
+			if (diff > CORRECTNESS_THRESHOLD)
+			{
+				num_diff++;
+				if(VERBOSE == VERBOSE_DEBUG || num_diff < 10)
+					printf("Correctness Error at mats[%d][%d][%d]. val is %lf, but must be %lf\n", mode,i,j,old_val,new_val );
+			}
+		}
+	}
+
+	printf("total diff is %d / %d. Sums are %lf and %lf \n", num_diff , size, sum_mat, sum_base);
+	return 0;
+}
 
 
 #endif

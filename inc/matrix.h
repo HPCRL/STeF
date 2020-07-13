@@ -15,6 +15,9 @@ typedef struct dense_matrix matrix;
 matrix* create_matrix(int dim1, int dim2, TYPE val = 0);
 
 int print_matrix(matrix mat);
+int set_matrix(matrix mat, TYPE val);
+int random_matrix(matrix mat, TYPE val);
 int free_matrix(matrix* mat);
+
 
 #endif

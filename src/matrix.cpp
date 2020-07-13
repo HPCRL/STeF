@@ -36,6 +36,34 @@ int print_matrix(matrix mat)
 	return 0; 
 }
 
+int random_matrix(matrix mat, TYPE val)
+{
+	idx_t i,j;
+	for(i = 0; i < mat.dim1 ; i++ )
+	{
+		for(j = 0; j < mat.dim2 ; j++)
+		{
+			mat.val[i * mat.dim2 + j] = ((TYPE) val + (i * mat.dim2 + j))/(mat.dim1*mat.dim2)/100;
+		}
+
+	}	
+	return 0;	
+}
+
+int set_matrix(matrix mat, TYPE val)
+{
+	idx_t i,j;
+	for(i = 0; i < mat.dim1 ; i++ )
+	{
+		for(j = 0; j < mat.dim2 ; j++)
+		{
+			mat.val[i * mat.dim2 + j] = val;
+		}
+
+	}	
+	return 0;
+}
+
 int free_matrix(matrix* mat)
 {
 	rem(mat->val);

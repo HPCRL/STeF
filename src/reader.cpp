@@ -137,8 +137,9 @@ int readline(char* line, idx_t* idx, TYPE* val)
 	int isfloat = 0;
 	int valinit = 1;
 	*val = 0;
-	while(*(start) != '\0')
+	while(*start != '\0')
 	{
+		
 		if(isdigit(*start))
 		{
 			*end = *start;
@@ -170,10 +171,15 @@ int readline(char* line, idx_t* idx, TYPE* val)
 			end = convert;
 		}
 		start ++;
+	}	
+
+	if(end != convert)
+	{
+		*end = '\0';
+		*val = atof(convert);
+		valinit = 0;
+		end = convert;
 	}
-
-
-
 
 	if (valinit) // last value of the read was the value of the nnz
 	{
@@ -314,6 +320,7 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 	t.fiber_count = (int* ) malloc(nmode*sizeof(int));
 
 	ii = 0;
+	
 
 	total_space = ilen*sizeof(idx_t);
 	total_space += 2*(nmode+1)*sizeof(idx_t*);
@@ -363,14 +370,25 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 	t.ind[nmode - 1] = t.inds + ii ;
 	ii += nnz + 1;
 	t.ind[nmode] = t.inds + ii ;
+	/*
+	printf("test %d\n",t.ind[0][0] );
+	printf("%d %d %d %d \n", pindex[0][0], pindex[0][1], pindex[0][2], pindex[0][3]);
+	printf("%d %d %d %d \n", sort_order[0], sort_order[1], sort_order[2], sort_order[3]);
 
-
+	printf("%d %d %d %d \n", t.ptr[0][0], t.ptr[1][0], t.ptr[2][0], t.ptr[3][0]);
+	*/
 	for( i=0 ; i<nmode ; i++)
 	{
-		t.inds[t.ptr[i][0]] = pindex[0][i];
+		j = sort_order[i];
+		t.ind[i][0] = pindex[0][j];
 		ind[i] = 1;
 		dimlen[i] = 1;
+	//	printf("test %d\n",t.ind[0][0] );
 	}
+
+
+
+	//printf("test %d\n",t.ind[0][0] );
 
 	for( i=1 ; i<nnz ; i++)
 	{
@@ -386,9 +404,9 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 					dimlen[jj-1] ++; 
 				}
 			}
-			if(diff > 0)
+			if(diff > 0 )
 			{
-				int loc = t.ptr[jj][ind[jj]];
+			//	int loc = t.ptr[jj][ind[jj]];
 				if(jj < nmode-1)
 				{
 					t.ptr[jj][ind[jj]] = t.ptr[jj][ind[jj]-1] + dimlen[jj];
@@ -413,6 +431,8 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 	{
 		t.fiber_count[i] = ind[i];
 	}
+
+
 
 	for(i = 0 ; i<nnz ; i++)
 	{
@@ -465,7 +485,36 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 	return 0;
 }
 
-int read_tensor(const char* file, csf* res)
+int sort_coo(idx_t** pindex,idx_t* index,TYPE* val,int* sort_order,idx_t nnz, int nmode)
+{
+	idx_t* tindex = (idx_t* ) malloc(nnz*nmode*sizeof(idx_t));
+	TYPE* tval = (TYPE* ) malloc(nnz*sizeof(TYPE));
+	for(int i=0; i< nnz; i++)
+	{
+		idx_t* nnz_ptr = tindex + i*nmode;
+		int jump = (pindex[i] - index)/nmode;
+		for(int j=0; j<nmode; j++)
+		{
+			int j_old = sort_order[j];
+			nnz_ptr[j] = pindex[i][j_old];	 
+		}
+		tval[i] = val[jump];
+	}
+
+	for(int i=0; i< nnz*nmode; i++)
+	{
+		index[i] = tindex[i];
+	}
+
+	for(int i=0; i< nnz; i++)
+	{
+		val[i] = tval[i];
+	}
+
+	return 0;
+}
+
+int read_tensor(const char* file, csf* res,  coo* debugt)
 {
 	FILE *fp;
 	int *loc;
@@ -534,6 +583,7 @@ int read_tensor(const char* file, csf* res)
 			}
 		}
 		vals[nnz] = val;
+		//printf("*%s* val is %lf mode len is %d\n",buf, val,mode_len);
 
 		nnz ++;
 		//pindex[nnz] = index + nnz*nmode;
@@ -554,9 +604,10 @@ int read_tensor(const char* file, csf* res)
 
 	order_modes(mlen, nmode, sort_order);
 	/*
-	sort_order[0] = 0;
-	sort_order[1] = 1;
-	sort_order[2] = 2;
+	sort_order[0] = 2;
+	sort_order[1] = 0;
+	sort_order[2] = 1;
+	sort_order[3] = 3;
 	*/
 	qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
 	count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
@@ -577,10 +628,25 @@ int read_tensor(const char* file, csf* res)
 	}
 
 
+	if(debugt == NULL)
+	{
+		rem(index);
+		
+		rem(vals);
+		
+	}
+	else
+	{
+		sort_coo(pindex,index,vals,sort_order,nnz,nmode);
 
-	rem(index);
+
+		debugt -> ind = index;
+		debugt -> val = vals;
+		debugt -> nnz = nnz;
+		debugt -> nmode = nmode;
+		//debugt -> sort_order = sort_order;
+	}
 	rem(pindex);
-	rem(vals);
 	rem(sort_order);
 	rem(mlen)
 	rem(fiber_count);

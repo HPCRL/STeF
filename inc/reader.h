@@ -4,6 +4,6 @@
 #include "../inc/tensor.h"
 
 
-int read_tensor(const char* file,  csf* res=NULL);
+int read_tensor(const char* file,  csf* res = NULL, coo* debugt = NULL);
 
 #endif

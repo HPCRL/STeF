@@ -35,7 +35,7 @@
 #define MAX_MODE 10
 #define TYPE double
 #define VERBOSE VERBOSE_LOW
-
+#define CORRECTNESS_THRESHOLD 1E-8
 
 enum verbosity
 {
