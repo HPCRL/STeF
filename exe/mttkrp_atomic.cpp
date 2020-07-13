@@ -18,6 +18,7 @@ int main(int argc, char** argv)
 		read_tensor(argv[1],t);
 	}
 
+	t->intval = NULL;
 	int profile = -1;
 
 	if (argc > 3)
