@@ -22,10 +22,13 @@ int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
 	for(i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
 		vals[i] = 0;
 
-	LIKWID_MARKER_INIT;
-	LIKWID_MARKER_THREADINIT;
-	LIKWID_MARKER_START("Compute");
-
+	//if(profile == mode)
+	{
+		LIKWID_MARKER_INIT;
+		LIKWID_MARKER_THREADINIT;
+		LIKWID_MARKER_START("Compute");
+	}
+	
 	for(i = 0 ; i < t->fiber_count[0] ; i++ )
 	{
 		
@@ -62,7 +65,7 @@ int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
 }
 
 
-int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec)
+int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int profile)
 {
 	/* 
 	if(t->nmode == 3)
@@ -96,10 +99,12 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec)
 	
 
 	//printf("nmode is %d nnz is %d \n",nmode,nnz);
-
-	LIKWID_MARKER_INIT;
-	LIKWID_MARKER_THREADINIT;
-	LIKWID_MARKER_START("Compute");
+	if(profile == mode)
+	{
+		LIKWID_MARKER_INIT;
+		LIKWID_MARKER_THREADINIT;
+		LIKWID_MARKER_START("Compute");
+	}
 
 	it = 0;
 	// DO the process for the first nnz
@@ -234,8 +239,11 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec)
 	rem(mats[nmode-1]->val);
 	mats[nmode-1]->val = vals;
 
-	LIKWID_MARKER_STOP("Compute");
-	LIKWID_MARKER_CLOSE;
+	if(profile == mode)
+	{
+		LIKWID_MARKER_STOP("Compute");
+		LIKWID_MARKER_CLOSE;
+	}
 
 	rem(inds);
 	rem(partial_products);
@@ -302,7 +310,7 @@ int mttkrp_fused_init(csf* t,int r)
 	return 0;
 }
 
-int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats)
+int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 {
 	TYPE *partial_products, *vals;
 	int i,ii,it,nmode,nnz;
@@ -330,11 +338,12 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats)
 	it = 0;
 	// DO the process for the first nnz
 
-	
-	LIKWID_MARKER_INIT;
-	LIKWID_MARKER_THREADINIT;
-	LIKWID_MARKER_START("Compute");
-
+	if(profile == mode)
+	{
+		LIKWID_MARKER_INIT;
+		LIKWID_MARKER_THREADINIT;
+		LIKWID_MARKER_START("Compute");
+	}
 
 	for(ii = 0; ii < nmode - 1 ; ii++)
 	{
@@ -511,9 +520,11 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats)
 	rem(mats[mode]->val);
 	mats[mode]->val = vals;
 
-
-	LIKWID_MARKER_STOP("Compute");
-	LIKWID_MARKER_CLOSE;
+	if(profile == mode)
+	{
+		LIKWID_MARKER_STOP("Compute");
+		LIKWID_MARKER_CLOSE;
+	}
 
 	rem(inds);
 	rem(partial_products);
@@ -523,7 +534,7 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats)
 
 }
 
-int mttkrp_atomic_middle(csf* t, int mode, int r, matrix** mats)
+int mttkrp_atomic_middle(csf* t, int mode, int r, matrix** mats, int profile)
 {
 	csf tt = *t;
 	tt.nmode = mode+1;
@@ -541,10 +552,10 @@ int mttkrp_atomic_middle(csf* t, int mode, int r, matrix** mats)
 		printf("\n");
 	}
 	*/
-	return mttkrp_atomic_last(&tt,mode,r,mats,1);
+	return mttkrp_atomic_last(&tt,mode,r,mats,1,profile);
 }
 
-int mttkrp_atomic(csf* t, int mode, int r, matrix** mats)
+int mttkrp_atomic(csf* t, int mode, int r, matrix** mats, int profile)
 {
 	//printf("here\n");
 	//printf("%d %d \n", mode, t->nmode);
@@ -552,17 +563,17 @@ int mttkrp_atomic(csf* t, int mode, int r, matrix** mats)
 	{
 		// return mttkrp_atomic_first(t,mode,mats);
 
-		return mttkrp_atomic_first(t,mode,r,mats);
+		return mttkrp_atomic_first(t,mode,r,mats, profile);
 
 	}
 	else if (mode == (t->nmode)-1)
 	{
-		return mttkrp_atomic_last(t,mode,r,mats);
+		return mttkrp_atomic_last(t,mode,r,mats,0 , profile);
 	}
 	else
 	{
 		//printf("To be implemented\n");
-		return mttkrp_atomic_middle(t,mode,r,mats);
+		return mttkrp_atomic_middle(t,mode,r,mats, profile);
 	}
 
 
