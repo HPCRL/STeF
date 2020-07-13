@@ -18,6 +18,11 @@ int main(int argc, char** argv)
 		read_tensor(argv[1],t);
 	}
 
+	int profile = -1;
+
+	if (argc > 2)
+		profile = atoi(argv[2]);
+
 	print_csf(t);
 	
 	matrix** mats;
@@ -46,7 +51,7 @@ int main(int argc, char** argv)
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
-		mttkrp_atomic(t,mode,r,mats);
+		mttkrp_atomic(t,mode,r,mats,profile);
 		//printf("here\n");
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
