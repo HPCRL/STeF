@@ -20,8 +20,8 @@ int main(int argc, char** argv)
 
 	int profile = -1;
 
-	if (argc > 2)
-		profile = atoi(argv[2]);
+	if (argc > 3)
+		profile = atoi(argv[3]);
 
 	print_csf(t);
 	
@@ -47,6 +47,8 @@ int main(int argc, char** argv)
 	mttkrp_fused_init(t,r);
 
 	double total=0;
+
+//	printf("here\n")
 
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
