@@ -65,6 +65,7 @@ int main(int argc, char** argv)
 		{
 			mttkrp_test(dt,mode,r,mats);
 		}
+		random_matrix(*mats[mode],i+1);
 
 		for(i=0 ; i<nmode ; i++)
 		{

@@ -64,6 +64,58 @@ int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
 	return 0;
 }
 
+int find_inds(idx_t* inds ,csf* t,idx_t it)
+{
+	int nmode = t->nmode;
+	//printf("here ss\n");
+	if (it == 0)
+	{
+		for (int i=0; i<nmode ; i++)
+		{
+			inds[i] = 0;
+		}
+
+		return 0;
+	}
+	else
+	{
+		
+		inds[nmode-1] = it;
+		idx_t last_pos = it;
+		for(int i=nmode-2 ; i>=0 ; i--)
+		{
+			// do binary seach and find the index
+			// idx_t id = -1;
+			idx_t start = 0;
+			idx_t end = t->fiber_count[i];
+			while(end > start+1)
+			{
+				idx_t pivot = (end + start)/2;
+				if(t->ptr[i][pivot] > last_pos)
+				{
+					end = pivot;
+				}
+				else if (t->ptr[i][pivot] <= last_pos)
+				{
+					start = pivot;
+				}
+				//printf("%d %d %d %d\n",start, end , i , last_pos);
+			}
+			inds[i] = start;
+			last_pos = start;
+		}
+		/*
+		for(int i=0; i<nmode ; i++)
+		{
+			printf("%d", inds[i] );
+		}
+		printf("\n");
+		*/
+		return 0;
+	}
+
+	
+}
 
 int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int profile)
 {
@@ -74,10 +126,13 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	}
 	*/
 
-	TYPE* partial_products, *vals;
-	int i,ii,it,nmode,nnz;
-	idx_t* inds;
-	int num_th, th;
+
+
+	TYPE* partial_products_all, *vals;
+	int i,ii,nmode,nnz;
+	idx_t* inds_all;
+	int num_th;
+	TYPE* temp_res_all;
 
 	nmode = t->nmode;
 	#ifdef OMP
@@ -85,13 +140,18 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 
 	#else
 		num_th = 1;
-		th = 0;
+		int th = 0;
 	#endif
-
-
+	/*	
+	for(i=0 ;i<nmode; i++)
+	{
+		print_matrix(*mats[i]);
+	}
+	*/
 	printf("num ths %d\n", num_th);
-	partial_products = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
-	inds = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
+	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
+	temp_res_all = (TYPE* ) malloc(num_th*r*sizeof(TYPE));
+	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
 	nnz = t->fiber_count[nmode-1];
 	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	for(i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
@@ -99,60 +159,71 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	
 
 	//printf("nmode is %d nnz is %d \n",nmode,nnz);
+	
 	if(profile == mode)
 	{
 		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
-		LIKWID_MARKER_THREADINIT;
-		LIKWID_MARKER_START("Compute");
 	}
+	
 
-	it = 0;
-	// DO the process for the first nnz
-
-	for(i = 0 ; i<r ; i++)
-	{
-		partial_products[i] = MAT(mats[0], t->ind[0][0] ,i);
-	}
-
-	for(ii = 1; ii < nmode - 1 ; ii++)
-	{
-		for(i = 0 ; i<r ; i++)
-		{
-			partial_products[ii * r + i]  = partial_products[(ii-1) * r + i] * MAT(mats[ii], t->ind[ii][0],i);
-		}	
-	}
-
-	if(vec == 0)
-	{
-		for(i=0 ; i<r ; i++)
-		{
-			vals[t->ind[nmode-1][0]*r + i]	= partial_products[(nmode-2) * r + i] * t->val[0];
-		}
-	}
-	else
-	{
-		for(i=0 ; i<r ; i++)
-		{
-			vals[t->ind[nmode-1][0]*r + i]	= partial_products[(nmode-2) * r + i] * t->val[i];
-		}	
-	}
-
-	for(i = 0 ; i < nmode ; i++)
-	{
-		inds[i] = 0;
-	}
-
-	it = 1;
-	//printf("%d\n",nnz);
 	#ifdef OMP
 	#pragma omp parallel
 	#endif
 	{
+		if (profile == mode)
+		{
+			LIKWID_MARKER_THREADINIT;	
+		}
+	}
+
+	// it = 0;
+	// DO the process for the first nnz
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if(profile == mode)
+		{
+			LIKWID_MARKER_START("Compute");
+		}
 		#ifdef OMP
-			th = omp_get_thread_num();
+			int th = omp_get_thread_num();
+			printf("th id is %d\n",th);
 		#endif
-		while(it<nnz)
+
+		idx_t it, end;
+		it = (th*nnz)/num_th;
+		end = ((th+1)*nnz)/num_th;
+		if(VERBOSE == VERBOSE_DEBUG)
+			printf("start %d end is %d for thread %d \n",it,end,th);
+
+		TYPE* partial_products;	
+		idx_t* inds = inds_all + th*nmode;
+		partial_products = partial_products_all + th*nmode*r;
+		TYPE* temp_res = temp_res_all + th*r;
+	
+		
+		find_inds(inds,t,it);
+		
+		
+	
+		for(i = 0 ; i<r ; i++)
+		{
+			partial_products[i] = MAT(mats[0], t->ind[0][inds[0]] ,i);
+		}
+	
+		for(ii = 1; ii < nmode - 1 ; ii++)
+		{
+			for(i = 0 ; i<r ; i++)
+			{
+				partial_products[ii * r + i]  = partial_products[(ii-1) * r + i] * MAT(mats[ii], t->ind[ii][inds[ii]],i);
+			}	
+		}
+	
+		#include "../inc/mttkrp_atomic_last_logic.cpp"
+		it ++;
+		while(it<end)
 		{
 
 			// traverse nnz
@@ -162,17 +233,17 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 			if(it == t->ptr[nmode-2][inds[nmode-2]+1])
 			{
 				int update = 0;
-				inds[th*nmode + nmode-2] ++;
+				inds[nmode-2] ++;
 				for(i = nmode-3; i>=0 ; i--)
 				{
-					if(inds[th*nmode + i+1]  < t->ptr[i][inds[th*nmode + i]+1] )
+					if(inds[i+1]  < t->ptr[i][inds[i]+1] )
 					{
 						update = i+1;
 						break;
 					}
 					else
 					{
-						inds[th*nmode + i] ++;
+						inds[i] ++;
 	
 					}
 	
@@ -182,7 +253,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 				{
 					for(i = 0 ; i<r ; i++)
 					{
-						partial_products[th*nmode*r + i] = MAT(mats[0], t->ind[0][inds[nmode*th  +0]] ,i);
+						partial_products[i] = MAT(mats[0], t->ind[0][inds[0]] ,i);
 						//printf("update %lf %lf \n, ",MAT(mats[0], t->ind[0][inds[nmode*th  +0]] ,i), partial_products[th*nmode*r + i]);
 					}
 					update ++;
@@ -192,62 +263,40 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	
 				for(ii = update; ii<nmode-1; ii++)
 				{
+					TYPE* xx = partial_products + ii*r;
+					TYPE* yy = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
+					TYPE* zz = partial_products + (ii-1)*r;
 					for(i = 0 ; i<r ; i++)
 					{
-						partial_products[th*nmode*r +  ii*r + i] = MAT(mats[ii], t->ind[ii][inds[th*nmode + ii]] ,i) * partial_products[th*nmode*r +  (ii-1)*r + i];
+						partial_products[ ii*r + i] = MAT(mats[ii], t->ind[ii][inds[ii]] ,i) * partial_products[ (ii-1)*r + i];
+						//xx[i] = yy[i] * zz[i];
 					}
 					update ++;
 				}
 			}
 			// use partial products to update last mode
 			// Assign all access to a variable
-			int xx , yy;
-			xx = t->ind[nmode-1][it]*r;
-			yy = th*nmode*r +  (nmode-2) * r ;
+			TYPE* xx , *yy;
+			xx = vals + t->ind[nmode-1][it]*r;
+			yy = partial_products + (nmode-2) * r ;
 
-			if(vec == 0)
-			{
-				TYPE tval = t->val[it];
-				#pragma omp simd
-				for(i=0 ; i<r ; i++)
-				{
-					// put a locking step here
-					// This should be atomic
-					vals[xx + i]	+= partial_products[yy + i] * tval;
-					//printf("last mode %lf %lf %lf \n",  vals[xx + i], partial_products[yy + i] , tval);
-				}
-				
-			}
-			else
-			{
-
-				TYPE* tval = (t->val) + it*r;
-				#pragma omp simd
-				for(i=0 ; i<r ; i++)
-				{
-					// put a locking step here
-					// This should be atomic
-
-					vals[xx + i]	+= partial_products[yy + i] * tval[i];
-
-				}
-				//printf("here %lf %lf %lf \n",vals[xx],partial_products[yy],tval[0]);
-			}
+			#include "../inc/mttkrp_atomic_last_logic.cpp"
 
 			it++;
+		}
+		if(profile == mode)
+		{
+			LIKWID_MARKER_STOP("Compute");
 		}
 	}
 	rem(mats[nmode-1]->val);
 	mats[nmode-1]->val = vals;
 
-	if(profile == mode)
-	{
-		LIKWID_MARKER_STOP("Compute");
-		LIKWID_MARKER_CLOSE;
-	}
+	LIKWID_MARKER_CLOSE;
 
-	rem(inds);
-	rem(partial_products);
+	rem(inds_all);
+	rem(partial_products_all);
+	rem(temp_res_all);
 	return 0;
 }
 
@@ -311,225 +360,279 @@ int mttkrp_fused_init(csf* t,int r)
 	return 0;
 }
 
+// Finds the first nnz id corresponding to fiber pointed by an index
+idx_t find_nnz_pos(csf* t, int depth, idx_t loc) 
+{
+	int nmode = t->nmode;
+	idx_t nnz_pos = loc;
+	int mode_id = depth-1;
+	while ( mode_id < nmode-1)
+	{
+		nnz_pos = t->ptr[mode_id][nnz_pos];
+		mode_id ++;
+	}
+	
+	return nnz_pos;	
+}
+
+int dist_dot_work(idx_t* inds ,csf* t,int p,idx_t* count, int th,int depth)
+{
+	int nmode = t->nmode;
+	idx_t nnz = t->fiber_count[nmode-1];
+	idx_t loc = 0;
+	idx_t start = 0;
+	idx_t end = 0;
+	idx_t goal = (th*nnz)/p;
+	idx_t end_goal = ((th+1)*nnz)/p;
+
+	if(th == 0)
+	{
+		start = 0;
+	}
+	else
+	{
+		int bstart = 0;
+		int bend = t->fiber_count[depth-1];
+
+		// DO a binary search to find the location
+
+		while (bstart < bend - 1)
+		{
+			int pivot = (bstart+bend)/2;
+			int pos = find_nnz_pos(t,depth,pivot);
+			if (pos < goal)
+			{
+				bstart = pivot;
+			}
+			else if (pos > goal)
+			{
+				bend = pivot;
+			}
+			else
+			{
+				bstart = pivot;
+				bend = pivot + 1;
+			}
+		}
+		start = bstart;
+	}
+
+	
+	// Starting position for the thread found
+
+	// Now find the ending position for the thread
+	if(end_goal == nnz)
+	{
+		end = t->fiber_count[depth-1];
+	}
+	else
+	{
+		int bstart = 0;
+		int bend = t->fiber_count[depth-1];
+
+		// DO a binary search to find the location
+
+		while (bstart < bend - 1)
+		{
+			int pivot = (bstart+bend)/2;
+			int pos = find_nnz_pos(t,depth,pivot);
+			if (pos < end_goal)
+			{
+				bstart = pivot;
+			}
+			else if (pos > end_goal)
+			{
+				bend = pivot;
+			}
+			else
+			{
+				bstart = pivot;
+				bend = pivot + 1;
+			}
+		}
+		end = bstart;
+	}
+	
+	
+
+	if(start >= end)
+	{
+		printf("SPTL ERROR: No work is available for thread %d\n", th );
+		return 1;
+	}
+	else
+	{
+		
+		idx_t start_pos = find_nnz_pos(t,depth,start);
+		
+		idx_t end_pos = find_nnz_pos(t,depth,end);
+		*count = end_pos-start_pos;
+		//printf("start pos is %d\n",start_pos );
+		find_inds(inds,t,start_pos);
+		return 0;
+	}
+
+}
+
 int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 {
-	TYPE *partial_products, *vals;
-	int i,ii,it,nmode,nnz;
-	idx_t* inds;
-	int num_th, th;
+	TYPE *partial_products_all, *vals;
+	int i,ii,nmode,nnz;
+	idx_t* inds_all;
+	int num_th;
 
 	nmode = t->nmode;
+
 	#ifdef OMP
 		num_th = omp_get_max_threads();
 
 	#else
 		num_th = 1;
-		th = 0;
+		int th = 0;
 	#endif
 
 	printf("num ths %d\n", num_th);
-	partial_products = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
-	inds = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
+	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
+	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
 	nnz = t->fiber_count[nmode-1];
 	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+	#pragma omp parallel
 	for(i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
 		vals[i] = 0;
 
 
-	it = 0;
+
+
+	// it = 0;
 	// DO the process for the first nnz
 
 	if(profile == mode)
 	{
 		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
-		LIKWID_MARKER_THREADINIT;
-		LIKWID_MARKER_START("Compute");
 	}
 
-	for(ii = 0; ii < nmode - 1 ; ii++)
-	{
-		for(i = 0 ; i<r ; i++)
-		{
-			partial_products[ii * r + i]  =  0 ; //partial_products[(ii-1) * r + i] * MAT(mats[ii], t->ind[ii][0],i);
-		}	
-	}
-
-	for(i=0 ; i<r ; i++)
-	{
-		partial_products[(nmode-2) * r + i] = t->val[0] * MAT(mats[nmode-1],t->ind[nmode-1][0],i);
-		//printf("first %lf %lf %lf\n",partial_products[(nmode-2) * r + i], );
-	}
-
-	for(i = 0 ; i < nmode ; i++)
-	{
-		inds[i] = 0;
-	}
-
-	it = 1;
 	#ifdef OMP
 	#pragma omp parallel
 	#endif
 	{
-		#ifdef OMP
-			th = omp_get_thread_num();
-		#endif
-		while(it<nnz)
+		if(profile == mode)
 		{
-			/*
-			printf("partial products ");
-			for(i = 0 ; i<(nmode-1)*r; i++)
+			LIKWID_MARKER_THREADINIT;	
+		}
+	}
+		
+		
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if (profile == mode)
+		{
+			LIKWID_MARKER_START("Compute");
+		}
+		#ifdef OMP
+			int th = omp_get_thread_num();
+		#endif
+
+		TYPE* partial_products;	
+		idx_t* inds = inds_all + th*nmode;
+		partial_products = partial_products_all + th*nmode*r;
+		idx_t num_it;
+
+		
+
+		dist_dot_work(inds,t,num_th,&num_it,th);
+		if(VERBOSE == VERBOSE_DEBUG)
+			printf("first nnz for thread %d is %d and nnz count is %d\n",th, inds[nmode-1], num_it);
+		idx_t it_start = inds[nmode-1];
+		idx_t it = it_start;
+		for(ii = 0; ii < nmode - 1 ; ii++)
+		{
+			for(i = 0 ; i<r ; i++)
 			{
-				printf("%lf ", partial_products[i]);
-			}
-			printf("\n");
-			*/
-			// traverse nnz
-			// if there is a new fiber
-			// --update partial_products
-			
-			if(it == t->ptr[nmode-2][inds[nmode-2]+1])
+				partial_products[ii * r + i]  =  0 ; //partial_products[(ii-1) * r + i] * MAT(mats[ii], t->ind[ii][0],i);
+			}	
+		}
+	
+		{
+			#include "../inc/mttkrp_atomic_first_nnz_logic.cpp"
+			//inds[nmode-1] ++ ;
+		}
+	
+		
+		{
+		
+			while(it-it_start<num_it)
 			{
-				int update = 0;
-				//inds[th*nmode + nmode-2] ++;
-				for(i = nmode-3; i>=0 ; i--)
+				// traverse nnz
+				// if there is a new fiber
+				// --update partial_products
+				
+				if(it == t->ptr[nmode-2][inds[nmode-2]+1])
 				{
-					if(inds[th*nmode + i+1] + 1 < t->ptr[i][inds[th*nmode + i]+1] )
+					int update = 0;
+					//inds[th*nmode + nmode-2] ++;
+					for(i = nmode-3; i>=0 ; i--)
 					{
-						update = i+1;
-						break;
+						if(inds[i+1] + 1 < t->ptr[i][inds[i]+1] )
+						{
+							update = i+1;
+							break;
+						}
+						/*
+						else
+						{
+							inds[th*nmode + i] ++;
+						}
+						*/
 					}
 					/*
-					else
+					for(i = 0 ; i < nmode ; i++ )
 					{
-						inds[th*nmode + i] ++;
+						printf("%d ",inds[i]);
 					}
+					printf("\n");
 					*/
-				}
-				/*
-				for(i = 0 ; i < nmode ; i++ )
-				{
-					printf("%d ",inds[i]);
-				}
-				printf("\n");
-				*/
-				
-				//printf("update %d\n", update);
-
-				for(ii = nmode-2; ii>=update && ii>0 ; ii--)
-				{
-					int xx = th*nmode*r +  (ii-1)*r;
-					int yy = th*nmode*r +  ii*r ;
-					int zz = t->ind[ii][inds[th*nmode + ii]];
-					#pragma omp simd
-					for(i = 0 ; i<r ; i++)
-					{
-						partial_products[xx + i]  +=   partial_products[yy + i] * MAT(mats[ii],  zz ,i);
-					}
-				}			
-				
-				if(update == 0)
-				{
-
-					for(i = 0 ; i<r ; i++)
-					{
-						vals[ (t->ind[0][inds[th*nmode]])*r +i] = partial_products[th*nmode*r + i];
-						
-						partial_products[th*nmode*r + i] = 0;
-						
-					}
-					update ++;
-					inds[ th*nmode ]++;
-
-				}
-
-				for(ii = update; ii < nmode - 1; ii++)
-				{
-					for(i = 0 ; i<r ; i++)
-					{
-						t->intval[ii][inds[th*nmode + ii]*r + i]  =   partial_products[th*nmode*r +  ii*r + i];
-						partial_products[th*nmode*r +  ii*r + i] = 0;
-					}
-					inds[th*nmode + ii] ++;
-				}
-				/*
-				for(i = 0 ; i < nmode ; i++ )
-				{
-					printf("%d ",inds[i]);
-				}
-				printf("are inds at exit \n");
-				*/
-
-			}
-			// use partial products to update last mode
-			// Assign all access to a variable
-			int xx , yy;
-			xx = t->ind[nmode-1][it]*r;
-			yy = th*nmode*r +  (nmode-2) * r ;
-			TYPE tval = t->val[it];
-			TYPE* matval = (mats[nmode-1]->val)+(mats[nmode-1]->dim2)*t->ind[nmode-1][it];
-			
-
-			#pragma omp simd
-			for(i=0 ; i<r ; i++)
-			{
-				// put a locking step here
-				// This should be atomic
-				//vals[xx + i]	+= partial_products[yy + i] * tval[it];
-				partial_products[yy + i] += tval * matval[i];
-				/*
-				if(i==0)
-					printf("%lf %lf %lf %d\n",  vals[t->ind[nmode-1][it]*r + i], partial_products[(nmode-2) * r + i], t->val[it], t->ind[nmode-1][it]);
-				*/
-			}
-			it++;
+					
+					//printf("update %d\n", update);
 	
+					#include "../inc/mttkrp_atomic_first_logic.cpp"
+					/*
+					for(i = 0 ; i < nmode ; i++ )
+					{
+						printf("%d ",inds[i]);
+					}
+					printf("are inds at exit \n");
+					*/
+	
+				}
+				// use partial products to update last mode
+				// Assign all access to a variable
+				#include "../inc/mttkrp_atomic_first_nnz_logic.cpp"
+				//inds[nmode-1] ++ ;
+		
+			}
+		}
+	
+		int update = 0;
+		#include "../inc/mttkrp_atomic_first_logic.cpp"
+		if(profile == mode)
+		{
+			LIKWID_MARKER_STOP("Compute");
 		}
 	}
-	for(ii = nmode-2; ii>0 ; ii--)
-	{
-		int xx = th*nmode*r +  (ii-1)*r;
-		int yy = th*nmode*r +  ii*r ;
-		int zz = t->ind[ii][inds[th*nmode + ii]];
-		#pragma omp simd
-		for(i = 0 ; i<r ; i++)
-		{
-			partial_products[xx + i]  +=   partial_products[yy + i] * MAT(mats[ii],  zz ,i);
-		}
-	}			
 
-	{
-
-		for(i = 0 ; i<r ; i++)
-		{
-			vals[ (t->ind[0][inds[th*nmode]])*r +i] = partial_products[th*nmode*r + i];
-			partial_products[th*nmode*r + i] = 0;
-			
-		}
-		inds[ th*nmode ]++;
-
-	}
-
-	for(ii = 1; ii <= nmode - 2; ii++)
-	{
-		for(i = 0 ; i<r ; i++)
-		{
-			t->intval[ii][inds[th*nmode + ii]*r + i]  =   partial_products[th*nmode*r +  ii*r + i];
-			partial_products[th*nmode*r +  ii*r + i] = 0;
-		}
-		inds[th*nmode + ii] ++;
-	}
 	rem(mats[mode]->val);
 	mats[mode]->val = vals;
 
-	if(profile == mode)
-	{
-		LIKWID_MARKER_STOP("Compute");
-		LIKWID_MARKER_CLOSE;
-	}
+	
+	LIKWID_MARKER_CLOSE;
+	
 
-	rem(inds);
-	rem(partial_products);
+	rem(inds_all);
+	rem(partial_products_all);
 
 
 	return 0;
