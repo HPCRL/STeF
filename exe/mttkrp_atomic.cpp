@@ -63,7 +63,12 @@ int main(int argc, char** argv)
 
 		if(debug)
 		{
+			auto start2 = std::chrono::high_resolution_clock::now();
 			mttkrp_test(dt,mode,r,mats);
+			auto end2 = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double> diff = end2-start2;
+			//total += diff.count();
+			printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 		}
 		random_matrix(*mats[mode],i+1);
 
