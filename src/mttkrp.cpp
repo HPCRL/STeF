@@ -9,14 +9,14 @@ int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
 
 
 	TYPE* partial_products;
-	int i,j,k,x,y,ind,nmode;
+	int i,j,k,y,nmode;
 	TYPE* vals;
 
 	nmode = t->nmode;
 	partial_products = (TYPE* ) malloc(nmode*r*sizeof(TYPE));
 	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	
-	matrix m;
+	//matrix m;
 
 
 	for(i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
@@ -202,7 +202,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		TYPE* partial_products;	
 		idx_t* inds = inds_all + th*nmode;
 		partial_products = partial_products_all + th*nmode*r;
-		TYPE* temp_res = temp_res_all + th*(r+64);
+		//TYPE* temp_res = temp_res_all + th*(r+64);
 	
 		
 		find_inds(inds,t,it);
@@ -348,7 +348,7 @@ int mttkrp_fused_init(csf* t,int r)
 			// B
 			space_sign = "B";
 		}
-		printf("Additional space requirement for the intermediate tensors is %ld%s \n",total_space,space_sign);
+		printf("Additional space requirement for the intermediate tensors is %llu%s \n",total_space,space_sign);
 	}
 	for(i = 1; i < (t->nmode)-1 ; i++)
 	{
@@ -380,7 +380,7 @@ int dist_dot_work(idx_t* inds ,csf* t,int p,idx_t* count, int th,int depth)
 {
 	int nmode = t->nmode;
 	idx_t nnz = t->fiber_count[nmode-1];
-	idx_t loc = 0;
+	//idx_t loc = 0;
 	idx_t start = 0;
 	idx_t end = 0;
 	idx_t goal = (th*nnz)/p;
@@ -483,7 +483,7 @@ int dist_dot_work(idx_t* inds ,csf* t,int p,idx_t* count, int th,int depth)
 int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 {
 	TYPE *partial_products_all, *vals;
-	int nmode,nnz;
+	int nmode;
 	idx_t* inds_all;
 	int num_th;
 
@@ -500,7 +500,7 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 	printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
-	nnz = t->fiber_count[nmode-1];
+	//int nnz = t->fiber_count[nmode-1];
 	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	#pragma omp parallel
 	for(int i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
@@ -734,7 +734,7 @@ int mttkrp_test(coo* dt, int mode, int r, matrix** mats)
 				idx_t row_id = ptr[ mode_id ];
 				//printf("row_id is %d mode_id is %d\n",row_id,mode_id);
 				
-				TYPE const * const restrict inrow = mats[m]->val + row_id*(mats[m]->dim2);
+				TYPE const * const __restrict__ inrow = mats[m]->val + row_id*(mats[m]->dim2);
 				for(y=0 ; y<r ; y++)
 				{
 					accum[y] *= inrow[y]; // Multiply tensor with the dense matrix

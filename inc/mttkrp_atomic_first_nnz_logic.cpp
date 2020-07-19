@@ -1,4 +1,4 @@
-TYPE* xx , *yy;
+TYPE *yy;
 //xx = t->ind[nmode-1][it]*r;
 yy = partial_products + (nmode-2) * r ;
 TYPE tval = t->val[it];

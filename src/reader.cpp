@@ -52,7 +52,7 @@ int compare_nnz(const void *a, const void *b)
 {
 	idx_t** x = (idx_t**) a;
 	idx_t** y = (idx_t**) b;
-	int shift = sort_shift;
+	//int shift = sort_shift;
 	int i, ii;
 	int size = num_mode ;//*(x+1) - *x;
 	//printf(" size %d\n", size);
@@ -192,7 +192,7 @@ int readline(char* line, idx_t* idx, TYPE* val)
 
 int print_stats(int* sort_order, int* fiber_count, const char* file, int nmode, int nnz)
 {
-	int i, ii;
+	int  ii;
 	
 	printf("%s Active number of fibers for modes ",file);
 	for(ii = 0; ii < nmode; ii++)
@@ -230,7 +230,7 @@ int print_stats(int* sort_order, int* fiber_count, const char* file, int nmode, 
 
 int reorder_stat(int nmode, int nnz, idx_t** pindex, const char* file)
 {
-	int i,ii;
+	int i;
 	int nfac = 1;
 	int * fiber_count;
 	for(i = 1; i <= nmode; i++)
@@ -243,7 +243,7 @@ int reorder_stat(int nmode, int nnz, idx_t** pindex, const char* file)
 		create_perm(i , sort_order , nmode);
 		qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
 
-		int num_fiber = count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
+		//int num_fiber = count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
 		
 		print_stats(sort_order, fiber_count, file, nmode, nnz);
 			
@@ -254,7 +254,7 @@ int reorder_stat(int nmode, int nnz, idx_t** pindex, const char* file)
 int order_modes(int* mlen, int nmode, int* sort_order)
 {
 	// Simple bubble sort of the mlem array and the result written in sort_order
-	int i, ii, ind, min, *len;
+	int i, ii, ind=-1, min, *len;
 
 	int *sorted = (int* ) malloc(nmode*sizeof(int)) ;
 	len = (int* ) malloc(nmode*sizeof(int)) ;
@@ -298,7 +298,7 @@ int order_modes(int* mlen, int nmode, int* sort_order)
 int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* fiber_count, csf* res,int* mlen)
 {
 	csf t;
-	int i, j, jj , ii, ilen, plen, len, *ind, *dimlen;
+	int i, j, jj , ii, ilen, plen,  *ind, *dimlen;
 	long long total_space;
 	char* space_sign;
 
@@ -352,7 +352,7 @@ int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* f
 		space_sign = "B";
 	}
 
-	printf("Total space requirement of the CSF is %ld%s \n",total_space,space_sign);
+	printf("Total space requirement of the CSF is %llu%s \n",total_space,space_sign);
 
 	for( i=0 ; i< plen ; i++)	
 	{
@@ -517,20 +517,21 @@ int sort_coo(idx_t** pindex,idx_t* index,TYPE* val,int* sort_order,idx_t nnz, in
 int read_tensor(const char* file, csf* res,  coo* debugt)
 {
 	FILE *fp;
-	int *loc;
-	char buf[300];
-	int nflag, sflag;
-	int dummy, pre_count=0, tmp_ne;
-	int i,j,ii;
+	//int *loc;
+	#define  buf_size  (MAX_MODE+1)*30
+	char buf[buf_size];
+	//int nflag, sflag;
+	// int dummy, pre_count=0, tmp_ne;
+	int i,ii=-1;
 	idx_t* index = NULL;
 	idx_t** pindex = NULL;
 	int sizestep = 1000000;
 	int size = sizestep;
 	int nmode = 0;
 	int nnz = 0;
-	int* mlen;
+	int* mlen=NULL;
 	int * fiber_count;
-	TYPE* vals;
+	TYPE* vals=NULL;
 	srand(time(NULL));
 	//int compare_nnz(const void *a, const void *b);
 
@@ -538,7 +539,7 @@ int read_tensor(const char* file, csf* res,  coo* debugt)
 	fp = fopen(file, "r");
 
 	//for(int i = 0 ; i < 10 ; i++)
-	while(fgets(buf, (MAX_MODE+1)*30, fp))
+	while(fgets(buf, buf_size, fp))
 	{
 		if(strstr(buf, "#") != NULL)
 			continue;
