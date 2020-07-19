@@ -6,7 +6,7 @@ TYPE* matval = (mats[nmode-1]->val)+(mats[nmode-1]->dim2)*(t->ind[nmode-1][it]);
 
 
 #pragma omp simd
-for(i=0 ; i<r ; i++)
+for(int i=0 ; i<r ; i++)
 {
 	// put a locking step here
 	// This should be atomic

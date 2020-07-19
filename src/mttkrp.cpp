@@ -129,7 +129,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 
 
 	TYPE* partial_products_all, *vals;
-	int i,ii,nmode,nnz;
+	int nmode,nnz;
 	idx_t* inds_all;
 	int num_th;
 	TYPE* temp_res_all;
@@ -150,11 +150,11 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	*/
 	printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
-	temp_res_all = (TYPE* ) malloc(num_th*r*sizeof(TYPE));
+	temp_res_all = (TYPE* ) malloc(num_th*(r+64)*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
 	nnz = t->fiber_count[nmode-1];
 	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-	for(i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
+	for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
 		vals[i] = 0;
 	
 
@@ -189,6 +189,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		}
 		#ifdef OMP
 			int th = omp_get_thread_num();
+			if(VERBOSE == VERBOSE_DEBUG)
 			printf("th id is %d\n",th);
 		#endif
 
@@ -201,21 +202,21 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		TYPE* partial_products;	
 		idx_t* inds = inds_all + th*nmode;
 		partial_products = partial_products_all + th*nmode*r;
-		TYPE* temp_res = temp_res_all + th*r;
+		TYPE* temp_res = temp_res_all + th*(r+64);
 	
 		
 		find_inds(inds,t,it);
 		
 		
 	
-		for(i = 0 ; i<r ; i++)
+		for(int i = 0 ; i<r ; i++)
 		{
 			partial_products[i] = MAT(mats[0], t->ind[0][inds[0]] ,i);
 		}
 	
-		for(ii = 1; ii < nmode - 1 ; ii++)
+		for(int ii = 1; ii < nmode - 1 ; ii++)
 		{
-			for(i = 0 ; i<r ; i++)
+			for(int i = 0 ; i<r ; i++)
 			{
 				partial_products[ii * r + i]  = partial_products[(ii-1) * r + i] * MAT(mats[ii], t->ind[ii][inds[ii]],i);
 			}	
@@ -234,7 +235,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 			{
 				int update = 0;
 				inds[nmode-2] ++;
-				for(i = nmode-3; i>=0 ; i--)
+				for(int i = nmode-3; i>=0 ; i--)
 				{
 					if(inds[i+1]  < t->ptr[i][inds[i]+1] )
 					{
@@ -251,7 +252,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 
 				if(update == 0)
 				{
-					for(i = 0 ; i<r ; i++)
+					for(int i = 0 ; i<r ; i++)
 					{
 						partial_products[i] = MAT(mats[0], t->ind[0][inds[0]] ,i);
 						//printf("update %lf %lf \n, ",MAT(mats[0], t->ind[0][inds[nmode*th  +0]] ,i), partial_products[th*nmode*r + i]);
@@ -261,24 +262,24 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	
 	
 	
-				for(ii = update; ii<nmode-1; ii++)
+				for(int ii = update; ii<nmode-1; ii++)
 				{
 					TYPE* xx = partial_products + ii*r;
 					TYPE* yy = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
 					TYPE* zz = partial_products + (ii-1)*r;
-					for(i = 0 ; i<r ; i++)
+					for(int i = 0 ; i<r ; i++)
 					{
-						partial_products[ ii*r + i] = MAT(mats[ii], t->ind[ii][inds[ii]] ,i) * partial_products[ (ii-1)*r + i];
-						//xx[i] = yy[i] * zz[i];
+						//partial_products[ ii*r + i] = MAT(mats[ii], t->ind[ii][inds[ii]] ,i) * partial_products[ (ii-1)*r + i];
+						xx[i] = yy[i] * zz[i];
 					}
 					update ++;
 				}
 			}
 			// use partial products to update last mode
 			// Assign all access to a variable
-			TYPE* xx , *yy;
-			xx = vals + t->ind[nmode-1][it]*r;
-			yy = partial_products + (nmode-2) * r ;
+			//TYPE* xx , *yy;
+			//xx = vals + t->ind[nmode-1][it]*r;
+			//yy = partial_products + (nmode-2) * r ;
 
 			#include "../inc/mttkrp_atomic_last_logic.cpp"
 
@@ -462,13 +463,18 @@ int dist_dot_work(idx_t* inds ,csf* t,int p,idx_t* count, int th,int depth)
 	}
 	else
 	{
-		
+		//auto start_time = std::chrono::high_resolution_clock::now();
 		idx_t start_pos = find_nnz_pos(t,depth,start);
 		
 		idx_t end_pos = find_nnz_pos(t,depth,end);
 		*count = end_pos-start_pos;
 		//printf("start pos is %d\n",start_pos );
 		find_inds(inds,t,start_pos);
+
+		//auto end_time = std::chrono::high_resolution_clock::now();
+		//std::chrono::duration<double> diff = end_time-start_time;
+		//total += diff.count();
+		//printf("preprocessing %lf \n",diff.count());
 		return 0;
 	}
 
@@ -477,7 +483,7 @@ int dist_dot_work(idx_t* inds ,csf* t,int p,idx_t* count, int th,int depth)
 int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 {
 	TYPE *partial_products_all, *vals;
-	int i,ii,nmode,nnz;
+	int nmode,nnz;
 	idx_t* inds_all;
 	int num_th;
 
@@ -497,7 +503,7 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 	nnz = t->fiber_count[nmode-1];
 	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	#pragma omp parallel
-	for(i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
+	for(int i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
 		vals[i] = 0;
 
 
@@ -542,15 +548,19 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 		idx_t num_it;
 
 		
-
+		auto start_time = std::chrono::high_resolution_clock::now();
 		dist_dot_work(inds,t,num_th,&num_it,th);
+		auto end_time = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> diff = end_time-start_time;
+		//total += diff.count();
+		printf("preprocessing for th %d %lf \n",th,diff.count());
 		if(VERBOSE == VERBOSE_DEBUG)
 			printf("first nnz for thread %d is %d and nnz count is %d\n",th, inds[nmode-1], num_it);
 		idx_t it_start = inds[nmode-1];
 		idx_t it = it_start;
-		for(ii = 0; ii < nmode - 1 ; ii++)
+		for(int ii = 0; ii < nmode - 1 ; ii++)
 		{
-			for(i = 0 ; i<r ; i++)
+			for(int i = 0 ; i<r ; i++)
 			{
 				partial_products[ii * r + i]  =  0 ; //partial_products[(ii-1) * r + i] * MAT(mats[ii], t->ind[ii][0],i);
 			}	
@@ -574,7 +584,7 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 				{
 					int update = 0;
 					//inds[th*nmode + nmode-2] ++;
-					for(i = nmode-3; i>=0 ; i--)
+					for(int i = nmode-3; i>=0 ; i--)
 					{
 						if(inds[i+1] + 1 < t->ptr[i][inds[i]+1] )
 						{
