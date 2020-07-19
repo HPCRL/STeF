@@ -12,9 +12,9 @@ printf("before updating partial_products th %d\n",th);
 
 for(int ii = nmode-2; ii>=update && ii>0 ; ii--)
 {
-	TYPE* xx =  partial_products + (ii-1)*r;
-	TYPE* yy =  partial_products + ii*r ;
-	TYPE* zz = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
+	TYPE* __restrict__ xx =  partial_products + (ii-1)*r;
+	TYPE const * const __restrict__ yy =  partial_products + ii*r ;
+	TYPE const * const __restrict__ zz = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
 	#pragma omp simd
 	for(int i = 0 ; i<r ; i++)
 	{
@@ -37,8 +37,8 @@ if(update == 0)
 {
 	if(DOT_PARALLEL_DEPTH <= 1)
 	{
-		TYPE* xx = vals + (t->ind[0][inds[0]])*r;
-		TYPE* yy = partial_products;
+		TYPE * __restrict__ xx = vals + (t->ind[0][inds[0]])*r;
+		TYPE const * const __restrict__ yy = partial_products;
 		for(int i = 0 ; i<r ; i++)
 		{
 			xx[i] = yy[i];
@@ -46,8 +46,8 @@ if(update == 0)
 	}
 	else
 	{	
-		TYPE* xx = vals + (t->ind[0][inds[0]])*r;
-		TYPE* yy = partial_products;
+		TYPE* __restrict__ xx = vals + (t->ind[0][inds[0]])*r;
+		TYPE const * const __restrict__ yy = partial_products;
 		for(int i = 0 ; i<r ; i++)
 		{
 			#pragma omp atomic update
@@ -69,8 +69,8 @@ for(int ii = update; ii < nmode - 1; ii++)
 {
 	if(DOT_PARALLEL_DEPTH > ii+1)
 	{
-		TYPE* xx = t->intval[ii]  + (inds[ii]*r);
-		TYPE* yy = partial_products + ii*r;
+		TYPE* __restrict__ xx = t->intval[ii]  + (inds[ii]*r);
+		TYPE* __restrict__ yy = partial_products + ii*r;
 		for(int i = 0 ; i<r ; i++)
 		{
 			#pragma omp atomic update

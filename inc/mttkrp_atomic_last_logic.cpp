@@ -1,5 +1,5 @@
 {
-	TYPE* xx , *yy;
+	TYPE* __restrict__ xx , * __restrict__ yy;
 	xx = vals + t->ind[nmode-1][it]*r;
 	yy = partial_products + (nmode-2) * r ;
 

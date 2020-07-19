@@ -26,7 +26,7 @@
 #define LIKWID_MARKER_GET(regionTag, nevents, events, time, count)
 #endif
 
-#define OMP
+//#define OMP
 #ifdef OMP
 #include <omp.h>
 #endif

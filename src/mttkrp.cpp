@@ -199,7 +199,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		if(VERBOSE == VERBOSE_DEBUG)
 			printf("start %d end is %d for thread %d \n",it,end,th);
 
-		TYPE* partial_products;	
+		TYPE* __restrict__ partial_products;	
 		idx_t* inds = inds_all + th*nmode;
 		partial_products = partial_products_all + th*nmode*r;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
@@ -264,9 +264,9 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	
 				for(int ii = update; ii<nmode-1; ii++)
 				{
-					TYPE* xx = partial_products + ii*r;
-					TYPE* yy = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
-					TYPE* zz = partial_products + (ii-1)*r;
+					TYPE* __restrict__ xx = partial_products + ii*r;
+					TYPE const * const __restrict__ yy = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
+					TYPE const * const __restrict__ zz = partial_products + (ii-1)*r;
 					for(int i = 0 ; i<r ; i++)
 					{
 						//partial_products[ ii*r + i] = MAT(mats[ii], t->ind[ii][inds[ii]] ,i) * partial_products[ (ii-1)*r + i];
