@@ -549,7 +549,8 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 
 		
 		auto start_time = std::chrono::high_resolution_clock::now();
-		dist_dot_work(inds,t,num_th,&num_it,th);
+		if(dist_dot_work(inds,t,num_th,&num_it,th))
+			return 1;
 		auto end_time = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end_time-start_time;
 		//total += diff.count();
