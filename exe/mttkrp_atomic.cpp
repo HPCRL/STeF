@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	}
 	for(i=0 ; i<nmode ; i++)
 	{
-		random_matrix(*mats[i],i+1);
+		random_matrix(*mats[i],i);
 		if(VERBOSE  == VERBOSE_DEBUG)
 			print_matrix(*mats[i]);
 	}
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 			//total += diff.count();
 			printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 		}
-		random_matrix(*mats[mode],i+1);
+		random_matrix(*mats[mode],i);
 
 		for(i=0 ; i<nmode ; i++)
 		{
@@ -94,7 +94,9 @@ int main(int argc, char** argv)
 
 	//free(t->intval[1]);
 	free_csf(t);
-
+	free_coo(dt);
+	rem(t);
+	rem(dt);
 	for(i=0 ; i<nmode ; i++)
 	{
 		free_matrix(mats[i]);

@@ -39,6 +39,7 @@ if(update == 0)
 	{
 		TYPE * __restrict__ xx = vals + (t->ind[0][inds[0]])*r;
 		TYPE const * const __restrict__ yy = partial_products;
+		#pragma omp simd
 		for(int i = 0 ; i<r ; i++)
 		{
 			xx[i] = yy[i];
@@ -48,12 +49,15 @@ if(update == 0)
 	{	
 		TYPE* __restrict__ xx = vals + (t->ind[0][inds[0]])*r;
 		TYPE const * const __restrict__ yy = partial_products;
+		#pragma omp simd
 		for(int i = 0 ; i<r ; i++)
 		{
 			#pragma omp atomic update
 			xx[i] += yy[i];
 		}
 	}
+
+	#pragma omp simd
 	for(int i = 0 ; i<r ; i++)
 	{	
 		//printf("partial_result at %d added to output at %d %lf in th %d\n",i,(t->ind[0][inds[0]])*r + i,partial_products[i] ,th);
@@ -71,6 +75,7 @@ for(int ii = update; ii < nmode - 1; ii++)
 	{
 		TYPE* __restrict__ xx = t->intval[ii]  + (inds[ii]*r);
 		TYPE* __restrict__ yy = partial_products + ii*r;
+		#pragma omp simd
 		for(int i = 0 ; i<r ; i++)
 		{
 			#pragma omp atomic update
@@ -79,11 +84,14 @@ for(int ii = update; ii < nmode - 1; ii++)
 	}
 	else
 	{	
+		#pragma omp simd 
 		for(int i = 0 ; i<r ; i++)
 		{
 			t->intval[ii][inds[ii]*r + i]  =   partial_products[ ii*r + i];			
 		}
 	}	
+	
+	#pragma omp simd
 	for(int i = 0 ; i<r ; i++)
 	{
 		//printf("partial_result at %d added to intval at %d %lf in th %d\n",ii*r+i,inds[ii]*r+i,partial_products[ii*r+i] ,th);

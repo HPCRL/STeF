@@ -28,6 +28,7 @@ typedef struct tensor_coo coo;
 
 
 int free_csf(csf* t);
+int free_coo(coo* t);
 int csf_space(csf* t);
 int print_csf(csf* t);
 

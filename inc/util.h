@@ -26,7 +26,7 @@
 #define LIKWID_MARKER_GET(regionTag, nevents, events, time, count)
 #endif
 
-//#define OMP
+#define OMP
 #ifdef OMP
 #include <omp.h>
 #endif
@@ -35,8 +35,9 @@
 #define MAX_MODE 10
 #define TYPE double
 #define VERBOSE VERBOSE_LOW
-#define CORRECTNESS_THRESHOLD 1E-8
+#define CORRECTNESS_THRESHOLD 1E-10
 #define DOT_PARALLEL_DEPTH 1
+#define PAD 64
 
 enum verbosity
 {

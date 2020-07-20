@@ -24,6 +24,14 @@ int free_csf(csf* t)
 	return 0;
 }
 
+int free_coo(coo* t)
+{
+	rem(t->ind);
+	rem(t->val);
+	return 0;
+}
+
+
 int print_csf(csf* t)
 {
 	for(int i=0; i<t->nmode ;i++)

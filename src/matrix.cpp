@@ -43,7 +43,7 @@ int random_matrix(matrix mat, TYPE val)
 	{
 		for(j = 0; j < mat.dim2 ; j++)
 		{
-			mat.val[i * mat.dim2 + j] = ((TYPE) val + (i * mat.dim2 + j))/(mat.dim1*mat.dim2)/100;
+			mat.val[i * mat.dim2 + j] =  val + ((TYPE)  ((i * mat.dim2 + j)%100))/100;
 		}
 
 	}	
@@ -67,7 +67,7 @@ int set_matrix(matrix mat, TYPE val)
 int free_matrix(matrix* mat)
 {
 	rem(mat->val);
-	rem(mat);
+	//rem(mat);
 	return 0;
 }
 
