@@ -796,7 +796,19 @@ int mttkrp_test(coo* dt, int mode, int r, matrix** mats)
 // Hardwired for 4 dimension for testing out
 int mttkrp_hardwired_first(csf* t, int mode, int r, matrix** mats, int profile)
 {
+
+	
 	int nmode = t->nmode;
+	if (nmode == 3)
+		return mttkrp_hardwired_first_3(t,mode,r,mats,profile);
+	else if (nmode == 4)
+		return mttkrp_hardwired_first_4(t,mode,r,mats,profile);
+	else if (nmode == 5)
+		return mttkrp_hardwired_first_5(t,mode,r,mats,profile);
+	else
+		return 1;
+
+	/*
 	int num_th = 1;
 	int partial_results_size = nmode*r+PAD;
 	#ifdef OMP
@@ -895,7 +907,9 @@ int mttkrp_hardwired_first(csf* t, int mode, int r, matrix** mats, int profile)
 		}
 	}
 	rem(partial_results_all);	
+	*/
 	return 0;
+
 }
 
 

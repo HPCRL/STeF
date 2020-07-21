@@ -3,6 +3,7 @@
 #include "../inc/matrix.h"
 #include "../inc/tensor.h"
 #include "../inc/util.h"
+#include "../inc/mttkrp_hardwired.h"
 
 
 int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats);
