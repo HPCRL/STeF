@@ -153,8 +153,8 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	temp_res_all = (TYPE* ) malloc(num_th*(r+64)*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
 	nnz = t->fiber_count[nmode-1];
-	//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-	vals = mats[mode]->val;
+	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+	//vals = mats[mode]->val;
 	for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
 		vals[i] = 0;
 	
@@ -200,7 +200,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		if(VERBOSE == VERBOSE_DEBUG)
 			printf("start %d end is %d for thread %d \n",it,end,th);
 
-		TYPE* __restrict__ partial_products;	
+		TYPE* partial_products;	
 		idx_t* inds = inds_all + th*nmode;
 		partial_products = partial_products_all + th*nmode*r;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
@@ -265,9 +265,9 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	
 				for(int ii = update; ii<nmode-1; ii++)
 				{
-					TYPE* __restrict__ xx = partial_products + ii*r;
-					TYPE const * const __restrict__ yy = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
-					TYPE const * const __restrict__ zz = partial_products + (ii-1)*r;
+					TYPE*  xx = partial_products + ii*r;
+					TYPE  *  yy = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
+					TYPE  *  zz = partial_products + (ii-1)*r;
 					for(int i = 0 ; i<r ; i++)
 					{
 						//partial_products[ ii*r + i] = MAT(mats[ii], t->ind[ii][inds[ii]] ,i) * partial_products[ (ii-1)*r + i];
@@ -682,8 +682,8 @@ int mttkrp_atomic(csf* t, int mode, int r, matrix** mats, int profile)
 	{
 		// return mttkrp_atomic_first(t,mode,mats);
 
-		//return mttkrp_atomic_first(t,mode,r,mats, profile);
-		return mttkrp_hardwired_first(t,mode,r,mats, profile);
+		return mttkrp_atomic_first(t,mode,r,mats, profile);
+		//return mttkrp_hardwired_first(t,mode,r,mats, profile);
 
 	}
 	else if (mode == (t->nmode)-1)
@@ -801,7 +801,7 @@ int mttkrp_hardwired_first(csf* t, int mode, int r, matrix** mats, int profile)
 	int partial_results_size = nmode*r+PAD;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
-	printf("here \n");
+	//printf("here \n");
 	#endif
 
 	printf("num ths %d\n", num_th);
@@ -824,7 +824,7 @@ int mttkrp_hardwired_first(csf* t, int mode, int r, matrix** mats, int profile)
 
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
 		#ifdef OMP
-		#pragma omp for
+		#pragma omp for schedule(dynamic,1)
 		#endif
 		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
 		{
@@ -840,6 +840,7 @@ int mttkrp_hardwired_first(csf* t, int mode, int r, matrix** mats, int profile)
 						//#pragma omp simd
 						//printf("i vals are %d %d %d %d\n",i0,i1,i2,i3);
 						//printf("%d %d %d %d\n",t->ind[0][i0],t->ind[1][i1],t->ind[2][i2],t->ind[3][i3]);
+						#pragma omp simd
 						for(int y=0 ; y<r ; y++)
 						{
 							pr[y] += tval * matval[y];	// TTM step			
@@ -848,28 +849,42 @@ int mttkrp_hardwired_first(csf* t, int mode, int r, matrix** mats, int profile)
 					// write to intval
 					
 					TYPE* matval = (mats[2]->val) + ((mats[2]) -> dim2) * t->ind[2][i2];
-					//#pragma omp simd
+					TYPE* intval = t->intval[2] + i2*r;
+					#pragma omp simd
 					for(int y=0 ; y<r ; y++)
 					{
 						//printf("2nd level loop %lf\n",partial_results[2*r+y]);
 						partial_results[r+y] += partial_results[2*r+y] * matval[y]; // TTV
-						t->intval[2][i2*r + y] = partial_results[2*r + y];
+						intval[y]= partial_results[2*r + y];
+						
+					}
+					#pragma omp simd
+					for(int y=0; y<r; y++)
+					{
 						partial_results[2*r+y] = 0;
 					}
 				}
 				// write to intval
 				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
-				//#pragma omp simd
+				TYPE* intval = t->intval[1] + i1*r;
+				#pragma omp simd
 				for(int y=0 ; y<r ; y++)
 				{
 					//printf("1st level loop %lf\n",partial_results[r+y]);
 					partial_results[y] += partial_results[r+y] * matval[y]; // TTV
-					t->intval[1][i1*r + y] = partial_results[r + y];
+					intval[y] = partial_results[r + y];
+					//partial_results[r+y] = 0;
+				}
+				#pragma omp simd
+				for(int y=0; y<r; y++)
+				{
 					partial_results[r+y] = 0;
 				}
 			}
 			// write to output matrix
 			TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * t->ind[0][i0]; 
+
+			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
 				//	printf("0th level loop %lf\n",partial_results[y]);

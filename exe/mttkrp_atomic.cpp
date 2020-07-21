@@ -50,7 +50,17 @@ int main(int argc, char** argv)
 	double total=0;
 
 //	printf("here\n")
-
+	{
+		auto start = std::chrono::high_resolution_clock::now();
+		mttkrp_hardwired_first(t,0,r,mats,profile);
+		//printf("here\n");
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> diff = end-start;
+		
+		printf("Hardwired time for mode %d %lf \n",t->modeid[0],diff.count());	
+		mttkrp_test(dt,0,r,mats);
+	}
+	
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
