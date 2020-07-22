@@ -97,6 +97,23 @@ int main(int argc, char** argv)
 
 	}
 
+	#ifdef OMP
+		mutex_array* mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
+		//mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
+	#endif
+
+	{
+
+		auto start = std::chrono::high_resolution_clock::now();
+		mttkrp_hardwired_last(t,nmode-1,r,mats,profile);
+		//printf("here\n");
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> diff = end-start;
+		
+		printf("Hardwired time for mode %d %lf \n",t->modeid[nmode-1],diff.count());	
+		mttkrp_test(dt,nmode-1,r,mats);
+	}
+
 	printf("Total MTTKRP time %lf \n",total);
 
 	

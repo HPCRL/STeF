@@ -2,120 +2,9 @@
 #define MTTKRP_CPP
 #include "../inc/mttkrp.h"
 
-
-
-int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats)
-{
-
-
-	TYPE* partial_products;
-	int i,j,k,y,nmode;
-	TYPE* vals;
-
-	nmode = t->nmode;
-	partial_products = (TYPE* ) malloc(nmode*r*sizeof(TYPE));
-	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-	
-	//matrix m;
-
-
-	for(i=0 ; i<mats[mode]->dim1*mats[mode]->dim2 ; i++)
-		vals[i] = 0;
-
-	//if(profile == mode)
-	{
-		LIKWID_MARKER_INIT;
-		LIKWID_MARKER_THREADINIT;
-		LIKWID_MARKER_START("Compute");
-	}
-	
-	for(i = 0 ; i < t->fiber_count[0] ; i++ )
-	{
-		
-		for(y = 0; y<r ; y++)
-		{
-			partial_products[y] = MAT(mats[0], t->ind[0][i] ,y);
-		}
-		for(j = t->ptr[0][i] ; j < t->ptr[0][i+1] ; j++)
-		{
-
-			for(y = 0; y<r ; y++)
-			{
-				partial_products[r + y] = partial_products[y] * MAT(mats[1], t->ind[1][j] ,y);
-			}
-
-			for(k = t->ptr[1][j] ; k < t->ptr[1][j+1]; k++)
-			{
-				int kk = t->ind[2][k];
-				for(y = 0; y<r ; y++)
-				{
-					vals[kk*mats[mode]->dim2 + y] += partial_products[r + y] * t->val[k];
-					//if (y == 0)						printf("%lf %lf %d %d\n", partial_products[r + y] * t->val[k] , vals[kk*mats[mode]->dim2 + y], kk*mats[mode]->dim2 + y, kk);
-					//printf("%lf\n", t->val[k]);
-				}
-			}
-		}
-		
-	}
-
-	mats[nmode-1]->val = vals;
-	LIKWID_MARKER_STOP("Compute");
-	LIKWID_MARKER_CLOSE;
-	return 0;
-}
-
-int find_inds(idx_t* inds ,csf* t,idx_t it)
-{
-	int nmode = t->nmode;
-	//printf("here ss\n");
-	if (it == 0)
-	{
-		for (int i=0; i<nmode ; i++)
-		{
-			inds[i] = 0;
-		}
-
-		return 0;
-	}
-	else
-	{
-		
-		inds[nmode-1] = it;
-		idx_t last_pos = it;
-		for(int i=nmode-2 ; i>=0 ; i--)
-		{
-			// do binary seach and find the index
-			// idx_t id = -1;
-			idx_t start = 0;
-			idx_t end = t->fiber_count[i];
-			while(end > start+1)
-			{
-				idx_t pivot = (end + start)/2;
-				if(t->ptr[i][pivot] > last_pos)
-				{
-					end = pivot;
-				}
-				else if (t->ptr[i][pivot] <= last_pos)
-				{
-					start = pivot;
-				}
-				//printf("%d %d %d %d\n",start, end , i , last_pos);
-			}
-			inds[i] = start;
-			last_pos = start;
-		}
-		/*
-		for(int i=0; i<nmode ; i++)
-		{
-			printf("%d", inds[i] );
-		}
-		printf("\n");
-		*/
-		return 0;
-	}
-
-	
-}
+#ifdef OMP
+mutex_array* mutex = NULL;
+#endif
 
 int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int profile)
 {
@@ -358,6 +247,14 @@ int mttkrp_fused_init(csf* t,int r)
 			t->intval[i][j] = 0;
 		}
 	}
+
+	#ifdef OMP
+	if (mutex == NULL)
+	{
+		//mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
+		mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
+	}
+	#endif
 
 	return 0;
 }
@@ -808,109 +705,33 @@ int mttkrp_hardwired_first(csf* t, int mode, int r, matrix** mats, int profile)
 	else
 		return 1;
 
-	/*
-	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
-	#ifdef OMP
-	num_th = omp_get_max_threads();
-	//printf("here \n");
-	#endif
-
-	printf("num ths %d\n", num_th);
-
-	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
-
-	for(int i = 0 ; i < num_th*partial_results_size ; i++)
-		partial_results_all[i] = 0;
-
-	set_matrix(*mats[0],0);
-
-	#ifdef OMP
-	#pragma omp parallel 
-	#endif
-	{
-		int th = 0;
-		#ifdef OMP
-		th = omp_get_thread_num();
-		#endif
-
-		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
-		{
-			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
-			{
-				for(idx_t i2 = t->ptr[1][i1] ; i2< t->ptr[1][i1+1]; i2++)
-				{
-					for(idx_t i3 = t->ptr[2][i2] ; i3< t->ptr[2][i2+1]; i3++)
-					{
-						TYPE* pr = partial_results + 2*r;
-						TYPE tval = t->val[i3];
-						TYPE* matval = (mats[3]->val) + ((mats[3]) -> dim2) * t->ind[3][i3];
-						//#pragma omp simd
-						//printf("i vals are %d %d %d %d\n",i0,i1,i2,i3);
-						//printf("%d %d %d %d\n",t->ind[0][i0],t->ind[1][i1],t->ind[2][i2],t->ind[3][i3]);
-						#pragma omp simd
-						for(int y=0 ; y<r ; y++)
-						{
-							pr[y] += tval * matval[y];	// TTM step			
-						}
-					}
-					// write to intval
-					
-					TYPE* matval = (mats[2]->val) + ((mats[2]) -> dim2) * t->ind[2][i2];
-					TYPE* intval = t->intval[2] + i2*r;
-					#pragma omp simd
-					for(int y=0 ; y<r ; y++)
-					{
-						//printf("2nd level loop %lf\n",partial_results[2*r+y]);
-						partial_results[r+y] += partial_results[2*r+y] * matval[y]; // TTV
-						intval[y]= partial_results[2*r + y];
-						
-					}
-					#pragma omp simd
-					for(int y=0; y<r; y++)
-					{
-						partial_results[2*r+y] = 0;
-					}
-				}
-				// write to intval
-				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
-				TYPE* intval = t->intval[1] + i1*r;
-				#pragma omp simd
-				for(int y=0 ; y<r ; y++)
-				{
-					//printf("1st level loop %lf\n",partial_results[r+y]);
-					partial_results[y] += partial_results[r+y] * matval[y]; // TTV
-					intval[y] = partial_results[r + y];
-					//partial_results[r+y] = 0;
-				}
-				#pragma omp simd
-				for(int y=0; y<r; y++)
-				{
-					partial_results[r+y] = 0;
-				}
-			}
-			// write to output matrix
-			TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * t->ind[0][i0]; 
-
-			#pragma omp simd
-			for(int y=0 ; y<r ; y++)
-			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
-				matval[y] = partial_results[y];
-				partial_results[y] = 0;
-			}
-
-		}
-	}
-	rem(partial_results_all);	
-	*/
-	return 0;
+	//return 0;
 
 }
+
+int mttkrp_hardwired_last(csf* t, int mode, int r, matrix** mats, int profile)
+{
+	mutex_array* arr = NULL;
+	#ifdef OMP 
+	arr = mutex;
+	#endif
+
+	int nmode = t->nmode;
+	if(nmode == 3)
+	{
+		return mttkrp_hardwired_last_3(t,mode,r,mats,arr,profile);
+	}
+	else if(nmode == 4)
+	{
+		return mttkrp_hardwired_last_4(t,mode,r,mats,arr,profile);
+	}
+	else if(nmode == 5)
+	{
+		return mttkrp_hardwired_last_5(t,mode,r,mats,arr,profile);
+	}
+	return 1;
+}
+
 
 
 #endif

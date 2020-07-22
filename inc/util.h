@@ -6,9 +6,12 @@
 #include <time.h> 
 #include <string.h>
 #include <chrono>
+#include <thread>         
+#include <mutex>  
 //#include <typeinfo>
 
 //#define OMP
+
 
 
 #define rem(X) if(X != NULL){free(X); X = NULL;}
@@ -26,7 +29,7 @@
 #define LIKWID_MARKER_GET(regionTag, nevents, events, time, count)
 #endif
 
-#define OMP
+//#define OMP
 #ifdef OMP
 #include <omp.h>
 #endif
@@ -34,7 +37,7 @@
 #define idx_t int
 #define MAX_MODE 10
 #define TYPE double
-#define VERBOSE VERBOSE_LOW
+#define VERBOSE VERBOSE_HIGH
 #define CORRECTNESS_THRESHOLD 1E-10
 #define DOT_PARALLEL_DEPTH 1
 #define PAD 64
@@ -46,6 +49,7 @@ enum verbosity
 	VERBOSE_HIGH,
 	VERBOSE_DEBUG
 };
+
 
 
 #endif

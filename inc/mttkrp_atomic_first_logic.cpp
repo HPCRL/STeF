@@ -52,7 +52,7 @@ if(update == 0)
 		#pragma omp simd
 		for(int i = 0 ; i<r ; i++)
 		{
-			#pragma omp atomic update
+			//#pragma omp atomic update
 			xx[i] += yy[i];
 		}
 	}
@@ -75,10 +75,12 @@ for(int ii = update; ii < nmode - 1; ii++)
 	{
 		TYPE* __restrict__ xx = t->intval[ii]  + (inds[ii]*r);
 		TYPE* __restrict__ yy = partial_products + ii*r;
+		//const idx_t row_id = 
+
 		#pragma omp simd
 		for(int i = 0 ; i<r ; i++)
 		{
-			#pragma omp atomic update
+			//#pragma omp atomic update
 			xx[i] += yy[i];
 		}
 	}

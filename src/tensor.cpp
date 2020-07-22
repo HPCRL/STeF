@@ -49,4 +49,58 @@ int csf_space(csf* t)
 	return 0;
 }
 
+int find_inds(idx_t* inds ,csf* t,idx_t it)
+{
+	int nmode = t->nmode;
+	//printf("here ss\n");
+	if (it == 0)
+	{
+		for (int i=0; i<nmode ; i++)
+		{
+			inds[i] = 0;
+		}
+
+		return 0;
+	}
+	else
+	{
+		
+		inds[nmode-1] = it;
+		idx_t last_pos = it;
+		for(int i=nmode-2 ; i>=0 ; i--)
+		{
+			// do binary seach and find the index
+			// idx_t id = -1;
+			idx_t start = 0;
+			idx_t end = t->fiber_count[i];
+			while(end > start+1)
+			{
+				idx_t pivot = (end + start)/2;
+				if(t->ptr[i][pivot] > last_pos)
+				{
+					end = pivot;
+				}
+				else if (t->ptr[i][pivot] <= last_pos)
+				{
+					start = pivot;
+				}
+				//printf("%d %d %d %d\n",start, end , i , last_pos);
+			}
+			inds[i] = start;
+			last_pos = start;
+		}
+		/*
+		for(int i=0; i<nmode ; i++)
+		{
+			printf("%d", inds[i] );
+		}
+		printf("\n");
+		*/
+		return 0;
+	}
+
+	
+}
+
+
 #endif
