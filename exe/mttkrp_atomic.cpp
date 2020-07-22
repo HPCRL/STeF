@@ -97,10 +97,7 @@ int main(int argc, char** argv)
 
 	}
 
-	#ifdef OMP
-		mutex_array* mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
-		//mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
-	#endif
+
 
 	{
 

@@ -467,7 +467,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 
 	int nmode;
 	int num_th;
-	TYPE* temp_res_all;
+	
 	
 
 	nmode = t->nmode;
