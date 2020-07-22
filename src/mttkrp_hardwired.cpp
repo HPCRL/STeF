@@ -324,10 +324,9 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 {
 	TYPE* partial_products_all, *vals;
 
-	int nmode,nnz;
-	idx_t* inds_all;
+	int nmode;
+	
 	int num_th;
-	TYPE* temp_res_all;
 	
 
 	nmode = t->nmode;
@@ -346,7 +345,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 	printf("num ths %d\n", num_th);
 	int partial_products_size = nmode*r + PAD;
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
-	nnz = t->fiber_count[nmode-1];
+	
 	//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	vals = mats[mode]->val;
 	for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
@@ -466,8 +465,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 {
 	TYPE* partial_products_all, *vals;
 
-	int nmode,nnz;
-	idx_t* inds_all;
+	int nmode;
 	int num_th;
 	TYPE* temp_res_all;
 	
@@ -489,7 +487,6 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 	*/
 	printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
-	nnz = t->fiber_count[nmode-1];
 	//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	vals = mats[mode]->val;
 	for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
@@ -527,7 +524,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 			int th = omp_get_thread_num();
 			if(VERBOSE == VERBOSE_HIGH)
-			printf("th id is %d\n",th);
+				printf("th id is %d\n",th);
 		#endif
 
 
@@ -616,10 +613,8 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 {
 	TYPE* partial_products_all, *vals;
 
-	int nmode,nnz;
-	idx_t* inds_all;
+	int nmode;
 	int num_th;
-	TYPE* temp_res_all;
 	
 
 	nmode = t->nmode;
@@ -639,7 +634,6 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 	*/
 	printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
-	nnz = t->fiber_count[nmode-1];
 	//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	vals = mats[mode]->val;
 	for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
