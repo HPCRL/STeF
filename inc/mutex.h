@@ -12,8 +12,9 @@ typedef struct
   int pad_size;
   #ifdef OMP
   omp_lock_t * locks;
-  #endif
+  #else
   int* locks;
+  #endif
 } mutex_array;
 
 
