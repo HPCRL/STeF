@@ -2,7 +2,7 @@
 #define MUTEX_H
 #ifdef OMP
 #include <omp.h>
-#include "../util.h"
+#include "../inc/util.h"
 typedef struct
 {
   bool initialized;
