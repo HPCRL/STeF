@@ -31,7 +31,7 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 		#ifdef OMP
 		th = omp_get_thread_num();
 		#endif
-
+		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
 		#ifdef OMP
 		#pragma omp for schedule(dynamic,1)
@@ -83,6 +83,12 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 			}
 
 		}
+
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+
 	}
 	rem(partial_results_all);	
 	return 0;
@@ -117,6 +123,8 @@ int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
+
+		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
 		#pragma omp for schedule(dynamic,1)
 		#endif
@@ -187,6 +195,12 @@ int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile
 			}
 
 		}
+
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+
 	}
 	rem(partial_results_all);	
 	return 0;
@@ -221,6 +235,8 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
+
+		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
 		#pragma omp for schedule(dynamic,1)
 		#endif
@@ -313,6 +329,12 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 			}
 
 		}
+
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+
 	}
 	rem(partial_results_all);	
 	return 0;
@@ -391,7 +413,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		partial_products = partial_products_all + th*partial_products_size;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
 	
-				
+		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
 		#pragma omp for schedule(dynamic,1)
 		#endif
@@ -447,6 +469,11 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 				}
 			}
 		}
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -532,7 +559,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		partial_products = partial_products_all + th*partial_products_size;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
 	
-				
+		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
 		#pragma omp for schedule(dynamic,1)
 		#endif
@@ -595,6 +622,12 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 				}
 			}
 		}
+
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -678,7 +711,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 		TYPE* partial_products;	
 		partial_products = partial_products_all + th*partial_products_size;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
-	
+		auto time_start = std::chrono::high_resolution_clock::now();
 				
 		#ifdef OMP
 		#pragma omp for schedule(dynamic,1)
@@ -754,6 +787,11 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 				}
 			}
 		}
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");

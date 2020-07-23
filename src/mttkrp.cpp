@@ -94,7 +94,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		partial_products = partial_products_all + th*nmode*r;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
 	
-		
+		auto time_start = std::chrono::high_resolution_clock::now();
 		find_inds(inds,t,it);
 		
 		
@@ -179,6 +179,11 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		{
 			LIKWID_MARKER_STOP("Compute");
 		}
+
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Basic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 	}
 	//rem(mats[nmode-1]->val);
 	mats[nmode-1]->val = vals;
@@ -441,23 +446,23 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 			int th = omp_get_thread_num();
 		#endif
 
+
 		TYPE* partial_products;	
 		idx_t* inds = inds_all + th*nmode;
 		partial_products = partial_products_all + th*nmode*r;
 		idx_t num_it;
 
 		
-		auto start_time = std::chrono::high_resolution_clock::now();
+		
 		dist_dot_work(inds,t,num_th,&num_it,th);
 			
-		auto end_time = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> diff = end_time-start_time;
-		//total += diff.count();
-		printf("preprocessing for th %d %lf \n",th,diff.count());
+		
 		if(VERBOSE == VERBOSE_DEBUG)
 			printf("first nnz for thread %d is %d and nnz count is %d\n",th, inds[nmode-1], num_it);
 		idx_t it_start = inds[nmode-1];
 		idx_t it = it_start;
+
+		auto time_start = std::chrono::high_resolution_clock::now();
 		for(int ii = 0; ii < nmode - 1 ; ii++)
 		{
 			#pragma omp simd
@@ -526,9 +531,17 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 		
 			}
 		}
+
+
 	
 		int update = 0;
 		#include "../inc/mttkrp_atomic_first_logic.cpp"
+
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Basic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());	
+
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
