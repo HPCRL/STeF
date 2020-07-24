@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
-		mttkrp_atomic(t,mode,r,mats,profile);
+		mttkrp_hardwired(t,mode,r,mats,profile);
 		//printf("here\n");
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
