@@ -1,6 +1,8 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 #include "../inc/util.h"
+#include "../inc/matrix.h"
+
 struct tensor_csf
 {
 	idx_t** ptr;
@@ -11,6 +13,8 @@ struct tensor_csf
 	idx_t* fiber_count;
 	idx_t* mlen;
 	int* modeid;
+	matrix** private_mats;
+	int num_th;
 	int nmode;
 	TYPE** intval;
 };

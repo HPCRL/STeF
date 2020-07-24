@@ -5,6 +5,7 @@
 #include "../inc/util.h"
 #include "../inc/mutex.h"
 
+int reduce(csf* t, int r, matrix* mat);
 int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile = -1);
 int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile = -1);
 int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile = -1);

@@ -259,6 +259,23 @@ int mttkrp_fused_init(csf* t,int r)
 		//mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
 		mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
 	}
+
+	int num_th = omp_get_max_threads();
+	t->private_mats = (matrix** ) malloc(num_th*sizeof(matrix*));
+
+	idx_t max_len = t->mlen[0];
+	for(int i=1; i<t->nmode ; i++)
+	{	
+		if(t->mlen[i] > max_len)
+			max_len = t->mlen[i];
+	}
+	for(int i=0; i<num_th ; i++)
+	{
+		t->private_mats[i] = create_matrix(max_len, r, 0);
+	}
+	t->num_th = num_th;
+	#else
+	t->num_th = 1;
 	#endif
 
 	return 0;
