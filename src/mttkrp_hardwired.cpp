@@ -1264,7 +1264,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 				{
 					partial_products[y+1*r] = partial_products[y+0*r] * matval1[y];	
 				}
-				for(idx_t i2 = t->ptr[0][i0]; i2 < t->ptr[0][i0+1] ; i2++)	
+				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
 					//printf(" middle index is %d\n",i1);
@@ -1318,6 +1318,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 	rem(partial_products_all);
 	return 0;
 }
+
 
 
 
