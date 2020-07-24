@@ -922,4 +922,403 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 	return 0;
 }
 
+
+int mttkrp_hardwired_last_vec_2(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
+{
+	TYPE* partial_products_all;
+	int nmode;
+	int num_th;
+	nmode = t->nmode;
+	
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	#else
+	num_th = 1;
+	int th = 0;
+	#endif
+	
+	int partial_products_size = nmode*r + PAD;
+	
+	printf("num ths %d\n", num_th);
+	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
+	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if (profile == mode)
+		{
+			LIKWID_MARKER_THREADINIT;	
+		}
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if(profile == mode)
+		{
+			LIKWID_MARKER_START("Compute");
+		}
+		#ifdef OMP
+		int th = omp_get_thread_num();
+		if(VERBOSE == VERBOSE_HIGH)
+		printf("th id is %d\n",th);
+		#endif
+		
+		TYPE* partial_products;	
+		partial_products = partial_products_all + th*partial_products_size;
+		
+		TYPE* vals;
+		if(t->num_th > 1)
+		{
+			vals = t->private_mats[th]->val;
+		}
+		else
+		{
+			vals = mats[mode]->val;
+		}
+		
+		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+		
+		auto time_start = std::chrono::high_resolution_clock::now();
+		#ifdef OMP
+		#pragma omp for schedule(dynamic,1)
+		#endif
+		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+		{
+			
+			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
+			
+			#pragma omp simd
+			for(int y=0; y<r ; y++)
+			{
+				partial_products[y] = matval0[y];	
+			}
+			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1]  ; i1++)
+			{
+				const idx_t row_id = t->ind[1][i1];
+				TYPE* xx  = vals + t->ind[1][i1]*(mats[mode]->dim2);
+				TYPE* yy = partial_products + 0*r ;
+				TYPE* intval = t->intval[1] + i1*r ;
+				
+				
+				#pragma omp simd
+				for(int i=0 ; i<r ; i++)
+				{
+					TYPE increment = yy [i] * intval[i];
+					xx [i]	+= increment;
+				}
+				
+			}
+		}
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		
+		if(profile == mode)
+		{
+			LIKWID_MARKER_STOP("Compute");
+		}
+	}
+	
+	LIKWID_MARKER_CLOSE;
+	
+	t->num_th = num_th;
+	if(num_th > 1)
+	{
+		auto time_start = std::chrono::high_resolution_clock::now();
+		reduce(t,r,mats[mode]);
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+	}
+	
+	rem(partial_products_all);
+	return 0;
+}
+
+int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
+{
+	TYPE* partial_products_all;
+	int nmode;
+	int num_th;
+	nmode = t->nmode;
+	
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	#else
+	num_th = 1;
+	int th = 0;
+	#endif
+	
+	int partial_products_size = nmode*r + PAD;
+	
+	printf("num ths %d\n", num_th);
+	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
+	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if (profile == mode)
+		{
+			LIKWID_MARKER_THREADINIT;	
+		}
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if(profile == mode)
+		{
+			LIKWID_MARKER_START("Compute");
+		}
+		#ifdef OMP
+		int th = omp_get_thread_num();
+		if(VERBOSE == VERBOSE_HIGH)
+		printf("th id is %d\n",th);
+		#endif
+		
+		TYPE* partial_products;	
+		partial_products = partial_products_all + th*partial_products_size;
+		
+		TYPE* vals;
+		if(t->num_th > 1)
+		{
+			vals = t->private_mats[th]->val;
+		}
+		else
+		{
+			vals = mats[mode]->val;
+		}
+		
+		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+		
+		auto time_start = std::chrono::high_resolution_clock::now();
+		#ifdef OMP
+		#pragma omp for schedule(dynamic,1)
+		#endif
+		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+		{
+			
+			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
+			
+			#pragma omp simd
+			for(int y=0; y<r ; y++)
+			{
+				partial_products[y] = matval0[y];	
+			}
+			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
+			{
+				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
+				//printf(" middle index is %d\n",i1);
+				
+				#pragma omp simd
+				for(int y=0; y<r ; y++)
+				{
+					partial_products[y+1*r] = partial_products[y+0*r] * matval1[y];	
+				}
+				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1]  ; i2++)
+				{
+					const idx_t row_id = t->ind[2][i2];
+					TYPE* xx  = vals + t->ind[2][i2]*(mats[mode]->dim2);
+					TYPE* yy = partial_products + 1*r ;
+					TYPE* intval = t->intval[2] + i2*r ;
+					
+					
+					#pragma omp simd
+					for(int i=0 ; i<r ; i++)
+					{
+						TYPE increment = yy [i] * intval[i];
+						xx [i]	+= increment;
+					}
+					
+				}
+			}
+		}
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		
+		if(profile == mode)
+		{
+			LIKWID_MARKER_STOP("Compute");
+		}
+	}
+	
+	LIKWID_MARKER_CLOSE;
+	
+	t->num_th = num_th;
+	if(num_th > 1)
+	{
+		auto time_start = std::chrono::high_resolution_clock::now();
+		reduce(t,r,mats[mode]);
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+	}
+	
+	rem(partial_products_all);
+	return 0;
+}
+
+int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
+{
+	TYPE* partial_products_all;
+	int nmode;
+	int num_th;
+	nmode = t->nmode;
+	
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	#else
+	num_th = 1;
+	int th = 0;
+	#endif
+	
+	int partial_products_size = nmode*r + PAD;
+	
+	printf("num ths %d\n", num_th);
+	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
+	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if (profile == mode)
+		{
+			LIKWID_MARKER_THREADINIT;	
+		}
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if(profile == mode)
+		{
+			LIKWID_MARKER_START("Compute");
+		}
+		#ifdef OMP
+		int th = omp_get_thread_num();
+		if(VERBOSE == VERBOSE_HIGH)
+		printf("th id is %d\n",th);
+		#endif
+		
+		TYPE* partial_products;	
+		partial_products = partial_products_all + th*partial_products_size;
+		
+		TYPE* vals;
+		if(t->num_th > 1)
+		{
+			vals = t->private_mats[th]->val;
+		}
+		else
+		{
+			vals = mats[mode]->val;
+		}
+		
+		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+		
+		auto time_start = std::chrono::high_resolution_clock::now();
+		#ifdef OMP
+		#pragma omp for schedule(dynamic,1)
+		#endif
+		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+		{
+			
+			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
+			
+			#pragma omp simd
+			for(int y=0; y<r ; y++)
+			{
+				partial_products[y] = matval0[y];	
+			}
+			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
+			{
+				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
+				//printf(" middle index is %d\n",i1);
+				
+				#pragma omp simd
+				for(int y=0; y<r ; y++)
+				{
+					partial_products[y+1*r] = partial_products[y+0*r] * matval1[y];	
+				}
+				for(idx_t i2 = t->ptr[0][i0]; i2 < t->ptr[0][i0+1] ; i2++)	
+				{
+					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
+					//printf(" middle index is %d\n",i1);
+					
+					#pragma omp simd
+					for(int y=0; y<r ; y++)
+					{
+						partial_products[y+2*r] = partial_products[y+1*r] * matval2[y];	
+					}
+					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1]  ; i3++)
+					{
+						const idx_t row_id = t->ind[3][i3];
+						TYPE* xx  = vals + t->ind[3][i3]*(mats[mode]->dim2);
+						TYPE* yy = partial_products + 2*r ;
+						TYPE* intval = t->intval[3] + i3*r ;
+						
+						
+						#pragma omp simd
+						for(int i=0 ; i<r ; i++)
+						{
+							TYPE increment = yy [i] * intval[i];
+							xx [i]	+= increment;
+						}
+						
+					}
+				}
+			}
+		}
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		
+		if(profile == mode)
+		{
+			LIKWID_MARKER_STOP("Compute");
+		}
+	}
+	
+	LIKWID_MARKER_CLOSE;
+	
+	t->num_th = num_th;
+	if(num_th > 1)
+	{
+		auto time_start = std::chrono::high_resolution_clock::now();
+		reduce(t,r,mats[mode]);
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+	}
+	
+	rem(partial_products_all);
+	return 0;
+}
+
+
+
 #endif

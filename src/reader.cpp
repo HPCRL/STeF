@@ -514,7 +514,7 @@ int sort_coo(idx_t** pindex,idx_t* index,TYPE* val,int* sort_order,idx_t nnz, in
 	return 0;
 }
 
-int read_tensor(const char* file, csf* res,  coo* debugt)
+int read_tensor(const char* file, csf* res,  coo* debugt )
 {
 	FILE *fp;
 	//int *loc;

@@ -49,19 +49,8 @@ int main(int argc, char** argv)
 
 	double total=0;
 
-//	printf("here\n")
-	{
-		auto start = std::chrono::high_resolution_clock::now();
-		mttkrp_hardwired_first(t,0,r,mats,profile);
-		//printf("here\n");
-		auto end = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> diff = end-start;
-		
-		printf("Hardwired time for mode %d %lf \n",t->modeid[0],diff.count());	
-		mttkrp_test(dt,0,r,mats);
-	}
-	
-	for(mode = 1 ; mode<nmode ; mode++)
+
+	for(mode = 0 ; mode<nmode ; mode++)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
 		mttkrp_atomic(t,mode,r,mats,profile);
@@ -69,7 +58,7 @@ int main(int argc, char** argv)
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
 		total += diff.count();
-		printf("time for mode %d %lf \n",t->modeid[mode],diff.count());
+		printf("Hardwired time for mode %d %lf \n",t->modeid[mode],diff.count());
 
 		if(debug)
 		{
@@ -99,19 +88,7 @@ int main(int argc, char** argv)
 
 
 
-	{
-
-		auto start = std::chrono::high_resolution_clock::now();
-		mttkrp_hardwired_last(t,nmode-1,r,mats,profile);
-		//printf("here\n");
-		auto end = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> diff = end-start;
-		
-		printf("Hardwired time for mode %d %lf \n",t->modeid[nmode-1],diff.count());	
-		mttkrp_test(dt,nmode-1,r,mats);
-	}
-
-	printf("Total MTTKRP time %lf \n",total);
+	
 
 	
 	

@@ -99,15 +99,15 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		{
 			//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 			vals = mats[mode]->val;
-			memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+			
 			
 		}
 		else // Use private copies
 		{	
 			vals = t->private_mats[th]->val;
-			memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+			//memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		}
-		
+		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	
 		auto time_start = std::chrono::high_resolution_clock::now();
 		find_inds(inds,t,it);
@@ -748,7 +748,32 @@ int mttkrp_test(coo* dt, int mode, int r, matrix** mats)
 	return 0;
 }
 
-// Hardwired for 4 dimension for testing out
+
+int mttkrp_hardwired(csf* t, int mode, int r, matrix** mats, int profile)
+{
+	if (mode == 0)
+	{
+		return mttkrp_hardwired_first(t,mode,r,mats, profile);
+		//return mttkrp_hardwired_first(t,mode,r,mats, profile);
+
+	}
+	else if (mode == (t->nmode)-1)
+	{
+		return mttkrp_hardwired_last(t,mode,r,mats, profile);
+	}
+	else
+	{
+		//printf("To be implemented\n");
+		return mttkrp_hardwired_middle(t,mode,r,mats, profile);
+	}
+
+
+	printf("%d %d \n", mode, t->nmode);
+
+	return 0;
+}
+
+
 int mttkrp_hardwired_first(csf* t, int mode, int r, matrix** mats, int profile)
 {
 
@@ -790,6 +815,33 @@ int mttkrp_hardwired_last(csf* t, int mode, int r, matrix** mats, int profile)
 	return 1;
 }
 
+
+int mttkrp_hardwired_middle(csf* t, int mode, int r, matrix** mats, int profile)
+{
+	csf tt = *t;
+	tt.nmode = mode+1;
+	tt.val = t->intval[mode];
+
+	mutex_array* arr = NULL;
+	#ifdef OMP 
+	arr = mutex;
+	#endif
+
+	if(tt.nmode == 2)
+	{
+		return mttkrp_hardwired_last_vec_2(t,mode,r,mats,arr,profile);
+	}
+	else if(tt.nmode == 3)
+	{
+		return mttkrp_hardwired_last_vec_3(t,mode,r,mats,arr,profile);
+	}
+	else if(tt.nmode == 4)
+	{
+		return mttkrp_hardwired_last_vec_4(t,mode,r,mats,arr,profile);
+	}
+
+	return 1;
+}
 
 
 #endif
