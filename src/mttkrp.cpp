@@ -17,7 +17,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 
 
 
-	TYPE* partial_products_all, *vals;
+	TYPE* partial_products_all;
 	int nmode,nnz;
 	idx_t* inds_all;
 	int num_th;
@@ -42,10 +42,10 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	temp_res_all = (TYPE* ) malloc(num_th*(r+64)*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
 	nnz = t->fiber_count[nmode-1];
-	vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+	//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	//vals = mats[mode]->val;
-	for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
-		vals[i] = 0;
+	//for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
+	//	vals[i] = 0;
 	
 
 	//printf("nmode is %d nnz is %d \n",nmode,nnz);
@@ -93,6 +93,21 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		idx_t* inds = inds_all + th*nmode;
 		partial_products = partial_products_all + th*nmode*r;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
+		TYPE* vals;
+
+		if(num_th == 1)
+		{
+			//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+			vals = mats[mode]->val;
+			memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+			
+		}
+		else // Use private copies
+		{	
+			vals = t->private_mats[th]->val;
+			memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+		}
+		
 	
 		auto time_start = std::chrono::high_resolution_clock::now();
 		find_inds(inds,t,it);
@@ -185,10 +200,23 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		
 		printf("Basic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 	}
+
 	//rem(mats[nmode-1]->val);
-	mats[nmode-1]->val = vals;
+	//mats[nmode-1]->val = vals;
 
 	LIKWID_MARKER_CLOSE;
+	t->num_th = num_th;
+	if(num_th > 1)
+	{
+		auto time_start = std::chrono::high_resolution_clock::now();
+		reduce(t,r,mats[mode]);
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Basic kernel time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+
+
+	}
 
 	rem(inds_all);
 	rem(partial_products_all);

@@ -366,11 +366,11 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 
 int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all, *vals;
+	TYPE* partial_products_all;
 
 	int nmode;
-	
 	int num_th;
+	
 	
 
 	nmode = t->nmode;
@@ -380,6 +380,8 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		num_th = 1;
 		int th = 0;
 	#endif
+
+	int partial_products_size = nmode*r + PAD;
 	/*	
 	for(i=0 ;i<nmode; i++)
 	{
@@ -387,13 +389,11 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 	}
 	*/
 	printf("num ths %d\n", num_th);
-	int partial_products_size = nmode*r + PAD;
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
-	
 	//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-	vals = mats[mode]->val;
-	for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
-		vals[i] = 0;
+	//vals = mats[mode]->val;
+	//for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
+	//	vals[i] = 0;
 	
 	//memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 
@@ -426,14 +426,27 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 		#ifdef OMP
 			int th = omp_get_thread_num();
-			if(VERBOSE == VERBOSE_DEBUG)
-			printf("th id is %d\n",th);
+			if(VERBOSE == VERBOSE_HIGH)
+				printf("th id is %d\n",th);
 		#endif
 
 
 		TYPE* partial_products;	
 		partial_products = partial_products_all + th*partial_products_size;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
+		
+		TYPE* vals;
+		if(t->num_th > 1)
+		{
+			vals = t->private_mats[th]->val;
+		}
+		else
+		{
+			vals = mats[mode]->val;
+		}
+
+		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+
 	
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
@@ -470,9 +483,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 					TYPE* yy = partial_products + r ;
 
 					TYPE tval = t->val[i2];
-					#ifdef OMP
-					mutex_set_lock(mutex,row_id);
-					#endif
+
 
 					#pragma omp simd
 					for(int i=0 ; i<r ; i++)
@@ -485,9 +496,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 						xx [i]	+= increment;
 						//printf("last mode %lf %lf %lf to pos mat[%d][%d][%d] \n", xx [i], yy[i] , tval, mode, t->ind[nmode-1][it],i);
 					}
-					#ifdef OMP
-					mutex_unset_lock(mutex,row_id);
-					#endif
+
 				}
 			}
 		}
@@ -503,6 +512,20 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 	}
 
 	LIKWID_MARKER_CLOSE;
+
+	t->num_th = num_th;
+	if(num_th > 1)
+	{
+		auto time_start = std::chrono::high_resolution_clock::now();
+		reduce(t,r,mats[mode]);
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+
+
+	}
+
 
 	rem(partial_products_all);
 	
@@ -585,16 +608,13 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		if(t->num_th > 1)
 		{
 			vals = t->private_mats[th]->val;
-			memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		}
 		else
 		{
 			vals = mats[mode]->val;
-			//for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
-			//	vals[i] = 0;
-			
-			memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		}
+
+		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
@@ -673,6 +693,9 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 	}
 
+	
+	LIKWID_MARKER_CLOSE;
+
 	t->num_th = num_th;
 	if(num_th > 1)
 	{
@@ -681,12 +704,11 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for reducing mode %d thread %lf \n",t->modeid[mode],time_diff.count());		
+		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 
 
 	}
 
-	LIKWID_MARKER_CLOSE;
 
 	rem(partial_products_all);
 	
@@ -696,10 +718,11 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 
 int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all, *vals;
+	TYPE* partial_products_all;
 
 	int nmode;
 	int num_th;
+	
 	
 
 	nmode = t->nmode;
@@ -720,9 +743,9 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 	printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-	vals = mats[mode]->val;
-	for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
-		vals[i] = 0;
+	//vals = mats[mode]->val;
+	//for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
+	//	vals[i] = 0;
 	
 	//memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 
@@ -756,13 +779,27 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 			int th = omp_get_thread_num();
 			if(VERBOSE == VERBOSE_HIGH)
-			printf("th id is %d\n",th);
+				printf("th id is %d\n",th);
 		#endif
 
 
 		TYPE* partial_products;	
 		partial_products = partial_products_all + th*partial_products_size;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
+		
+		TYPE* vals;
+		if(t->num_th > 1)
+		{
+			vals = t->private_mats[th]->val;
+		}
+		else
+		{
+			vals = mats[mode]->val;
+		}
+
+		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+
+
 		auto time_start = std::chrono::high_resolution_clock::now();
 				
 		#ifdef OMP
@@ -820,9 +857,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 							TYPE* yy = partial_products + 3*r ;
 
 							TYPE tval = t->val[i4];
-							#ifdef OMP
-							mutex_set_lock(mutex,row_id);
-							#endif
+
 
 							#pragma omp simd
 							for(int i=0 ; i<r ; i++)
@@ -831,9 +866,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 								xx [i]	+= increment;
 								//printf("last mode %lf %lf %lf to pos mat[%d][%d][%d] \n", xx [i], yy[i] , tval, mode, t->ind[nmode-1][it],i);
 							}
-							#ifdef OMP
-							mutex_unset_lock(mutex,row_id);
-							#endif
+
 						}
 					}
 				}
@@ -851,6 +884,19 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 	}
 
 	LIKWID_MARKER_CLOSE;
+
+	t->num_th = num_th;
+	if(num_th > 1)
+	{
+		auto time_start = std::chrono::high_resolution_clock::now();
+		reduce(t,r,mats[mode]);
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+
+
+	}
 
 	rem(partial_products_all);
 	

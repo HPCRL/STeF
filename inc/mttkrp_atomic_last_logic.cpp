@@ -1,6 +1,6 @@
 {
 	TYPE* __restrict__ xx , * __restrict__ yy;
-	const idx_t row_id = t->ind[nmode-1][it];
+	//const idx_t row_id = t->ind[nmode-1][it];
 	xx = vals + t->ind[nmode-1][it]*r;
 	yy = partial_products + (nmode-2) * r ;
 
@@ -8,7 +8,7 @@
 	{
 		TYPE tval = t->val[it];
 		#ifdef OMP
-		mutex_set_lock(mutex,row_id);
+		//mutex_set_lock(mutex,row_id);
 		#endif
 
 		#pragma omp simd
@@ -23,7 +23,7 @@
 			//printf("last mode %lf %lf %lf to pos mat[%d][%d][%d] \n", xx [i], yy[i] , tval, mode, t->ind[nmode-1][it],i);
 		}
 		#ifdef OMP
-		mutex_unset_lock(mutex,row_id);
+		//mutex_unset_lock(mutex,row_id);
 		#endif
 	}
 	else
@@ -31,7 +31,7 @@
 
 		TYPE* tval = (t->val) + it*r;
 		#ifdef OMP
-		mutex_set_lock(mutex,row_id);
+		//mutex_set_lock(mutex,row_id);
 		#endif
 
 		#pragma omp simd
@@ -45,7 +45,7 @@
 
 		}
 		#ifdef OMP
-		mutex_unset_lock(mutex,row_id);
+		//mutex_unset_lock(mutex,row_id);
 		#endif
 		//printf("here %lf %lf %lf \n",vals[xx],partial_products[yy],tval[0]);
 	}
