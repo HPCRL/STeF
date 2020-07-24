@@ -382,6 +382,331 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 }
 
 
+int mttkrp_hardwired_first_not_fused_3(csf* t, int mode, int r, matrix** mats, int profile )
+{
+	int nmode = t->nmode;
+	int num_th = 1;
+	int partial_results_size = nmode*r+PAD;
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	
+	#endif
+	
+	printf("num ths %d\n", num_th);
+	
+	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
+	
+	for(int i = 0 ; i < num_th*partial_results_size ; i++)
+	partial_results_all[i] = 0;
+	
+	set_matrix(*mats[0],0);
+	
+	#ifdef OMP
+	#pragma omp parallel 
+	#endif
+	{
+		int th = 0;
+		#ifdef OMP
+		th = omp_get_thread_num();
+		#endif
+		auto time_start = std::chrono::high_resolution_clock::now();
+		TYPE* partial_results = partial_results_all + th*partial_results_size;
+		#ifdef OMP
+		#pragma omp for schedule(dynamic,1)
+		#endif
+		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		{
+			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
+			{
+				for(idx_t i2 = t->ptr[1][i1] ; i2< t->ptr[1][i1+1]; i2++)
+				{
+					TYPE* pr = partial_results + 1 * r;
+					TYPE tval = t->val[i2];
+					TYPE* matval = (mats[2]->val) + ((mats[2]) -> dim2) * t->ind[2][i2];
+					
+					#pragma omp simd
+					for(int y=0 ; y<r ; y++)
+					{
+						pr[y] += tval * matval[y];	// TTM step			
+					}
+				}	
+				// write to intval
+				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
+				TYPE* intval = t->intval[1] + i1*r;
+				
+				#pragma omp simd
+				for(int y=0 ; y<r ; y++)
+				{
+					partial_results[0*r + y] += partial_results[1*r+y] * matval[y]; // TTV
+				}
+				
+				#pragma omp simd
+				for(int y=0; y<r; y++)
+				{
+					partial_results[1*r+y] = 0;
+				}
+			}
+			// write to output matrix
+			TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * t->ind[0][i0]; 
+			
+			#pragma omp simd
+			for(int y=0 ; y<r ; y++)
+			{
+				//	printf("0th level loop %lf\n",partial_results[y]);
+				matval[y] = partial_results[y];
+				partial_results[y] = 0;
+			}
+			
+		}
+		
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		
+	}
+	rem(partial_results_all);	
+	return 0;
+	
+}
+
+
+int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, int profile )
+{
+	int nmode = t->nmode;
+	int num_th = 1;
+	int partial_results_size = nmode*r+PAD;
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	
+	#endif
+	
+	printf("num ths %d\n", num_th);
+	
+	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
+	
+	for(int i = 0 ; i < num_th*partial_results_size ; i++)
+	partial_results_all[i] = 0;
+	
+	set_matrix(*mats[0],0);
+	
+	#ifdef OMP
+	#pragma omp parallel 
+	#endif
+	{
+		int th = 0;
+		#ifdef OMP
+		th = omp_get_thread_num();
+		#endif
+		auto time_start = std::chrono::high_resolution_clock::now();
+		TYPE* partial_results = partial_results_all + th*partial_results_size;
+		#ifdef OMP
+		#pragma omp for schedule(dynamic,1)
+		#endif
+		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		{
+			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
+			{
+				for(idx_t i2 = t->ptr[1][i1] ; i2< t->ptr[1][i1+1]; i2++)
+				{
+					for(idx_t i3 = t->ptr[2][i2] ; i3< t->ptr[2][i2+1]; i3++)
+					{
+						TYPE* pr = partial_results + 2 * r;
+						TYPE tval = t->val[i3];
+						TYPE* matval = (mats[3]->val) + ((mats[3]) -> dim2) * t->ind[3][i3];
+						
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							pr[y] += tval * matval[y];	// TTM step			
+						}
+					}	
+					// write to intval
+					TYPE* matval = (mats[2]->val) + ((mats[2]) -> dim2) * t->ind[2][i2];
+					TYPE* intval = t->intval[2] + i2*r;
+					
+					#pragma omp simd
+					for(int y=0 ; y<r ; y++)
+					{
+						partial_results[1*r + y] += partial_results[2*r+y] * matval[y]; // TTV
+					}
+					
+					#pragma omp simd
+					for(int y=0; y<r; y++)
+					{
+						partial_results[2*r+y] = 0;
+					}
+				}
+				// write to intval
+				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
+				TYPE* intval = t->intval[1] + i1*r;
+				
+				#pragma omp simd
+				for(int y=0 ; y<r ; y++)
+				{
+					partial_results[0*r + y] += partial_results[1*r+y] * matval[y]; // TTV
+				}
+				
+				#pragma omp simd
+				for(int y=0; y<r; y++)
+				{
+					partial_results[1*r+y] = 0;
+				}
+			}
+			// write to output matrix
+			TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * t->ind[0][i0]; 
+			
+			#pragma omp simd
+			for(int y=0 ; y<r ; y++)
+			{
+				//	printf("0th level loop %lf\n",partial_results[y]);
+				matval[y] = partial_results[y];
+				partial_results[y] = 0;
+			}
+			
+		}
+		
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		
+	}
+	rem(partial_results_all);	
+	return 0;
+	
+}
+
+
+
+int mttkrp_hardwired_first_not_fused_5(csf* t, int mode, int r, matrix** mats, int profile )
+{
+	int nmode = t->nmode;
+	int num_th = 1;
+	int partial_results_size = nmode*r+PAD;
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	
+	#endif
+	
+	printf("num ths %d\n", num_th);
+	
+	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
+	
+	for(int i = 0 ; i < num_th*partial_results_size ; i++)
+	partial_results_all[i] = 0;
+	
+	set_matrix(*mats[0],0);
+	
+	#ifdef OMP
+	#pragma omp parallel 
+	#endif
+	{
+		int th = 0;
+		#ifdef OMP
+		th = omp_get_thread_num();
+		#endif
+		auto time_start = std::chrono::high_resolution_clock::now();
+		TYPE* partial_results = partial_results_all + th*partial_results_size;
+		#ifdef OMP
+		#pragma omp for schedule(dynamic,1)
+		#endif
+		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		{
+			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
+			{
+				for(idx_t i2 = t->ptr[1][i1] ; i2< t->ptr[1][i1+1]; i2++)
+				{
+					for(idx_t i3 = t->ptr[2][i2] ; i3< t->ptr[2][i2+1]; i3++)
+					{
+						for(idx_t i4 = t->ptr[3][i3] ; i4< t->ptr[3][i3+1]; i4++)
+						{
+							TYPE* pr = partial_results + 3 * r;
+							TYPE tval = t->val[i4];
+							TYPE* matval = (mats[4]->val) + ((mats[4]) -> dim2) * t->ind[4][i4];
+							
+							#pragma omp simd
+							for(int y=0 ; y<r ; y++)
+							{
+								pr[y] += tval * matval[y];	// TTM step			
+							}
+						}	
+						// write to intval
+						TYPE* matval = (mats[3]->val) + ((mats[3]) -> dim2) * t->ind[3][i3];
+						TYPE* intval = t->intval[3] + i3*r;
+						
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							partial_results[2*r + y] += partial_results[3*r+y] * matval[y]; // TTV
+						}
+						
+						#pragma omp simd
+						for(int y=0; y<r; y++)
+						{
+							partial_results[3*r+y] = 0;
+						}
+					}
+					// write to intval
+					TYPE* matval = (mats[2]->val) + ((mats[2]) -> dim2) * t->ind[2][i2];
+					TYPE* intval = t->intval[2] + i2*r;
+					
+					#pragma omp simd
+					for(int y=0 ; y<r ; y++)
+					{
+						partial_results[1*r + y] += partial_results[2*r+y] * matval[y]; // TTV
+					}
+					
+					#pragma omp simd
+					for(int y=0; y<r; y++)
+					{
+						partial_results[2*r+y] = 0;
+					}
+				}
+				// write to intval
+				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
+				TYPE* intval = t->intval[1] + i1*r;
+				
+				#pragma omp simd
+				for(int y=0 ; y<r ; y++)
+				{
+					partial_results[0*r + y] += partial_results[1*r+y] * matval[y]; // TTV
+				}
+				
+				#pragma omp simd
+				for(int y=0; y<r; y++)
+				{
+					partial_results[1*r+y] = 0;
+				}
+			}
+			// write to output matrix
+			TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * t->ind[0][i0]; 
+			
+			#pragma omp simd
+			for(int y=0 ; y<r ; y++)
+			{
+				//	printf("0th level loop %lf\n",partial_results[y]);
+				matval[y] = partial_results[y];
+				partial_results[y] = 0;
+			}
+			
+		}
+		
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		
+	}
+	rem(partial_results_all);	
+	return 0;
+	
+}
+
+
+
+
+
 int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
 	TYPE* partial_products_all;

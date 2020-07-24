@@ -1,6 +1,7 @@
 #include "../inc/reader.h"
 #include "../inc/matrix.h"
 #include "../inc/mttkrp.h"
+#include "../inc/mttkrp_hardwired.h"
 
 int main(int argc, char** argv)
 {
@@ -8,21 +9,24 @@ int main(int argc, char** argv)
 	int debug = 1;
 	csf* t = (csf *) malloc(sizeof(csf));
 	coo* dt = NULL; 
+	int profile = -1;
+	int order_num = -1;
+	if (argc > 3)
+		order_num = atoi(argv[3]);
+	if (argc > 4)
+		profile = atoi(argv[4]);
 	if(debug)
 	{
 		dt = (coo *) malloc(sizeof(coo));
-		read_tensor(argv[1],t,dt);
+		read_tensor(argv[1],t,dt,order_num);
 	}
 	else
 	{
-		read_tensor(argv[1],t);
+		read_tensor(argv[1],t,dt,order_num);
 	}
 
 	t->intval = NULL;
-	int profile = -1;
 
-	if (argc > 3)
-		profile = atoi(argv[3]);
 
 	print_csf(t);
 	
@@ -49,6 +53,28 @@ int main(int argc, char** argv)
 
 	double total=0;
 
+
+	{
+		auto start = std::chrono::high_resolution_clock::now();
+		if(nmode == 3)
+		{
+			mttkrp_hardwired_first_not_fused_3(t,0,r,mats,profile);
+		}
+		else if(nmode == 4)
+		{
+			mttkrp_hardwired_first_not_fused_4(t,0,r,mats,profile);
+		}
+		else if(nmode == 5)
+		{
+			mttkrp_hardwired_first_not_fused_5(t,0,r,mats,profile);
+		}
+		//printf("here\n");
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> diff = end-start;
+		
+		printf("Hardwired time with no fusion for mode %d %lf \n",t->modeid[0],diff.count());	
+		mttkrp_test(dt,0,r,mats);
+	}
 
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
