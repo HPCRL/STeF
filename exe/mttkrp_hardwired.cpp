@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 {
 	int nmode,i,r,mode;
 	int debug = 1;
-	csf* t = (csf *) malloc(sizeof(csf));
+	csf* t = malloc_csf();
 	coo* dt = NULL; 
 	int profile = -1;
 	int order_num = -1;
@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 		profile = atoi(argv[4]);
 	if(debug)
 	{
-		dt = (coo *) malloc(sizeof(coo));
+		dt = malloc_coo();
 		read_tensor(argv[1],t,dt,order_num);
 	}
 	else
@@ -122,8 +122,8 @@ int main(int argc, char** argv)
 	//free(t->intval[1]);
 	free_csf(t);
 	free_coo(dt);
-	rem(t);
-	rem(dt);
+	//rem(t);
+	//rem(dt);
 	for(i=0 ; i<nmode ; i++)
 	{
 		free_matrix(mats[i]);

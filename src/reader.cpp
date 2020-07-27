@@ -68,51 +68,7 @@ int compare_nnz(const void *a, const void *b)
 	return 1;
 }
 
-int count_fiber(idx_t** pindex, int nnz, int nmode, int shift, int* fiber_count, int* sort_order)
-{
-	int num_fiber = nnz;
-	int i,j,jj,diff;
-	
-	for(i = 0; i<nmode ; i++)
-	{
-		fiber_count[i] = 0;
-	}
 
-	for(i = 1; i<nnz; i++)
-	{
-		diff = 0;
-		for(jj=0;jj<nmode-1;jj++)
-		{
-			//j = (jj+shift) % nmode;
-			j = sort_order[jj];
-			if(pindex[i][j] != pindex[i-1][j])
-			{
-				if(diff == 0)
-				{
-					fiber_count[jj] ++;
-				}
-				diff ++;
-			}
-		}
-		if (diff == 0)
-		{
-			num_fiber --;
-		}
-	}
-	fiber_count[0] ++;	
-	/*
-	printf("%d ",fiber_count[0] );
-	*/
-	for(i = 1; i < nmode - 1; i++)
-	{
-		fiber_count[i] += fiber_count[i-1];
-	//	printf("%d ",fiber_count[i] );
-	}
-	fiber_count[nmode-1] = nnz;
-	//printf("\n" );
-	
-	return num_fiber;
-}
 
 int printt(idx_t** pindex, int nnz, int nmode, TYPE* vals)
 {
@@ -295,196 +251,6 @@ int order_modes(int* mlen, int nmode, int* sort_order)
 }
 
 
-int coo2csr(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* fiber_count, csf* res,int* mlen)
-{
-	csf t;
-	int i, j, jj , ii, ilen, plen,  *ind, *dimlen;
-	long long total_space;
-	char* space_sign;
-
-	t = *res;
-	plen = 0;
-	for(i = 0; i < nmode -1  ; i++)
-		plen += fiber_count[i] + 1 ;
-
-	ilen = plen +  nnz + 1;
-	plen ++;
-	t.inds = (idx_t* ) malloc(ilen*sizeof(idx_t));
-	t.ptr = (idx_t** ) malloc((nmode+1)*sizeof(idx_t*));
-	t.ind = (idx_t** ) malloc((nmode+1)*sizeof(idx_t*));
-	t.ptrs = (idx_t* ) malloc((plen)*sizeof(idx_t));
-	t.val = (TYPE* ) malloc(nnz*sizeof(TYPE));
-	t.modeid = (int* ) malloc(nmode*sizeof(int));
-	dimlen = (int* ) malloc(nmode*sizeof(int));
-	ind = (int* ) malloc(nmode*sizeof(int));
-	t.fiber_count = (int* ) malloc(nmode*sizeof(int));
-
-	ii = 0;
-	
-
-	total_space = ilen*sizeof(idx_t);
-	total_space += 2*(nmode+1)*sizeof(idx_t*);
-	total_space += plen*sizeof(idx_t);
-	total_space += nnz*sizeof(idx_t);
-	total_space += 3*nmode*sizeof(idx_t);
-
-	if(total_space >= 1073741824)
-	{
-		// GB
-		space_sign = "GB";
-		total_space /= 1073741824;
-	}
-	else if(total_space >= 1048576)
-	{
-		// MB
-		space_sign = "MB";
-		total_space /= 1048576;
-	}
-	else if(total_space >= 1024)
-	{
-		// KB
-		space_sign = "KB";
-		total_space /= 1024;
-	}
-	else
-	{
-		// B
-		space_sign = "B";
-	}
-
-	printf("Total space requirement of the CSF is %llu%s \n",total_space,space_sign);
-
-	for( i=0 ; i< plen ; i++)	
-	{
-		t.ptrs[i] = 0;
-	}
-
-	for( i=0 ; i<nmode-1 ; i++)
-	{
-		t.ptr[i] = t.ptrs + ii;
-		t.ind[i] = t.inds + ii;
-		ii += fiber_count[i] + 1;
-		
-	}
-	t.ptr[nmode - 1]  = t.ptr[nmode] = t.ptrs + ii ;
-	t.ind[nmode - 1] = t.inds + ii ;
-	ii += nnz + 1;
-	t.ind[nmode] = t.inds + ii ;
-	/*
-	printf("test %d\n",t.ind[0][0] );
-	printf("%d %d %d %d \n", pindex[0][0], pindex[0][1], pindex[0][2], pindex[0][3]);
-	printf("%d %d %d %d \n", sort_order[0], sort_order[1], sort_order[2], sort_order[3]);
-
-	printf("%d %d %d %d \n", t.ptr[0][0], t.ptr[1][0], t.ptr[2][0], t.ptr[3][0]);
-	*/
-	for( i=0 ; i<nmode ; i++)
-	{
-		j = sort_order[i];
-		t.ind[i][0] = pindex[0][j];
-		ind[i] = 1;
-		dimlen[i] = 1;
-	//	printf("test %d\n",t.ind[0][0] );
-	}
-
-
-
-	//printf("test %d\n",t.ind[0][0] );
-
-	for( i=1 ; i<nnz ; i++)
-	{
-		int diff = 0;
-		for(jj = 0 ; jj < nmode  ; jj++)
-		{
-			j = sort_order[jj];
-			if(pindex[i][j] != pindex[i-1][j] && diff == 0)
-			{
-				diff ++;
-				if(jj > 0)
-				{
-					dimlen[jj-1] ++; 
-				}
-			}
-			if(diff > 0 )
-			{
-			//	int loc = t.ptr[jj][ind[jj]];
-				if(jj < nmode-1)
-				{
-					t.ptr[jj][ind[jj]] = t.ptr[jj][ind[jj]-1] + dimlen[jj];
-					dimlen[jj] = 1;
-				}
-				t.ind[jj][ind[jj]] = pindex[i][j];
-				ind[jj] ++;
-			}
-		}
-	}
-	for(i = 0 ; i<nmode - 1 ; i++)
-	{
-		t.ptr[i][ind[i]] = t.ptr[i][ind[i]-1] + dimlen[i];
-	}
-
-	for(i = 0 ; i<nmode  ; i++)
-	{
-		t.ind[sort_order[i]][ind[sort_order[i]]] = -1;
-	}
-
-	for(i = 0 ; i<nmode  ; i++)
-	{
-		t.fiber_count[i] = ind[i];
-	}
-
-
-
-	for(i = 0 ; i<nnz ; i++)
-	{
-		t.val[i] = *( vals  + (pindex[i] - index)/nmode);
-	}
-
-	if(VERBOSE == VERBOSE_DEBUG)
-	{
-		for(i = 0 ; i<nmode ; i++)
-			printf("ind %d\n",ind[i]);
-	
-		printf("\n");
-		printf("\n");
-	
-		for(i = 0 ; i<nmode+1 ; i++)
-		{
-			printf("%ld\n", t.ptr[i] - t.ptr[0]);
-		}
-	
-		printf("\n");
-	
-		for(i = 0 ; i<nmode+1 ; i++)
-		{
-			printf("%ld\n", t.ind[i] - t.ind[0]);
-		}
-	
-		printf("\n");
-	
-		for(i = 0 ; i<ilen ; i++)
-			printf("%d %d %d %lf\n", i, t.ptrs[i], t.inds[i], t.val[i]);
-		printf("\n");
-	}
-	t.nmode = nmode;
-
-	t.mlen = (int*) malloc(nmode*sizeof(int));
-	for(i = 0; i<nmode ; i++)
-	{
-		t.mlen[i] = mlen[i];
-	}
-	for(i = 0; i<nmode ; i++)
-	{
-		t.modeid[i] = sort_order[i];
-	}
-
-
-	*res = t;
-
-	rem(dimlen);
-	rem(ind);
-	return 0;
-}
-
 int sort_coo(idx_t** pindex,idx_t* index,TYPE* val,int* sort_order,idx_t nnz, int nmode)
 {
 	idx_t* tindex = (idx_t* ) malloc(nnz*nmode*sizeof(idx_t));
@@ -511,6 +277,8 @@ int sort_coo(idx_t** pindex,idx_t* index,TYPE* val,int* sort_order,idx_t nnz, in
 		val[i] = tval[i];
 	}
 
+	rem(tval);
+	rem(tindex);
 	return 0;
 }
 
@@ -638,6 +406,8 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 	sort_order[2] = 1;
 	sort_order[3] = 3;
 	*/
+	// COO reading is finished
+	
 	qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
 	count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
 
@@ -648,7 +418,9 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 	//reorder_stat(nmode, nnz,  pindex, file );
 
 	csf *t = res;
-	coo2csr(pindex, index, vals, nnz,nmode,fiber_count,t,mlen);
+
+
+	coo2csf(pindex, index, vals, nnz,nmode,fiber_count,t,mlen,sort_order);
 	if(VERBOSE == VERBOSE_DEBUG)
 	{
 		printt(pindex , nnz , nmode, vals);

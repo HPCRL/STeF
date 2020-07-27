@@ -285,7 +285,7 @@ int mttkrp_fused_init(csf* t,int r)
 	if (mutex == NULL)
 	{
 		//mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
-		mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
+		//mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
 	}
 
 	int num_th = omp_get_max_threads();
@@ -309,6 +309,11 @@ int mttkrp_fused_init(csf* t,int r)
 	return 0;
 }
 
+
+int mttkrp_fused_free(csf* t,int r)
+{
+	return 0;
+}
 // Finds the first nnz id corresponding to fiber pointed by an index
 idx_t find_nnz_pos(csf* t, int depth, idx_t loc) 
 {
@@ -745,6 +750,7 @@ int mttkrp_test(coo* dt, int mode, int r, matrix** mats)
 	printf("total diff is %d / %d. Sums are %lf and %lf \n", num_diff , size, sum_mat, sum_base);
 	//rem(vals);
 	rem(accum);
+	rem(vals);
 	return 0;
 }
 

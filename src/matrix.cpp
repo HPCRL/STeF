@@ -67,6 +67,7 @@ int set_matrix(matrix mat, TYPE val)
 int free_matrix(matrix* mat)
 {
 	rem(mat->val);
+	rem(mat);
 	//rem(mat);
 	return 0;
 }
