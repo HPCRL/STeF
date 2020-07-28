@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 		if(debug)
 		{
 			auto start2 = std::chrono::high_resolution_clock::now();
-			mttkrp_test(dt,mode,r,mats);
+			//mttkrp_test(dt,mode,r,mats);
 			auto end2 = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double> diff = end2-start2;
 			//total += diff.count();
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 	}
 
 
-
+	printf("Total Hardwired MTTKRP time %lf\n",total);
 	
 
 	

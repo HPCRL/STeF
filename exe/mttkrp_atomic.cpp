@@ -56,15 +56,16 @@ int main(int argc, char** argv)
 		//printf("here\n");
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
-		
+		total += diff.count();	
 		printf("Hardwired time for mode %d %lf \n",t->modeid[0],diff.count());	
-		mttkrp_test(dt,0,r,mats);
+		//mttkrp_test(dt,0,r,mats);
 	}
 	
 	for(mode = 1 ; mode<nmode ; mode++)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
 		mttkrp_atomic(t,mode,r,mats,profile);
+		//printf("here %lf\n",mats[mode]->val[0] );
 		//printf("here\n");
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
@@ -78,6 +79,7 @@ int main(int argc, char** argv)
 			auto end2 = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double> diff = end2-start2;
 			//total += diff.count();
+
 			printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 		}
 		random_matrix(*mats[mode],i);
@@ -98,7 +100,7 @@ int main(int argc, char** argv)
 	}
 
 
-
+	/*
 	{
 
 		auto start = std::chrono::high_resolution_clock::now();
@@ -110,7 +112,7 @@ int main(int argc, char** argv)
 		printf("Hardwired time for mode %d %lf \n",t->modeid[nmode-1],diff.count());	
 		mttkrp_test(dt,nmode-1,r,mats);
 	}
-
+	*/
 	printf("Total MTTKRP time %lf \n",total);
 
 	
@@ -119,8 +121,8 @@ int main(int argc, char** argv)
 	//free(t->intval[1]);
 	free_csf(t);
 	free_coo(dt);
-	rem(t);
-	rem(dt);
+	//rem(t);
+	//rem(dt);
 	for(i=0 ; i<nmode ; i++)
 	{
 		free_matrix(mats[i]);

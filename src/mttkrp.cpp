@@ -18,7 +18,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 
 
 	TYPE* partial_products_all;
-	int nmode,nnz;
+	int nmode;
 	idx_t* inds_all;
 	int num_th;
 	TYPE* temp_res_all;
@@ -41,13 +41,234 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
 	temp_res_all = (TYPE* ) malloc(num_th*(r+64)*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
-	nnz = t->fiber_count[nmode-1];
+	long long int nnz = t->fiber_count[nmode-1];
 	//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-	//vals = mats[mode]->val;
+	TYPE* vals = mats[mode]->val;
 	//for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
 	//	vals[i] = 0;
 	
+	memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+	//printf("nmode is %d nnz is %d \n",nmode,nnz);
+	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
 
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if (profile == mode)
+		{
+			LIKWID_MARKER_THREADINIT;	
+		}
+	}
+
+	// it = 0;
+	// DO the process for the first nnz
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		if(profile == mode)
+		{
+			LIKWID_MARKER_START("Compute");
+		}
+		#ifdef OMP
+			int th = omp_get_thread_num();
+			if(VERBOSE == VERBOSE_DEBUG)
+			printf("th id is %d\n",th);
+		#endif
+
+		idx_t  end;
+		long long int it = (th*nnz)/num_th;
+		end = ((th+1)*nnz)/num_th;
+		if(VERBOSE == VERBOSE_DEBUG)
+			printf("start %d end is %d for thread %d \n",it,end,th);
+
+		TYPE* partial_products;	
+		idx_t* inds = inds_all + th*nmode;
+		partial_products = partial_products_all + th*nmode*r;
+		//TYPE* temp_res = temp_res_all + th*(r+64);
+		//TYPE* vals;
+		/*
+		if(num_th == 1)
+		{
+			//vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+			vals = mats[mode]->val;
+			
+			
+		}
+		else // Use private copies
+		{	
+			vals = t->private_mats[th]->val;
+			//memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+		}
+		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+		*/
+
+		auto time_start = std::chrono::high_resolution_clock::now();
+		find_inds(inds,t,it);
+		
+		
+	
+		for(int i = 0 ; i<r ; i++)
+		{
+			partial_products[i] = MAT(mats[0], t->ind[0][inds[0]] ,i);
+		}
+	
+		for(int ii = 1; ii < nmode - 1 ; ii++)
+		{
+			for(int i = 0 ; i<r ; i++)
+			{
+				partial_products[ii * r + i]  = partial_products[(ii-1) * r + i] * MAT(mats[ii], t->ind[ii][inds[ii]],i);
+			}	
+		}
+	
+		#include "../inc/mttkrp_atomic_last_logic.cpp"
+		it ++;
+		while(it<end)
+		{
+
+			// traverse nnz
+			// if there is a new fiber
+			// --update partial_products
+			
+			if(it == t->ptr[nmode-2][inds[nmode-2]+1])
+			{
+				int update = 0;
+				inds[nmode-2] ++;
+				for(int i = nmode-3; i>=0 ; i--)
+				{
+					if(inds[i+1]  < t->ptr[i][inds[i]+1] )
+					{
+						update = i+1;
+						break;
+					}
+					else
+					{
+						inds[i] ++;
+	
+					}
+	
+				}
+
+				if(update == 0)
+				{
+					for(int i = 0 ; i<r ; i++)
+					{
+						partial_products[i] = MAT(mats[0], t->ind[0][inds[0]] ,i);
+						//printf("update %lf %lf \n, ",MAT(mats[0], t->ind[0][inds[nmode*th  +0]] ,i), partial_products[th*nmode*r + i]);
+					}
+					update ++;
+				}
+	
+	
+	
+				for(int ii = update; ii<nmode-1; ii++)
+				{
+					TYPE*  xx = partial_products + ii*r;
+					TYPE  *  yy = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
+					TYPE  *  zz = partial_products + (ii-1)*r;
+					for(int i = 0 ; i<r ; i++)
+					{
+						//partial_products[ ii*r + i] = MAT(mats[ii], t->ind[ii][inds[ii]] ,i) * partial_products[ (ii-1)*r + i];
+						xx[i] = yy[i] * zz[i];
+					}
+					update ++;
+				}
+			}
+			// use partial products to update last mode
+			// Assign all access to a variable
+			//TYPE* xx , *yy;
+			//xx = vals + t->ind[nmode-1][it]*r;
+			//yy = partial_products + (nmode-2) * r ;
+
+			#include "../inc/mttkrp_atomic_last_logic.cpp"
+
+			it++;
+		}
+		if(profile == mode)
+		{
+			LIKWID_MARKER_STOP("Compute");
+		}
+
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Basic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+	}
+
+	//rem(mats[nmode-1]->val);
+	//mats[nmode-1]->val = vals;
+	//printf("here first val is %lf %lf \n",vals[0],mats[mode]->val[0]);
+
+	LIKWID_MARKER_CLOSE;
+	t->num_th = num_th;
+	/*
+	if(num_th > 1)
+	{
+		auto time_start = std::chrono::high_resolution_clock::now();
+		//reduce(t,r,mats[mode]);
+		auto time_end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> time_diff = time_end-time_start;
+		
+		printf("Basic kernel time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+
+
+	}
+	*/
+	rem(inds_all);
+	rem(partial_products_all);
+	rem(temp_res_all);
+	return 0;
+}
+
+int mttkrp_atomic_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int profile)
+{
+	/* 
+	if(t->nmode == 3)
+	{
+		return mttkrp_atomic3(t,mode,r,mats);
+	}
+	*/
+	#define VEC
+
+
+	TYPE* partial_products_all;
+	int nmode;
+	idx_t* inds_all;
+	int num_th;
+	TYPE* temp_res_all;
+
+	nmode = t->nmode;
+	#ifdef OMP
+		num_th = omp_get_max_threads();
+
+	#else
+		num_th = 1;
+		int th = 0;
+	#endif
+	/*	
+	for(i=0 ;i<nmode; i++)
+	{
+		print_matrix(*mats[i]);
+	}
+	*/
+	printf("num ths %d\n", num_th);
+	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
+	temp_res_all = (TYPE* ) malloc(num_th*(r+64)*sizeof(TYPE));
+	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
+	long long int nnz = t->fiber_count[nmode-1];
+	//TYPE* vals = (TYPE* ) malloc(mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+	TYPE* vals = mats[mode]->val;
+	//for(int i=0 ; i<(mats[mode]->dim1)*(mats[mode]->dim2) ; i++)
+	//	vals[i] = 0;
+	
+	memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 	//printf("nmode is %d nnz is %d \n",nmode,nnz);
 	
 	if(profile == mode)
@@ -93,6 +314,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		idx_t* inds = inds_all + th*nmode;
 		partial_products = partial_products_all + th*nmode*r;
 		//TYPE* temp_res = temp_res_all + th*(r+64);
+		/*
 		TYPE* vals;
 
 		if(num_th == 1)
@@ -108,7 +330,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 			//memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		}
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-	
+		*/
 		auto time_start = std::chrono::high_resolution_clock::now();
 		find_inds(inds,t,it);
 		
@@ -206,7 +428,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 
 	LIKWID_MARKER_CLOSE;
 	t->num_th = num_th;
-	if(num_th > 1)
+	/*if(num_th > 1)
 	{
 		auto time_start = std::chrono::high_resolution_clock::now();
 		reduce(t,r,mats[mode]);
@@ -216,19 +438,48 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		printf("Basic kernel time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 
 
-	}
+	}*/
 
 	rem(inds_all);
 	rem(partial_products_all);
 	rem(temp_res_all);
+	#undef VEC
 	return 0;
 }
+
 
 int mttkrp_fused_init(csf* t,int r)
 {
 	int i,j;
 	long long total_space = 0;
 	char* space_sign;
+
+	#ifdef OMP
+	if (mutex == NULL)
+	{
+		//mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
+		mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
+	}
+
+	int num_th = omp_get_max_threads();
+	t->private_mats = (matrix** ) malloc(num_th*sizeof(matrix*));
+
+	idx_t max_len = t->mlen[0];
+	for(int i=1; i<t->nmode ; i++)
+	{	
+		if(t->mlen[i] > max_len)
+			max_len = t->mlen[i];
+	}
+	for(int i=0; i<num_th ; i++)
+	{
+		t->private_mats[i] = create_matrix(max_len, r, 0);
+	}
+	t->num_th = num_th;
+	total_space += max_len*r;
+	#else
+	t->num_th = 1;
+	#endif
+
 
 	if(t->intval == NULL)
 	{
@@ -281,30 +532,8 @@ int mttkrp_fused_init(csf* t,int r)
 		}
 	}
 
-	#ifdef OMP
-	if (mutex == NULL)
-	{
-		//mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
-		//mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
-	}
 
-	int num_th = omp_get_max_threads();
-	t->private_mats = (matrix** ) malloc(num_th*sizeof(matrix*));
 
-	idx_t max_len = t->mlen[0];
-	for(int i=1; i<t->nmode ; i++)
-	{	
-		if(t->mlen[i] > max_len)
-			max_len = t->mlen[i];
-	}
-	for(int i=0; i<num_th ; i++)
-	{
-		t->private_mats[i] = create_matrix(max_len, r, 0);
-	}
-	t->num_th = num_th;
-	#else
-	t->num_th = 1;
-	#endif
 
 	return 0;
 }
@@ -631,7 +860,7 @@ int mttkrp_atomic_middle(csf* t, int mode, int r, matrix** mats, int profile)
 		printf("\n");
 	}
 	*/
-	return mttkrp_atomic_last(&tt,mode,r,mats,1,profile);
+	return mttkrp_atomic_last_vec(&tt,mode,r,mats,1,profile);
 }
 
 int mttkrp_atomic(csf* t, int mode, int r, matrix** mats, int profile)
@@ -700,6 +929,7 @@ int mttkrp_test(coo* dt, int mode, int r, matrix** mats)
 				//printf("row_id is %d mode_id is %d\n",row_id,mode_id);
 				
 				TYPE const * const __restrict__ inrow = mats[m]->val + row_id*(mats[m]->dim2);
+				#pragma omp simd
 				for(y=0 ; y<r ; y++)
 				{
 					accum[y] *= inrow[y]; // Multiply tensor with the dense matrix

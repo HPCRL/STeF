@@ -4,6 +4,8 @@
 
 #include "../inc/tensor.h"
 
+
+
 csf* malloc_csf()
 {
 	csf* res = (csf*) malloc(sizeof(csf));
@@ -431,6 +433,50 @@ int count_fiber(idx_t** pindex, int nnz, int nmode, int shift, int* fiber_count,
 	//printf("\n" );
 	
 	return num_fiber;
+}
+
+
+int count_fiber(coo* dt, int* sort_order, int hmode)
+{
+	int size = dt->nmode;
+	idx_t nnz = dt->nnz;
+	int nmode = dt->nmode;
+	uint32_t hashkey = 0;
+	uint32_t* tohash = new uint32_t[hmode];
+
+	uint32_t hashres = hashword(tohash,size,hashkey);
+
+	std::unordered_set<uint32_t>* sets = new std::unordered_set<uint32_t>[hmode];
+
+
+	printf("hash res test is  %d\n", hashres);
+	for(int i=0; i<nnz ; i++)
+	{
+		for(int m=0 ; m < hmode ; m++)
+		{
+			tohash[m] = dt->ind[i*nmode + sort_order[m]];
+			hashres = hashword(tohash,m+1,hashkey);
+			sets[m].insert(hashres);
+		}
+	}
+
+	printf("For mode order of ");
+	for(int i=0; i<hmode ; i++)
+	{
+		printf(" -> %d ", sort_order[i] );
+	}
+	printf(" number of fibers with hashmap is \n");
+
+	for(int i=0; i<hmode ; i++)
+	{
+		printf("Mode %d, hash val, %ld \n", sort_order[i], sets[i].size() );
+	}
+
+
+
+	// someone sets size a positive value 
+	//std::unordered_set<verylong*, MyHash, MyEqual> set(bucket_count, MyHash(size));
+	return 0;
 }
 
 #endif

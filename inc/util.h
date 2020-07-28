@@ -37,7 +37,7 @@
 #define idx_t int
 #define MAX_MODE 10
 #define TYPE double
-#define VERBOSE VERBOSE_LOW
+#define VERBOSE VERBOSE_HIGH
 #define CORRECTNESS_THRESHOLD 1E-10
 #define DOT_PARALLEL_DEPTH 1
 #define PAD 64

@@ -2,6 +2,9 @@
 #define TENSOR_H
 #include "../inc/util.h"
 #include "../inc/matrix.h"
+#include "../inc/hash.h"
+#include <unordered_set>
+#include <array>
 
 struct tensor_csf
 {
@@ -27,8 +30,12 @@ struct tensor_coo
 	int nmode;
 };
 
+
+
+
 typedef struct tensor_csf csf;
 typedef struct tensor_coo coo;
+
 
 
 csf* malloc_csf();
@@ -41,5 +48,6 @@ int find_inds(idx_t* inds ,csf* t,idx_t it);
 int count_fiber(idx_t** pindex, int nnz, int nmode, int shift, int* fiber_count, int* sort_order);
 int coo2csf(coo* dt, csf* t, int* sort_order);
 int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, int nnz, int nmode, int* fiber_count, csf* res,int* mlen, int* sort_order);
+int count_fiber(coo* dt, int* sort_order, int hmode);
 
 #endif
