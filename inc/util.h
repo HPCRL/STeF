@@ -39,7 +39,7 @@
 #define TYPE double
 #define VERBOSE VERBOSE_HIGH
 #define CORRECTNESS_THRESHOLD 1E-10
-#define DOT_PARALLEL_DEPTH 1
+#define DOT_PARALLEL_DEPTH 2	
 #define PAD 64
 
 enum verbosity

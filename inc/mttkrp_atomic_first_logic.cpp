@@ -49,12 +49,22 @@ if(update == 0)
 	{	
 		TYPE* __restrict__ xx = vals + (t->ind[0][inds[0]])*r;
 		TYPE const * const __restrict__ yy = partial_products;
+		#ifdef OMP
+		const idx_t row_id = 0;
+		mutex_set_lock(mutex,row_id);
+		printf("here\n");
+		#endif
+
 		#pragma omp simd
 		for(int i = 0 ; i<r ; i++)
 		{
 			//#pragma omp atomic update
 			xx[i] += yy[i];
 		}
+
+		#ifdef OMP 
+		mutex_unset_lock(mutex,row_id);
+		#endif
 	}
 
 	#pragma omp simd
@@ -74,8 +84,14 @@ for(int ii = update; ii < nmode - 1; ii++)
 	if(DOT_PARALLEL_DEPTH > ii+1)
 	{
 		TYPE* __restrict__ xx = t->intval[ii]  + (inds[ii]*r);
+
 		TYPE* __restrict__ yy = partial_products + ii*r;
 		//const idx_t row_id = 
+
+		#ifdef OMP
+		const idx_t row_id = ii;
+		mutex_set_lock(mutex,row_id);
+		#endif
 
 		#pragma omp simd
 		for(int i = 0 ; i<r ; i++)
@@ -83,6 +99,11 @@ for(int ii = update; ii < nmode - 1; ii++)
 			//#pragma omp atomic update
 			xx[i] += yy[i];
 		}
+
+		#ifdef OMP 
+		mutex_unset_lock(mutex,row_id);
+		#endif
+
 	}
 	else
 	{	

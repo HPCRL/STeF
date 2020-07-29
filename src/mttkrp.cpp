@@ -87,7 +87,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		long long int it = (th*nnz)/num_th;
 		end = ((th+1)*nnz)/num_th;
 		if(VERBOSE == VERBOSE_DEBUG)
-			printf("start %d end is %d for thread %d \n",it,end,th);
+			printf("start %lld end is %d for thread %d \n",it,end,th);
 
 		TYPE* partial_products;	
 		idx_t* inds = inds_all + th*nmode;
@@ -457,8 +457,8 @@ int mttkrp_fused_init(csf* t,int r)
 	#ifdef OMP
 	if (mutex == NULL)
 	{
-		//mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
-		mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
+		mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
+		//mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
 	}
 
 	int num_th = omp_get_max_threads();
@@ -475,7 +475,7 @@ int mttkrp_fused_init(csf* t,int r)
 		t->private_mats[i] = create_matrix(max_len, r, 0);
 	}
 	t->num_th = num_th;
-	total_space += max_len*r;
+	total_space += max_len*r*num_th;
 	#else
 	t->num_th = 1;
 	#endif
@@ -561,7 +561,7 @@ idx_t find_nnz_pos(csf* t, int depth, idx_t loc)
 int dist_dot_work(idx_t* inds ,csf* t,int p,idx_t* count, int th,int depth)
 {
 	int nmode = t->nmode;
-	idx_t nnz = t->fiber_count[nmode-1];
+	long long int nnz = t->fiber_count[nmode-1];
 	//idx_t loc = 0;
 	idx_t start = 0;
 	idx_t end = 0;

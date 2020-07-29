@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 		//mttkrp_test(dt,0,r,mats);
 	}
 	
-	for(mode = 1 ; mode<nmode ; mode++)
+	for(mode = 0 ; mode<nmode ; mode++)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
 		mttkrp_atomic(t,mode,r,mats,profile);

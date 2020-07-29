@@ -26,8 +26,8 @@ void mutex_free(mutex_array * array);
 
 static inline int mutex_translate_id(int const id, int const num_locks,int const pad_size)
 {
-  return (id & 0x3FF)>>4; 
-  //return (id % num_locks) * pad_size;
+  //return (id & 0x3FF)>>4; 
+  return (id % num_locks) * pad_size;
 }
 
 
