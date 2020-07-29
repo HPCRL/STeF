@@ -52,7 +52,7 @@ if(update == 0)
 		#ifdef OMP
 		const idx_t row_id = 0;
 		mutex_set_lock(mutex,row_id);
-		printf("here\n");
+		//printf("here\n");
 		#endif
 
 		#pragma omp simd

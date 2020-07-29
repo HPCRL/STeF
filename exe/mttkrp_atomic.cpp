@@ -6,24 +6,28 @@ int main(int argc, char** argv)
 {
 	int nmode,i,r,mode;
 	int debug = 1;
-	csf* t = (csf *) malloc(sizeof(csf));
+	csf* t = malloc_csf();
 	coo* dt = NULL; 
+	int profile = -1;
+	int order_num = -1;
+	if (argc > 3)
+		order_num = atoi(argv[3]);
+	if (argc > 4)
+		profile = atoi(argv[4]);
 	if(debug)
 	{
-		dt = (coo *) malloc(sizeof(coo));
-		read_tensor(argv[1],t,dt);
+		dt = malloc_coo();
+		read_tensor(argv[1],t,dt,order_num);
 	}
 	else
 	{
-		read_tensor(argv[1],t);
+		read_tensor(argv[1],t,dt,order_num);
 	}
 
 	t->intval = NULL;
-	int profile = -1;
 
-	if (argc > 3)
-		profile = atoi(argv[3]);
-
+	
+	
 	print_csf(t);
 	
 	matrix** mats;
