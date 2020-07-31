@@ -54,6 +54,13 @@ int main(int argc, char** argv)
 	double total=0;
 
 //	printf("here\n")
+	for(mode = 0 ; mode<nmode ; mode++)
+	{
+		mttkrp_atomic(t,mode,r,mats,profile);
+		random_matrix(*mats[mode],i);
+	}
+
+
 	{
 		auto start = std::chrono::high_resolution_clock::now();
 		mttkrp_hardwired_first(t,0,r,mats,profile);

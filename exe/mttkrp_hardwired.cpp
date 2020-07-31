@@ -55,6 +55,19 @@ int main(int argc, char** argv)
 
 
 	{
+		if(nmode == 3)
+		{
+			mttkrp_hardwired_first_not_fused_3(t,0,r,mats,profile);
+		}
+		else if(nmode == 4)
+		{
+			mttkrp_hardwired_first_not_fused_4(t,0,r,mats,profile);
+		}
+		else if(nmode == 5)
+		{
+			mttkrp_hardwired_first_not_fused_5(t,0,r,mats,profile);
+		}
+		
 		auto start = std::chrono::high_resolution_clock::now();
 		if(nmode == 3)
 		{
@@ -75,6 +88,13 @@ int main(int argc, char** argv)
 		printf("Hardwired time with no fusion for mode %d %lf \n",t->modeid[0],diff.count());	
 		mttkrp_test(dt,0,r,mats);
 	}
+
+	for(mode = 0 ; mode<nmode ; mode++)
+	{
+		mttkrp_hardwired(t,mode,r,mats,profile);
+		random_matrix(*mats[mode],i);
+	}
+
 
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
