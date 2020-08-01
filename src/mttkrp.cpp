@@ -969,7 +969,7 @@ int mttkrp_fused_init(csf* t,int r)
 			t->intval[i] = (TYPE*) malloc((t->fiber_count[i])*r*sizeof(TYPE));
 			if(t->intval[i] == NULL)
 			{
-				printf("Allocation error in mttkrp fused init\n");
+				printf("SpTL ERROR: Allocation error in mttkrp fused init\n");
 				exit(1);
 			}
 			else

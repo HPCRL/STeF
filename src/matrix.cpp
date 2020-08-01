@@ -10,6 +10,12 @@ matrix* create_matrix(int dim1, int dim2, TYPE val)
 	res->dim2 = dim2;
 	res->val = (TYPE*) malloc(dim1*dim2*sizeof(TYPE));
 
+	if (res->val == NULL)
+	{
+		printf("SpTL ERROR: malloc error in create_matrix\n");
+		exit(1);
+		return NULL;
+	}
 	for(i = 0; i< dim1; i++)
 	{
 		for(j=0 ; j<dim2 ; j++)
