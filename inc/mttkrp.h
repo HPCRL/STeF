@@ -10,10 +10,13 @@
 
 int mttkrp_atomic3(csf* t, int mode, int r, matrix** mats);
 int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec , int profile = -1);
+int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int profile = -1);
 int mttkrp_atomic_last_vec(csf* t, int mode, int r, matrix** mats, int vec , int profile = -1);
+int mttkrp_private_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int profile = -1);
 int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile = -1);
 int mttkrp_atomic_middle(csf* t, int mode, int r, matrix** mats, int profile = -1);
 int mttkrp_atomic(csf* t,int mode, int r, matrix** mats, int profile = -1);
+int mttkrp_private(csf* t,int mode, int r, matrix** mats, int profile = -1);
 int mttkrp_fused_init(csf* t,int r);
 int mttkrp_fused_free(csf* t,int r);
 int mttkrp_test(coo* dt, int mode, int r, matrix** mats);
