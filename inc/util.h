@@ -34,7 +34,7 @@
 #include <omp.h>
 #endif
 
-#define idx_t int
+#define idx_t long long int
 #define MAX_MODE 10
 #define TYPE double
 #define VERBOSE VERBOSE_HIGH

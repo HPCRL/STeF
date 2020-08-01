@@ -29,7 +29,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 
 	#else
 		num_th = 1;
-		int th = 0;
+		idx_t th = 0;
 	#endif
 	/*	
 	for(i=0 ;i<nmode; i++)
@@ -78,7 +78,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 			LIKWID_MARKER_START("Compute");
 		}
 		#ifdef OMP
-			int th = omp_get_thread_num();
+			idx_t th = omp_get_thread_num();
 			if(VERBOSE == VERBOSE_DEBUG)
 			printf("th id is %d\n",th);
 		#endif
@@ -115,14 +115,14 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		
 		
 	
-		for(int i = 0 ; i<r ; i++)
+		for(idx_t i = 0 ; i<r ; i++)
 		{
 			partial_products[i] = MAT(mats[0], t->ind[0][inds[0]] ,i);
 		}
 	
-		for(int ii = 1; ii < nmode - 1 ; ii++)
+		for(idx_t ii = 1; ii < nmode - 1 ; ii++)
 		{
-			for(int i = 0 ; i<r ; i++)
+			for(idx_t i = 0 ; i<r ; i++)
 			{
 				partial_products[ii * r + i]  = partial_products[(ii-1) * r + i] * MAT(mats[ii], t->ind[ii][inds[ii]],i);
 			}	
@@ -141,7 +141,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 			{
 				int update = 0;
 				inds[nmode-2] ++;
-				for(int i = nmode-3; i>=0 ; i--)
+				for(idx_t i = nmode-3; i>=0 ; i--)
 				{
 					if(inds[i+1]  < t->ptr[i][inds[i]+1] )
 					{
@@ -158,22 +158,22 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 
 				if(update == 0)
 				{
-					for(int i = 0 ; i<r ; i++)
+					for(idx_t i = 0 ; i<r ; i++)
 					{
 						partial_products[i] = MAT(mats[0], t->ind[0][inds[0]] ,i);
-						//printf("update %lf %lf \n, ",MAT(mats[0], t->ind[0][inds[nmode*th  +0]] ,i), partial_products[th*nmode*r + i]);
+						//pridx_tf("update %lf %lf \n, ",MAT(mats[0], t->ind[0][inds[nmode*th  +0]] ,i), partial_products[th*nmode*r + i]);
 					}
 					update ++;
 				}
 	
 	
 	
-				for(int ii = update; ii<nmode-1; ii++)
+				for(idx_t ii = update; ii<nmode-1; ii++)
 				{
 					TYPE*  xx = partial_products + ii*r;
 					TYPE  *  yy = (mats[ii]->val) + (t->ind[ii][inds[ii]])*(mats[ii]->dim2);
 					TYPE  *  zz = partial_products + (ii-1)*r;
-					for(int i = 0 ; i<r ; i++)
+					for(idx_t i = 0 ; i<r ; i++)
 					{
 						//partial_products[ ii*r + i] = MAT(mats[ii], t->ind[ii][inds[ii]] ,i) * partial_products[ (ii-1)*r + i];
 						xx[i] = yy[i] * zz[i];
@@ -230,9 +230,9 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int profile)
 {
 	TYPE* partial_products_all;
-	int nmode;
+	idx_t nmode;
 	idx_t* inds_all;
-	int num_th;
+	idx_t num_th;
 	TYPE* temp_res_all;
 
 	nmode = t->nmode;
@@ -241,7 +241,7 @@ int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int pro
 
 	#else
 		num_th = 1;
-		int th = 0;
+		idx_t th = 0;
 	#endif
 	/*	
 	for(i=0 ;i<nmode; i++)
@@ -277,14 +277,14 @@ int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int pro
 	else
 	{
 		#pragma omp parallel
-		for(int i =0 ; i<num_th ; i++)
+		for(idx_t i =0 ; i<num_th ; i++)
 		{
 			TYPE* val0 = t->private_mats[i]->val;
 			long long int range = ((long long int) mats[mode]->dim1)*(mats[mode]->dim2);
-			int steps = num_th*4;
+			idx_t steps = num_th*4;
 			long long int jump = range/steps;
 			#pragma omp for schedule (dynamic,1)
-			for(int j=0 ; j < steps ; j++)
+			for(idx_t j=0 ; j < steps ; j++)
 			{
 				memset(val0 + j*jump , 0 , jump*sizeof(TYPE));
 			}
@@ -353,7 +353,7 @@ int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int pro
 		
 		
 	
-		for(int i = 0 ; i<r ; i++)
+		for(idx_t i = 0 ; i<r ; i++)
 		{
 			partial_products[i] = MAT(mats[0], t->ind[0][inds[0]] ,i);
 		}
@@ -928,7 +928,7 @@ int mttkrp_private_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int
 
 int mttkrp_fused_init(csf* t,int r)
 {
-	int i,j;
+	//int i,j;
 	long long total_space = 0;
 	char* space_sign;
 
@@ -939,7 +939,7 @@ int mttkrp_fused_init(csf* t,int r)
 		//mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
 	}
 
-	int num_th = omp_get_max_threads();
+	idx_t num_th = omp_get_max_threads();
 	t->private_mats = (matrix** ) malloc(num_th*sizeof(matrix*));
 
 	idx_t max_len = t->mlen[0];
@@ -953,7 +953,7 @@ int mttkrp_fused_init(csf* t,int r)
 		t->private_mats[i] = create_matrix(max_len, r, 0);
 	}
 	t->num_th = num_th;
-	total_space += max_len*r*num_th;
+	total_space += max_len*r*num_th*sizeof(TYPE);
 	#else
 	t->num_th = 1;
 	#endif
@@ -964,7 +964,7 @@ int mttkrp_fused_init(csf* t,int r)
 		t->intval = (TYPE**) malloc((t->nmode)*sizeof(TYPE));
 		t->intval[0] = NULL;
 		t->intval[(t->nmode)-1] = NULL;
-		for(i = 1; i < (t->nmode)-1 ; i++)
+		for(int i = 1; i < (t->nmode)-1 ; i++)
 		{
 			t->intval[i] = (TYPE*) malloc((t->fiber_count[i])*r*sizeof(TYPE));
 			if(t->intval[i] == NULL)
@@ -1002,9 +1002,9 @@ int mttkrp_fused_init(csf* t,int r)
 		}
 		printf("Additional space requirement for the intermediate tensors is %llu%s \n",total_space,space_sign);
 	}
-	for(i = 1; i < (t->nmode)-1 ; i++)
+	for(int i = 1; i < (t->nmode)-1 ; i++)
 	{
-		for(j=0; j<(t->fiber_count[i])*r ; j++)
+		for(idx_t j=0; j<(t->fiber_count[i])*r ; j++)
 		{
 			t->intval[i][j] = 0;
 		}
@@ -1119,6 +1119,10 @@ int dist_dot_work(idx_t* inds ,csf* t,int p,idx_t* count, int th,int depth)
 	if(start >= end)
 	{
 		printf("SPTL ERROR: No work is available for thread %d\n", th );
+		idx_t start_pos = find_nnz_pos(t,depth,start);
+		
+		idx_t end_pos = find_nnz_pos(t,depth,end);
+		*count = end_pos-start_pos;
 		return 1;
 	}
 	else

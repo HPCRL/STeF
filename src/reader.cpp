@@ -146,7 +146,7 @@ int readline(char* line, idx_t* idx, TYPE* val)
 	return m_id;
 }
 
-int print_stats(int* sort_order, int* fiber_count, const char* file, int nmode, int nnz)
+int print_stats(int* sort_order, idx_t* fiber_count, const char* file, int nmode, int nnz)
 {
 	int  ii;
 	
@@ -188,11 +188,11 @@ int reorder_stat(int nmode, int nnz, idx_t** pindex, const char* file)
 {
 	int i;
 	int nfac = 1;
-	int * fiber_count;
+	idx_t * fiber_count;
 	for(i = 1; i <= nmode; i++)
 		nfac *= i;
 
-	fiber_count = (int*) malloc(nmode*sizeof(int));
+	fiber_count = (idx_t*) malloc(nmode*sizeof(idx_t));
 	for(i = 1; i <= nfac; i++)
 	{
 
@@ -298,7 +298,7 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 	int nmode = 0;
 	int nnz = 0;
 	int* mlen=NULL;
-	int * fiber_count;
+	idx_t * fiber_count;
 	TYPE* vals=NULL;
 	srand(time(NULL));
 	//int compare_nnz(const void *a, const void *b);
@@ -369,7 +369,7 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 	printf("%d and %d nnz\n",mlen[i],nnz);
 
 	sort_order = (int*) malloc(nmode*sizeof(int));
-	fiber_count = (int*) malloc(nmode*sizeof(int));
+	fiber_count = (idx_t*) malloc(nmode*sizeof(idx_t));
 
 	if(order_num == -1)
 		order_modes(mlen, nmode, sort_order);
