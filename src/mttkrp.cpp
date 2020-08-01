@@ -288,7 +288,11 @@ int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int pro
 			{
 				memset(val0 + j*jump , 0 , jump*sizeof(TYPE));
 			}
+			
 		}
+		#pragma omp parallel for
+		for(int i =0 ; i<num_th ; i++)
+			memset(val0 + steps*jump, 0 , (range - steps*jump)*sizeof(TYPE));
 	}
 
 	#ifdef OMP
@@ -744,7 +748,11 @@ int mttkrp_private_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int
 			{
 				memset(val0 + j*jump , 0 , jump*sizeof(TYPE));
 			}
+
 		}
+		#pragma omp parallel for
+		for(int i =0 ; i<num_th ; i++)
+			memset(val0 + steps*jump, 0 , (range - steps*jump)*sizeof(TYPE));
 
 	}
 
