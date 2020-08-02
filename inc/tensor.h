@@ -44,6 +44,7 @@ int free_csf(csf* t);
 int free_coo(coo* t);
 int csf_space(csf* t);
 int print_csf(csf* t);
+int print_fiber(csf* t, int modeid);
 int find_inds(idx_t* inds ,csf* t,idx_t it);
 int count_fiber(idx_t** pindex, idx_t nnz, int nmode, int shift, idx_t* fiber_count, int* sort_order);
 int coo2csf(coo* dt, csf* t, int* sort_order);

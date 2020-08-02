@@ -479,4 +479,42 @@ int count_fiber(coo* dt, int* sort_order, int hmode)
 	return 0;
 }
 
+int print_fiber(csf* t, int modeid)
+{
+	idx_t num_fiber = t->fiber_count[modeid];
+	idx_t* counter = new idx_t[num_fiber];
+	idx_t start = 0;
+	idx_t mean = (t->fiber_count[t->nmode-1])/num_fiber;
+	double stdev  = 0;
+	idx_t min=-1 , max=-1;
+	for(int i=0 ; i<num_fiber ; i++)
+	{
+		idx_t end = t->ptr[modeid][i+1];
+		int mode = modeid;
+		while(++mode < (t->nmode) -1)
+		{
+			end = t->ptr[mode][end];
+		}
+		idx_t count = end-start; 
+		counter[i] = count;
+
+		start = end;
+		stdev += pow(count - mean, 2);
+
+		if (count > max || max == -1)
+			max = count;
+
+		if (count < min  || min == -1)
+			min = count;
+	}
+
+
+	stdev = sqrt(stdev/num_fiber);
+	printf("Fibers in mode %d have average nnz of %d, min is %d, max is %d and stdev is %lf \n",modeid, mean, min, max, stdev );
+
+
+	delete [] counter;
+	return 0;
+}
+
 #endif
