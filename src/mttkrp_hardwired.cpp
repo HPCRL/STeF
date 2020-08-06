@@ -68,6 +68,15 @@ int mttkrp_hardwired_first_2(csf* t, int mode, int r, matrix** mats, int profile
 	
 	set_matrix(*mats[0],0);
 	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
 		if (profile == mode)
 		{
@@ -162,6 +171,15 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 	
 	set_matrix(*mats[0],0);
 	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
 		if (profile == mode)
 		{
@@ -275,6 +293,15 @@ int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile
 	
 	set_matrix(*mats[0],0);
 	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
 		if (profile == mode)
 		{
@@ -407,6 +434,15 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 	
 	set_matrix(*mats[0],0);
 	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
 		if (profile == mode)
 		{
@@ -558,6 +594,15 @@ int mttkrp_hardwired_first_6(csf* t, int mode, int r, matrix** mats, int profile
 	
 	set_matrix(*mats[0],0);
 	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
 		if (profile == mode)
 		{
@@ -728,6 +773,15 @@ int mttkrp_hardwired_first_7(csf* t, int mode, int r, matrix** mats, int profile
 	
 	set_matrix(*mats[0],0);
 	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
 		if (profile == mode)
 		{
@@ -917,6 +971,15 @@ int mttkrp_hardwired_first_8(csf* t, int mode, int r, matrix** mats, int profile
 	
 	set_matrix(*mats[0],0);
 	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
 		if (profile == mode)
 		{
@@ -1125,6 +1188,15 @@ int mttkrp_hardwired_first_9(csf* t, int mode, int r, matrix** mats, int profile
 	
 	set_matrix(*mats[0],0);
 	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
 		if (profile == mode)
 		{
@@ -1352,6 +1424,15 @@ int mttkrp_hardwired_first_10(csf* t, int mode, int r, matrix** mats, int profil
 	
 	set_matrix(*mats[0],0);
 	
+	if(profile == mode)
+	{
+		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		LIKWID_MARKER_INIT;
+	}
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
 		if (profile == mode)
 		{
