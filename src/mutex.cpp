@@ -1,5 +1,6 @@
 #ifndef MUTEX_CPP
 #define MUTEX_CPP
+#include "../inc/util.h"
 #ifdef OMP
 #include "../inc/mutex.h"
 

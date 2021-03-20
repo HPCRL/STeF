@@ -12,7 +12,7 @@
 
 //#include <typeinfo>
 
-//#define OMP
+#define OMP
 
 
 
