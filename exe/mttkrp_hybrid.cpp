@@ -27,11 +27,13 @@ int main(int argc, char** argv)
 	t->intval = NULL;
 
 	
-	
 	print_csf(t);
 	
 	matrix** mats;
 	nmode = t->nmode;
+
+
+	count_fiber_leaf_root_fast(t);
 
 	r = 32;
 	if(argc > 2)

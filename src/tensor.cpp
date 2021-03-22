@@ -162,6 +162,8 @@ int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_
 	ii = 0;
 	
 
+	count_fiber_leaf_root(pindex,nnz, mlen[sort_order[nmode-1]], nmode,sort_order);
+
 	total_space = ilen*sizeof(idx_t);
 	total_space += 2*(nmode+1)*sizeof(idx_t*);
 	total_space += plen*sizeof(idx_t);
@@ -369,6 +371,8 @@ int coo2csf(coo* dt, csf* t, int* sort_order)
 	qsort(pindex,nnz,sizeof(idx_t*),tensor_compare_nnz);
 	count_fiber(pindex,nnz,nmode,-1,fiber_count,sort_order);
 
+
+
 	for(int i =0 ; i<nmode ; i ++)
 		mlen[i] = 1;
 
@@ -382,6 +386,9 @@ int coo2csf(coo* dt, csf* t, int* sort_order)
 			}		
 		}
 	}
+
+	
+	//count_fiber_leaf_root_fast(pindex,nnz, mlen[sort_order[nmode-1]], nmode,sort_order);
 
 	coo2csf(pindex,dt->ind,dt->val,nnz,nmode,fiber_count,t,mlen,sort_order);
 
@@ -431,8 +438,111 @@ int count_fiber(idx_t** pindex, idx_t nnz, int nmode, int shift, idx_t* fiber_co
 	}
 	fiber_count[nmode-1] = nnz;
 	//printf("\n" );
+
+
+	//count_leaf_parent_fiber_length(pindex, nnz, nmode, sort_order );
 	
 	return num_fiber;
+}
+
+int count_fiber_leaf_root(idx_t** pindex, idx_t nnz, idx_t modelen, int nmode, int* sort_order)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+
+	int num_fiber = 0;
+	//int count_last = new int[modelen];
+
+	std::unordered_set<idx_t> count_last;
+
+	int i,j,jj,diff;
+
+	count_last.insert(pindex[0][sort_order[nmode-1]]);
+	for(i = 1; i<nnz; i++)
+	{
+		diff = 0;
+		for(jj=0;jj<nmode-2;jj++)
+		{
+			//j = (jj+shift) % nmode;
+			j = sort_order[jj];
+			if(pindex[i][j] != pindex[i-1][j])
+			{
+				if(diff == 0)
+				{
+					num_fiber += count_last.size();
+					count_last.clear();
+				}
+				diff ++;
+			}
+		}
+		count_last.insert(pindex[i][sort_order[nmode-1]]);
+		if (diff == 0)
+		{
+			num_fiber --;
+		}
+	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> dif = end-start;
+	
+	printf("time for preprocessing for mode d-1 is %lf and count is %d \n",dif.count(),num_fiber);
+
+	return 0;
+}
+
+int count_fiber_leaf_root_fast(csf* t)
+{
+
+	auto start = std::chrono::high_resolution_clock::now();
+
+	int num_fiber = 0;
+
+	int num_th = 1;
+
+	int nmode = t->nmode;
+
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	#endif
+
+	int* per_core = new int[num_th];
+
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		int th_id = omp_get_thread_num();
+		per_core [th_id] = 0;
+
+		std::unordered_set<idx_t> count_last;
+
+		#pragma omp for
+		for(idx_t j = 0 ; j < t->fiber_count[nmode - 3]; j++ )
+		{
+			for(idx_t i = t->ptr[nmode - 3][j] ; i < t->ptr[nmode - 3][j+1]; i++)
+			{
+				for(idx_t i1 = t->ptr[nmode - 2][i] ; i1 < t->ptr[nmode - 2][i+1]; i1++)
+				{
+					count_last.insert(t->ind[nmode - 1][i1]);	
+				}				
+			}
+			per_core[th_id]	+= count_last.size();
+			count_last.clear();
+		}
+
+	}
+
+	for(int i=0; i<num_th; i++)
+	{
+		num_fiber += per_core[i];
+		//printf("%d\n",per_core[i]);
+	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> dif = end-start;
+	
+	printf("time for fast-preprocessing for mode d-1 is %lf and count is %d \n",dif.count(),num_fiber);
+
+	return 0;
 }
 
 
@@ -471,6 +581,7 @@ int count_fiber(coo* dt, int* sort_order, int hmode)
 	{
 		printf("Mode %d, hash val, %ld \n", sort_order[i], sets[i].size() );
 	}
+
 
 
 
@@ -516,5 +627,7 @@ int print_fiber(csf* t, int modeid)
 	delete [] counter;
 	return 0;
 }
+
+
 
 #endif

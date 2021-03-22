@@ -50,5 +50,6 @@ int count_fiber(idx_t** pindex, idx_t nnz, int nmode, int shift, idx_t* fiber_co
 int coo2csf(coo* dt, csf* t, int* sort_order);
 int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_t* fiber_count, csf* res,int* mlen, int* sort_order);
 int count_fiber(coo* dt, int* sort_order, int hmode);
-
+int count_fiber_leaf_root(idx_t** pindex, idx_t nnz, idx_t modelen, int nmode, int* sort_order);
+int count_fiber_leaf_root_fast(csf* t);
 #endif
