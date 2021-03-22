@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
-		if(t->fiber_count[mode] / t->mlen[mode] > num_th * ATOMIC_THRESH )
+		if(mode == 0 || t->fiber_count[mode] / t->mlen[mode] > num_th * ATOMIC_THRESH )
 			mttkrp_hardwired(t,mode,r,mats,profile);
 		else
 			mttkrp_atomic(t,mode,r,mats,profile);
