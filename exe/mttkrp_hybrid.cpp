@@ -5,7 +5,7 @@
 int main(int argc, char** argv)
 {
 	int nmode,i,r,mode;
-	int debug = 1;
+	int debug = 0;
 	csf* t = malloc_csf();
 	coo* dt = NULL; 
 	int profile = -1;
