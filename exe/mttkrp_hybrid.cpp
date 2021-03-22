@@ -54,18 +54,19 @@ int main(int argc, char** argv)
 	double total=0;
 
 //	printf("here\n")
+	/*
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
 		mttkrp_atomic(t,mode,r,mats,profile);
 		random_matrix(*mats[mode],i);
 	}
-
+	*/
 	int num_th = 1;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	#endif
 
-
+	/*
 	{
 		auto start = std::chrono::high_resolution_clock::now();
 		mttkrp_hardwired_first(t,0,r,mats,profile);
@@ -76,7 +77,7 @@ int main(int argc, char** argv)
 		printf("Hardwired time for mode %d %lf \n",t->modeid[0],diff.count());	
 		//mttkrp_test(dt,0,r,mats);
 	}
-	
+	*/
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
