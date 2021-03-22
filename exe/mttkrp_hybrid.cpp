@@ -140,7 +140,8 @@ int main(int argc, char** argv)
 
 	//free(t->intval[1]);
 	free_csf(t);
-	free_coo(dt);
+	if(debug)
+		free_coo(dt);
 	//rem(t);
 	//rem(dt);
 	for(i=0 ; i<nmode ; i++)
