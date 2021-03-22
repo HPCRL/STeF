@@ -43,6 +43,7 @@
 #define CORRECTNESS_THRESHOLD 1E-10
 #define DOT_PARALLEL_DEPTH 2	
 #define PAD 64
+#define ATOMIC_THRESH 0.8
 
 enum verbosity
 {
