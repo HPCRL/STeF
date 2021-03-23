@@ -407,8 +407,14 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 	sort_order[3] = 3;
 	*/
 	// COO reading is finished
-	
-	qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
+	{	
+		auto start = std::chrono::high_resolution_clock::now();
+		qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> dif = end-start;
+		
+		printf("time for sorting COO is %lf \n",dif.count());
+	}
 	count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
 
 	if(VERBOSE > VERBOSE_HIGH)

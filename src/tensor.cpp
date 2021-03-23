@@ -162,6 +162,7 @@ int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_
 	ii = 0;
 	
 
+	printf("nmode is %d \n",nmode);
 	count_fiber_leaf_root(pindex,nnz, mlen[sort_order[nmode-1]], nmode,sort_order);
 
 	total_space = ilen*sizeof(idx_t);
@@ -449,42 +450,62 @@ int count_fiber_leaf_root(idx_t** pindex, idx_t nnz, idx_t modelen, int nmode, i
 {
 	auto start = std::chrono::high_resolution_clock::now();
 
-	int num_fiber = 0;
+	idx_t num_fibers = 0;
 	//int count_last = new int[modelen];
 
-	std::unordered_set<idx_t> count_last;
+	
 
-	int i,j,jj,diff;
+	
 
-	count_last.insert(pindex[0][sort_order[nmode-1]]);
-	for(i = 1; i<nnz; i++)
+	//count_last.insert(pindex[0][sort_order[nmode-1]]);
+
+
+	printf("last mode id is %d\n", sort_order[nmode-1]);
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
 	{
-		diff = 0;
-		for(jj=0;jj<nmode-2;jj++)
+		std::unordered_set<idx_t> count_last;
+		idx_t num_fiber=0;
+		int j,jj,diff;
+		idx_t i;
+		#pragma omp for
+		for(i = 1; i<nnz ; i++)
 		{
-			//j = (jj+shift) % nmode;
-			j = sort_order[jj];
-			if(pindex[i][j] != pindex[i-1][j])
+			diff = 0;
+			//printf("here\n");
+			for(jj=nmode-3;jj>=0;jj--)
 			{
-				if(diff == 0)
+				//j = (jj+shift) % nmode;
+				j = sort_order[jj];
+				if(pindex[i][j] != pindex[i-1][j])
 				{
-					num_fiber += count_last.size();
-					count_last.clear();
+					//printf("break\n");
+					//printf("%d\n", count_last.size());
+					//if(diff == 0)
+					{
+						num_fiber += count_last.size();
+						count_last.clear();
+					}
+					break;
 				}
-				diff ++;
 			}
+			count_last.insert(pindex[i][sort_order[nmode-1]]);
+			
 		}
-		count_last.insert(pindex[i][sort_order[nmode-1]]);
-		if (diff == 0)
+		num_fiber += count_last.size();
+
+		#pragma omp critical 
 		{
-			num_fiber --;
+			printf("%d\n", num_fiber);
+			num_fibers += num_fiber;
 		}
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> dif = end-start;
 	
-	printf("time for preprocessing for mode d-1 is %lf and count is %d \n",dif.count(),num_fiber);
+	printf("time for preprocessing for mode d-1 is %lf and count is %lld \n",dif.count(),num_fibers);
 
 	return 0;
 }
