@@ -207,6 +207,7 @@ int reorder_stat(int nmode, int nnz, idx_t** pindex, const char* file)
 	return 0;
 }
 
+
 int order_modes(int* mlen, int nmode, int* sort_order)
 {
 	// Simple bubble sort of the mlem array and the result written in sort_order
@@ -373,6 +374,16 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 
 	if(order_num == -1)
 		order_modes(mlen, nmode, sort_order);
+	else if (order_num == -2)
+	{
+		order_modes(mlen, nmode, sort_order);
+		int temp_mode_id = sort_order[nmode-1];
+		sort_order[nmode-1] = sort_order[nmode-2];
+		sort_order[nmode-2] = temp_mode_id;
+		int temp_mode_len = mlen[nmode-1];
+		mlen[nmode-1] = mlen[nmode-2];
+		mlen[nmode-2] = temp_mode_len;
+	}
 	else
 	{
 		idx_t* len = (idx_t*) malloc(sizeof(idx_t)*nmode);
