@@ -3000,10 +3000,7 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -3120,10 +3117,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -3251,10 +3245,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -3393,10 +3384,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -3546,10 +3534,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -3710,10 +3695,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -3885,10 +3867,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -4071,10 +4050,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -4268,10 +4244,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -4476,10 +4449,7 @@ int mttkrp_hardwired_last_vec_2(csf* t, int mode, int r, matrix** mats, mutex_ar
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -4596,10 +4566,7 @@ int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_ar
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -4727,10 +4694,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -4869,10 +4833,7 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -5022,10 +4983,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -5186,10 +5144,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -5361,10 +5316,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -5547,10 +5499,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -5744,10 +5693,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-		#ifdef OMP
-		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
-		#endif
-		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
+				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
