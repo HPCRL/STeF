@@ -2937,7 +2937,7 @@ int mttkrp_hardwired_first_not_fused_10(csf* t, int mode, int r, matrix** mats, 
 }
 int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all; idx_t* thread_start = t->thread_start; idx_t* thread_start = t->thread_start;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3054,7 +3054,7 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all; idx_t* thread_start = t->thread_start; idx_t* thread_start = t->thread_start;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3182,7 +3182,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all; idx_t* thread_start = t->thread_start; idx_t* thread_start = t->thread_start;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
