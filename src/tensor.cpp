@@ -18,6 +18,7 @@ csf* malloc_csf()
 	res->mlen = NULL;
 	res->modeid = NULL;
 	res->intval = NULL;
+	res->thread_start = NULL;
 	return res;
 }
 
@@ -50,6 +51,7 @@ int free_csf(csf* t)
 			free_matrix(t->private_mats[i]);
 	rem(t->private_mats);
 	rem(t->intval);
+	rem(t->thread_start);
 	rem(t);
 	return 0;
 }

@@ -20,6 +20,7 @@ struct tensor_csf
 	int num_th;
 	int nmode;
 	TYPE** intval;
+	idx_t * thread_start;
 };
 
 struct tensor_coo

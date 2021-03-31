@@ -932,6 +932,9 @@ int mttkrp_fused_init(csf* t,int r)
 	long long total_space = 0;
 	char* space_sign;
 
+
+	find_thread_start(t);
+
 	#ifdef OMP
 	if (mutex == NULL)
 	{

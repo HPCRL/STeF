@@ -2,6 +2,59 @@
 #define MTTKRP_HARDWIRED_CPP
 #include "../inc/mttkrp_hardwired.h"
 
+#define SCHEDULE dynamic
+#define CHUNK_SIZE 16
+
+
+
+
+void find_thread_start(csf* t)
+{
+	idx_t* thread_start = t->thread_start;
+	int nmode = t->nmode;
+	int num_th = 1;
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	#endif
+
+	idx_t total_work = 0;
+
+	idx_t nnz = t->fiber_count[nmode-1];
+	thread_start = new idx_t[num_th+1];
+
+	memset(thread_start,0,sizeof(idx_t)*(num_th+1));
+
+	for ( int d = 0; d < nmode ; d++)
+	{
+		total_work += t->mlen[d];
+	}
+
+	idx_t sid = 0;
+	for(int th = 0 ; th < num_th ; th++)
+	{
+		idx_t partial_work = 0;
+		while(sid < t->fiber_count[0] && partial_work < ((th + 1) * total_work) / (num_th))
+		{
+			idx_t loc1 = sid, loc2 = sid + 1;
+			for ( int d = 0; d < nmode ; d++)
+			{
+				partial_work += loc2 - loc1;
+
+				if(d < nmode-1)
+				{
+					loc1 = t->ptr[d][loc1];
+					loc2 = t->ptr[d][loc2];
+				}	
+			}	
+			sid ++;
+		}
+
+		thread_start[th+1] = sid;
+	}
+	t->thread_start = thread_start;
+}
+
+
 int reduce(csf* t, int r, matrix* mat)
 {
 	memset (mat->val, 0 , sizeof(TYPE)*(mat->dim1)*(mat->dim2));
@@ -53,7 +106,7 @@ int mttkrp_hardwired_first_2(csf* t, int mode, int r, matrix** mats, int profile
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -104,10 +157,7 @@ int mttkrp_hardwired_first_2(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -156,7 +206,7 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -207,16 +257,15 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
+			TYPE* mv = mats[0]->val + ((mats[0]) -> dim2) * t->ind[0][i0];
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
+				TYPE* pr = t->intval[1] + i1*r;
+
 				for(idx_t i2 = t->ptr[1][i1] ; i2< t->ptr[1][i1+1]; i2++)
-				{
-					TYPE* pr = partial_results + 1 * r;
+				{	
 					TYPE tval = t->val[i2];
 					TYPE* matval = (mats[2]->val) + ((mats[2]) -> dim2) * t->ind[2][i2];
 					
@@ -230,20 +279,25 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
 				TYPE* intval = t->intval[1] + i1*r;
 				
+				
+
 				#pragma omp simd
 				for(int y=0 ; y<r ; y++)
 				{
-					partial_results[y + 0*r] += partial_results[1*r+y] * matval[y]; // TTV
-					intval[y] = partial_results[1*r + y];
+
+					mv[y] += pr[y] * matval[y]; // TTV
+				//	intval[y] = partial_results[1*r + y];
 				}
-				
+				/*
 				#pragma omp simd
 				for(int y=0; y<r; y++)
 				{
 					partial_results[1*r+y] = 0;
 				}
+				*/
 			}
 			// write to output matrix
+			/*
 			TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * t->ind[0][i0]; 
 			
 			#pragma omp simd
@@ -253,7 +307,7 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
-			
+			*/
 		}
 		
 		auto time_end = std::chrono::high_resolution_clock::now();
@@ -278,7 +332,7 @@ int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start; 
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -329,10 +383,7 @@ int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -419,7 +470,7 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -470,10 +521,7 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -579,7 +627,7 @@ int mttkrp_hardwired_first_6(csf* t, int mode, int r, matrix** mats, int profile
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -630,10 +678,7 @@ int mttkrp_hardwired_first_6(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -758,7 +803,7 @@ int mttkrp_hardwired_first_7(csf* t, int mode, int r, matrix** mats, int profile
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -809,10 +854,7 @@ int mttkrp_hardwired_first_7(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -956,7 +998,7 @@ int mttkrp_hardwired_first_8(csf* t, int mode, int r, matrix** mats, int profile
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -1007,10 +1049,7 @@ int mttkrp_hardwired_first_8(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -1173,7 +1212,7 @@ int mttkrp_hardwired_first_9(csf* t, int mode, int r, matrix** mats, int profile
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -1224,10 +1263,7 @@ int mttkrp_hardwired_first_9(csf* t, int mode, int r, matrix** mats, int profile
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -1409,7 +1445,7 @@ int mttkrp_hardwired_first_10(csf* t, int mode, int r, matrix** mats, int profil
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -1460,10 +1496,7 @@ int mttkrp_hardwired_first_10(csf* t, int mode, int r, matrix** mats, int profil
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -1664,7 +1697,7 @@ int mttkrp_hardwired_first_not_fused_2(csf* t, int mode, int r, matrix** mats, i
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -1689,10 +1722,7 @@ int mttkrp_hardwired_first_not_fused_2(csf* t, int mode, int r, matrix** mats, i
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -1733,7 +1763,7 @@ int mttkrp_hardwired_first_not_fused_3(csf* t, int mode, int r, matrix** mats, i
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -1758,10 +1788,7 @@ int mttkrp_hardwired_first_not_fused_3(csf* t, int mode, int r, matrix** mats, i
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -1820,7 +1847,7 @@ int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, i
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -1845,10 +1872,7 @@ int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, i
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -1925,7 +1949,7 @@ int mttkrp_hardwired_first_not_fused_5(csf* t, int mode, int r, matrix** mats, i
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -1950,10 +1974,7 @@ int mttkrp_hardwired_first_not_fused_5(csf* t, int mode, int r, matrix** mats, i
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -2048,7 +2069,7 @@ int mttkrp_hardwired_first_not_fused_6(csf* t, int mode, int r, matrix** mats, i
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -2073,10 +2094,7 @@ int mttkrp_hardwired_first_not_fused_6(csf* t, int mode, int r, matrix** mats, i
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -2189,7 +2207,7 @@ int mttkrp_hardwired_first_not_fused_7(csf* t, int mode, int r, matrix** mats, i
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -2214,10 +2232,7 @@ int mttkrp_hardwired_first_not_fused_7(csf* t, int mode, int r, matrix** mats, i
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -2348,7 +2363,7 @@ int mttkrp_hardwired_first_not_fused_8(csf* t, int mode, int r, matrix** mats, i
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -2373,10 +2388,7 @@ int mttkrp_hardwired_first_not_fused_8(csf* t, int mode, int r, matrix** mats, i
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -2525,7 +2537,7 @@ int mttkrp_hardwired_first_not_fused_9(csf* t, int mode, int r, matrix** mats, i
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -2550,10 +2562,7 @@ int mttkrp_hardwired_first_not_fused_9(csf* t, int mode, int r, matrix** mats, i
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -2720,7 +2729,7 @@ int mttkrp_hardwired_first_not_fused_10(csf* t, int mode, int r, matrix** mats, 
 {
 	int nmode = t->nmode;
 	int num_th = 1;
-	int partial_results_size = nmode*r+PAD;
+	int partial_results_size = nmode*r+PAD; idx_t* thread_start = t->thread_start;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	
@@ -2745,10 +2754,7 @@ int mttkrp_hardwired_first_not_fused_10(csf* t, int mode, int r, matrix** mats, 
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
-		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
-		#endif
-		for(idx_t i0 = 0 ; i0< t->fiber_count[0]; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
@@ -2995,7 +3001,7 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -3115,7 +3121,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -3246,7 +3252,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -3388,7 +3394,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -3541,7 +3547,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -3705,7 +3711,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -3880,7 +3886,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -4066,7 +4072,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -4263,7 +4269,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -4471,7 +4477,7 @@ int mttkrp_hardwired_last_vec_2(csf* t, int mode, int r, matrix** mats, mutex_ar
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -4591,7 +4597,7 @@ int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_ar
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -4722,7 +4728,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -4864,7 +4870,7 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -5017,7 +5023,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -5181,7 +5187,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -5356,7 +5362,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -5542,7 +5548,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
@@ -5739,7 +5745,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		#ifdef OMP
-		#pragma omp for schedule(dynamic,1)
+		#pragma omp for schedule( SCHEDULE , CHUNK_SIZE )
 		#endif
 		for(idx_t i0 = 0; i0 < (t->fiber_count[0]) ; i0++)
 		{
