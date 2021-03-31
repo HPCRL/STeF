@@ -26,10 +26,11 @@ void find_thread_start(csf* t)
 
 	for ( int d = 0; d < nmode ; d++)
 	{
-		total_work += t->mlen[d];
+		total_work += t->fiber_count[d];
 	}
 
 	idx_t sid = 0;
+	idx_t partial_work = 0;
 	for(int th = 0 ; th < num_th ; th++)
 	{
 		idx_t partial_work = 0;
