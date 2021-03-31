@@ -2937,7 +2937,7 @@ int mttkrp_hardwired_first_not_fused_10(csf* t, int mode, int r, matrix** mats, 
 }
 int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3054,7 +3054,7 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3182,7 +3182,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3321,7 +3321,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3471,7 +3471,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3632,7 +3632,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3804,7 +3804,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3987,7 +3987,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -4181,7 +4181,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -4386,7 +4386,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 }
 int mttkrp_hardwired_last_vec_2(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -4503,7 +4503,7 @@ int mttkrp_hardwired_last_vec_2(csf* t, int mode, int r, matrix** mats, mutex_ar
 }
 int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -4631,7 +4631,7 @@ int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_ar
 }
 int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -4770,7 +4770,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 }
 int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -4920,7 +4920,7 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 }
 int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -5081,7 +5081,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 }
 int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -5253,7 +5253,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 }
 int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -5436,7 +5436,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 }
 int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -5630,7 +5630,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 }
 int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all;
+	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
