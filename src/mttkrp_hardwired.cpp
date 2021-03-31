@@ -33,8 +33,8 @@ void find_thread_start(csf* t)
 	idx_t partial_work = 0;
 	for(int th = 0 ; th < num_th ; th++)
 	{
-		idx_t partial_work = 0;
-		while(sid < t->fiber_count[0] && partial_work < ((th + 1) * total_work) / (num_th))
+		//idx_t partial_work = 0;
+		while(sid < t->fiber_count[0] && partial_work < (total_work/ num_th) * (th+1) )
 		{
 			idx_t loc1 = sid, loc2 = sid + 1;
 			for ( int d = 0; d < nmode ; d++)
@@ -53,6 +53,11 @@ void find_thread_start(csf* t)
 		thread_start[th+1] = sid;
 	}
 	t->thread_start = thread_start;
+
+	for(int i=0 ; i<= num_th ; i++)
+	{
+		printf("ths %d %lld\n  ",i,thread_start[i]);
+	}
 }
 
 
