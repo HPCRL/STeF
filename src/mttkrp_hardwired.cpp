@@ -3142,24 +3142,33 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 			{
 				TYPE const * const __restrict__  matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
 				//printf(" middle index is %d\n",i1);
-				
+
+				TYPE * const __restrict__ pp_out = partial_products + r;
+				TYPE const * const __restrict__ in = partial_products;
+
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
 				{
-					partial_products[y+1*r] = partial_products[y+0*r] * matval1[y];	
+					pp_out[y] = in[y] * matval1[y];
 				}
+				
+//				#pragma omp simd
+//				for(int y=0; y<r ; y++)
+//				{
+//					partial_products[y+1*r] = partial_products[y+0*r] * matval1[y];	
+//				}
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1]  ; i2++)
 				{
 					const idx_t row_id = t->ind[2][i2];
 					TYPE* const __restrict__ xx  = vals + t->ind[2][i2]*(mats[mode]->dim2);
-					TYPE const * const __restrict__ yy = partial_products + 1*r ;
+					//TYPE const * const __restrict__ yy = partial_products + 1*r ;
 					TYPE tval = t->val[i2];
 					
 					
 					#pragma omp simd
 					for(int i=0 ; i<r ; i++)
 					{
-						TYPE increment = yy [i] * tval;
+						TYPE increment = pp_out [i] * tval;
 						xx [i]	+= increment;
 					}
 					
