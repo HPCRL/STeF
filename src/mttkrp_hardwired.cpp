@@ -3131,7 +3131,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
-			TYPE const * const  matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
+			TYPE const * const __restrict__  matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
 			
 			#pragma omp simd
 			for(int y=0; y<r ; y++)
