@@ -41,10 +41,13 @@ void find_thread_start(csf* t)
 			{
 				partial_work += loc2 - loc1;
 
+
 				if(d < nmode-1)
 				{
+//					partial_work += loc2 - loc1;
 					loc1 = t->ptr[d][loc1];
 					loc2 = t->ptr[d][loc2];
+					
 				}	
 			}	
 			sid ++;
@@ -53,6 +56,8 @@ void find_thread_start(csf* t)
 		thread_start[th+1] = sid;
 	}
 	t->thread_start = thread_start;
+	thread_start[num_th] = t->fiber_count[0];
+
 
 	for(int i=0 ; i<= num_th ; i++)
 	{
@@ -3060,7 +3065,8 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 }
 int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
 {
-	TYPE* partial_products_all; idx_t* thread_start = t->thread_start;
+//	TYPE const * const  partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
+	idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
@@ -3075,7 +3081,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 	int partial_products_size = nmode*r + PAD;
 	
 	printf("num ths %d\n", num_th);
-	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
+	TYPE  * const  partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
@@ -3107,8 +3113,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		printf("th id is %d\n",th);
 		#endif
 		
-		TYPE* partial_products;	
-		partial_products = partial_products_all + th*partial_products_size;
+		TYPE * const partial_products = partial_products_all + th*partial_products_size;
 		
 		TYPE* vals;
 		if(t->num_th > 1)
@@ -3126,7 +3131,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
-			TYPE* matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
+			TYPE const * const  matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
 			
 			#pragma omp simd
 			for(int y=0; y<r ; y++)
@@ -3135,7 +3140,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 			}
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
-				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
+				TYPE const * const  matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
 				//printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
@@ -3146,8 +3151,8 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1]  ; i2++)
 				{
 					const idx_t row_id = t->ind[2][i2];
-					TYPE* xx  = vals + t->ind[2][i2]*(mats[mode]->dim2);
-					TYPE* yy = partial_products + 1*r ;
+					TYPE* const xx  = vals + t->ind[2][i2]*(mats[mode]->dim2);
+					TYPE const * const yy = partial_products + 1*r ;
 					TYPE tval = t->val[i2];
 					
 					
@@ -3183,7 +3188,8 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
-	rem(partial_products_all);
+//	rem(partial_products_all);
+	free(partial_products_all);	
 	return 0;
 }
 int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
