@@ -3081,7 +3081,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 	int partial_products_size = nmode*r + PAD;
 	
 	printf("num ths %d\n", num_th);
-	TYPE  * const  partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
+	TYPE  * const __restrict__  partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
@@ -3113,7 +3113,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		printf("th id is %d\n",th);
 		#endif
 		
-		TYPE * const partial_products = partial_products_all + th*partial_products_size;
+		TYPE * const __restrict__ partial_products = partial_products_all + th*partial_products_size;
 		
 		TYPE* vals;
 		if(t->num_th > 1)
@@ -3140,7 +3140,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 			}
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
-				TYPE const * const  matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
+				TYPE const * const __restrict__  matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
 				//printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
@@ -3151,8 +3151,8 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1]  ; i2++)
 				{
 					const idx_t row_id = t->ind[2][i2];
-					TYPE* const xx  = vals + t->ind[2][i2]*(mats[mode]->dim2);
-					TYPE const * const yy = partial_products + 1*r ;
+					TYPE* const __restrict__ xx  = vals + t->ind[2][i2]*(mats[mode]->dim2);
+					TYPE const * const __restrict__ yy = partial_products + 1*r ;
 					TYPE tval = t->val[i2];
 					
 					
