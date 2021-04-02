@@ -8,18 +8,22 @@ DIRS = $(OBJ_DIR) $(BIN_DIR)
 
 CC = g++
 
+LIKWID_DIR=/opt/likwid/
+LIKWID_INC=$(LIKWID_DIR)/include
+LIKWID_LIB=$(LIKWID_DIR)/lib
+
 EXE = $(wildcard $(EXE_DIR)/*.cpp)
 BIN = $(EXE:$(EXE_DIR)/%.cpp=$(BIN_DIR)/%.exe)
 SRC = $(wildcard $(SRC_DIR)/*.cpp)
 OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 CPPFLAGS += -I/usr/local/include   
-CFLAGS = -Wall -Wno-write-strings -g -std=c++11 -O3 $(EXTRA) -march=native  -fopenmp
+CFLAGS = -Wall -Wno-write-strings -g -std=c++11 -O3 $(EXTRA) -march=native  -fopenmp -funroll-loops -fstrict-aliasing -fgnu89-inline -fPIC -I/$(LIKWID_INC)
 #CFLAGS += -Wall -Wno-write-strings -g -std=c++11 -O0 -qopenmp $(EXTRA) -march=native -restrict -mkl
-LDFLAGS += -L/usr/local/lib -lpthread 
-#LDLIBS += -llikwid
+LDFLAGS += -L/usr/local/lib -L/$(LIKWID_LIB) -lpthread 
+LDLIBS += -llikwid
 #CFLAGS += -D OMP
-#CPPFLAGS += -D LIKWID_PERFMON
+CPPFLAGS += -D LIKWID_PERFMON
 
 .PHONY: all clean
 

@@ -2,6 +2,7 @@
 #include "../inc/matrix.h"
 #include "../inc/mttkrp.h"
 #include "../inc/mttkrp_hardwired.h"
+#include <time.h>
 
 int main(int argc, char** argv)
 {
@@ -100,14 +101,18 @@ int main(int argc, char** argv)
 
 	for(mode = 0 ; mode<nmode ; mode++)
 	{
+		clock_t cstart, cend;
 		auto start = std::chrono::high_resolution_clock::now();
+		cstart = clock();
 		mttkrp_hardwired(t,mode,r,mats,profile);
+		cend = clock();
 		//printf("here\n");
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
 		total += diff.count();
 		printf("Hardwired time for mode %d %lf \n",t->modeid[mode],diff.count());
-
+		double cdiff = ((double) (cend - cstart)) / CLOCKS_PER_SEC;
+		printf("Clock time for mode %d is %lf \n",t->modeid[mode],cdiff);
 		if(debug)
 		{
 			auto start2 = std::chrono::high_resolution_clock::now();
