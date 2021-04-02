@@ -3063,13 +3063,16 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 	rem(partial_products_all);
 	return 0;
 }
-int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array* mutex, int profile)
+int mttkrp_hardwired_last_3(csf* t, int mode, int rr, matrix** mats, mutex_array* mutex, int profile)
 {
 //	TYPE const * const  partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	idx_t* thread_start = t->thread_start;
 	int nmode;
 	int num_th;
 	nmode = t->nmode;
+
+	const int r = 32;
+	//#define r 32
 	
 	#ifdef OMP
 	num_th = omp_get_max_threads();
@@ -3113,8 +3116,9 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		printf("th id is %d\n",th);
 		#endif
 		
-		TYPE * const __restrict__ partial_products = partial_products_all + th*partial_products_size;
-		
+//		TYPE * const __restrict__ partial_products = partial_products_all + th*partial_products_size;
+		TYPE * const __restrict__ partial_products = (TYPE* ) malloc((partial_products_size)*sizeof(TYPE));		
+		TYPE * const __restrict__ pp_out = (TYPE* ) malloc((partial_products_size)*sizeof(TYPE));
 		TYPE* vals;
 		if(t->num_th > 1)
 		{
@@ -3128,7 +3132,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
-				for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
+		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			
 			TYPE const * const __restrict__  matval0 = mats[0]->val + ((mats[0]->dim2) * (t->ind)[0][i0]);
@@ -3136,20 +3140,21 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 			#pragma omp simd
 			for(int y=0; y<r ; y++)
 			{
-				partial_products[y] = matval0[y];	
+//				partial_products[y] = matval0[y];	
 			}
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE const * const __restrict__  matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
 				//printf(" middle index is %d\n",i1);
 
-				TYPE * const __restrict__ pp_out = partial_products + r;
-				TYPE const * const __restrict__ in = partial_products;
+//				TYPE * const __restrict__ pp_out = partial_products + r;
+				//TYPE const * const __restrict__ in = partial_products;
 
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
 				{
-					pp_out[y] = in[y] * matval1[y];
+//					pp_out[y] = in[y] * matval1[y];
+					pp_out[y] = matval0[y] * matval1[y];					
 				}
 				
 //				#pragma omp simd
