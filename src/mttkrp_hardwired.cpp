@@ -3134,8 +3134,8 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#endif
 		
 //		TYPE * const __restrict__ partial_products = partial_products_all + th*partial_products_size;
-		TYPE * const __restrict__ partial_products = (TYPE* ) malloc((partial_products_size)*sizeof(TYPE));		
-		TYPE * const __restrict__ pp_out = (TYPE* ) malloc((partial_products_size)*sizeof(TYPE));
+//		TYPE * const __restrict__ partial_products = (TYPE* ) malloc((partial_products_size)*sizeof(TYPE));		
+		TYPE * const __restrict__ pp_out = (TYPE* ) malloc((r)*sizeof(TYPE));
 		TYPE* vals;
 		if(t->num_th > 1)
 		{
@@ -3146,7 +3146,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 			vals = mats[mode]->val;
 		}
 		
-//		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+		memset(vals, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
 		
 		auto time_start = std::chrono::high_resolution_clock::now();
 		const idx_t i0_start = thread_start[th];
