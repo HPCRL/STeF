@@ -414,6 +414,7 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 		{
 			sort_order[i+1] = sort_order[i];
 		}
+		sort_order[0] = temp_mode_id;
 		temp_mode_len = mlen[nmode-1];
 		for (int i = nmode -2 ; i >= 0 ; i--)
 		{

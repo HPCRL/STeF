@@ -136,7 +136,7 @@ int main(int argc, char** argv)
 		for(i=0 ; i<nmode ; i++)
 		{
 			
-			if(VERBOSE  == VERBOSE_DEBUG)
+			//if(VERBOSE  == VERBOSE_DEBUG)
 			{
 				print_matrix(*mats[i]);
 				
