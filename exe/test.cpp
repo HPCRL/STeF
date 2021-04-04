@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 		read_tensor(argv[1],t,dt,order_num);
 	}
 
-	print_csf(t);
+	print_csf(t,argv[1]);
 
 	auto start = std::chrono::high_resolution_clock::now();
 	int* sort_order = new int[t->nmode];

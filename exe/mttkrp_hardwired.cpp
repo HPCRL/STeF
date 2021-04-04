@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	t->intval = NULL;
 
 
-	print_csf(t);
+	print_csf(t,argv[1]);
 	
 	matrix** mats;
 	nmode = t->nmode;

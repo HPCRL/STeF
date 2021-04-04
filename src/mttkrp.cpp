@@ -37,7 +37,8 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		print_matrix(*mats[i]);
 	}
 	*/
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG)
+		printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
 	temp_res_all = (TYPE* ) malloc(num_th*(r+64)*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
@@ -52,7 +53,8 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -80,7 +82,7 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 		#ifdef OMP
 			idx_t th = omp_get_thread_num();
 			if(VERBOSE == VERBOSE_DEBUG)
-			printf("th id is %d\n",th);
+				printf("th id is %d\n",th);
 		#endif
 
 		idx_t  end;
@@ -198,8 +200,8 @@ int mttkrp_atomic_last(csf* t, int mode, int r, matrix** mats, int vec, int prof
 
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		
-		printf("Atomic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("Atomic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 	}
 
 	//rem(mats[nmode-1]->val);
@@ -249,7 +251,8 @@ int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int pro
 		print_matrix(*mats[i]);
 	}
 	*/
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG)
+		printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
 	temp_res_all = (TYPE* ) malloc(num_th*(r+64)*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
@@ -264,7 +267,8 @@ int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int pro
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -318,7 +322,7 @@ int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int pro
 		#ifdef OMP
 			int th = omp_get_thread_num();
 			if(VERBOSE == VERBOSE_DEBUG)
-			printf("th id is %d\n",th);
+				printf("th id is %d\n",th);
 		#endif
 
 		idx_t  end;
@@ -436,8 +440,8 @@ int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int pro
 
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		
-		printf("Private kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("Private kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 	}
 
 	//rem(mats[nmode-1]->val);
@@ -453,8 +457,8 @@ int mttkrp_private_last(csf* t, int mode, int r, matrix** mats, int vec, int pro
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		
-		printf("Private kernel time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("Private kernel time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 
 
 	}
@@ -496,7 +500,8 @@ int mttkrp_atomic_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int 
 		print_matrix(*mats[i]);
 	}
 	*/
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG)
+		printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
 	temp_res_all = (TYPE* ) malloc(num_th*(r+64)*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
@@ -511,7 +516,8 @@ int mttkrp_atomic_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int 
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -539,7 +545,7 @@ int mttkrp_atomic_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int 
 		#ifdef OMP
 			int th = omp_get_thread_num();
 			if(VERBOSE == VERBOSE_DEBUG)
-			printf("th id is %d\n",th);
+				printf("th id is %d\n",th);
 		#endif
 
 		idx_t it, end;
@@ -657,8 +663,8 @@ int mttkrp_atomic_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int 
 
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		
-		printf("Atomic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("Atomic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 	}
 
 	//rem(mats[nmode-1]->val);
@@ -709,7 +715,8 @@ int mttkrp_private_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int
 		print_matrix(*mats[i]);
 	}
 	*/
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_HIGH)	
+		printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
 	temp_res_all = (TYPE* ) malloc(num_th*(r+64)*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
@@ -724,7 +731,8 @@ int mttkrp_private_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_HIGH)
+			printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -895,8 +903,8 @@ int mttkrp_private_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int
 
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		
-		printf("Private kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("Private kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 	}
 
 	//rem(mats[nmode-1]->val);
@@ -926,7 +934,7 @@ int mttkrp_private_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int
 }
 
 
-int mttkrp_fused_init(csf* t,int r)
+int mttkrp_fused_init(csf* t,int r,bool cap)
 {
 	//int i,j;
 	long long total_space = 0;
@@ -945,21 +953,68 @@ int mttkrp_fused_init(csf* t,int r)
 	idx_t num_th = omp_get_max_threads();
 	t->private_mats = (matrix** ) malloc(num_th*sizeof(matrix*));
 
-	idx_t max_len = t->mlen[0];
-	for(int i=1; i<t->nmode ; i++)
+	for(int i = 1; i < (t->nmode)-1 ; i++)
+	{
+		total_space += (t->fiber_count[i])*r*sizeof(TYPE); // Space for intvals
+	}	
+
+	idx_t max_len = 1;
+
+	idx_t remaining_memory_space = 0;
+	if( cap && PRIVATIZED_THRESH > total_space )
+		remaining_memory_space = PRIVATIZED_THRESH - total_space;
+
+
+	for(int i=0; i<t->nmode ; i++)
 	{	
-		if(t->mlen[i] > max_len)
+		if(t->mlen[i] > max_len && ( !cap || t->mlen[i] * r * num_th * sizeof(TYPE) < remaining_memory_space ))
+		{			
 			max_len = t->mlen[i];
+		}
 	}
+	total_space += max_len*r*num_th*sizeof(TYPE);
+
+	// Print total space requirement
+	if(total_space >= 1073741824)
+	{
+		// GB
+		space_sign = "GB";
+		total_space /= 1073741824;
+	}
+	else if(total_space >= 1048576)
+	{
+		// MB
+		space_sign = "MB";
+		total_space /= 1048576;
+	}
+	else if(total_space >= 1024)
+	{
+		// KB
+		space_sign = "KB";
+		total_space /= 1024;
+	}
+	else
+	{
+		// B
+		space_sign = "B";
+	}
+
+	printf("Additional space requirement for the intermediate tensors is %llu%s \n",total_space,space_sign);
+
+
+	// Allocate arrays
 	for(int i=0; i<num_th ; i++)
 	{
 		t->private_mats[i] = create_matrix(max_len, r, 0);
 	}
 	t->num_th = num_th;
-	total_space += max_len*r*num_th*sizeof(TYPE);
+	
 	#else
 	t->num_th = 1;
 	#endif
+
+
+
 
 
 	if(t->intval == NULL)
@@ -975,42 +1030,17 @@ int mttkrp_fused_init(csf* t,int r)
 				printf("SpTL ERROR: Allocation error in mttkrp fused init\n");
 				exit(1);
 			}
-			else
-			{
-				total_space += (t->fiber_count[i])*r*sizeof(TYPE);
-			}
 		}
-		if(total_space >= 1073741824)
-		{
-			// GB
-			space_sign = "GB";
-			total_space /= 1073741824;
-		}
-		else if(total_space >= 1048576)
-		{
-			// MB
-			space_sign = "MB";
-			total_space /= 1048576;
-		}
-		else if(total_space >= 1024)
-		{
-			// KB
-			space_sign = "KB";
-			total_space /= 1024;
-		}
-		else
-		{
-			// B
-			space_sign = "B";
-		}
-		printf("Additional space requirement for the intermediate tensors is %llu%s \n",total_space,space_sign);
+		
 	}
 	for(int i = 1; i < (t->nmode)-1 ; i++)
 	{
-		for(idx_t j=0; j<(t->fiber_count[i])*r ; j++)
-		{
-			t->intval[i][j] = 0;
-		}
+		memset(t->intval[i],0,sizeof(TYPE)*(t->fiber_count[i])*r);
+
+//		for(idx_t j=0; j<(t->fiber_count[i])*r ; j++)
+//		{
+//			t->intval[i][j] = 0;
+//		}
 	}
 
 
@@ -1163,8 +1193,8 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 		num_th = 1;
 		int th = 0;
 	#endif
-
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG)
+		printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*nmode*r*sizeof(TYPE));
 	inds_all = (idx_t* ) malloc(num_th * nmode* sizeof(idx_t));
 	//int nnz = t->fiber_count[nmode-1];
@@ -1182,7 +1212,8 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 
@@ -1303,8 +1334,8 @@ int mttkrp_atomic_first(csf* t, int mode, int r, matrix** mats, int profile)
 
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		
-		printf("Atomic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());	
+		if(VERBOSE >= VERBOSE_DEBUG)
+			printf("Atomic kernel time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());	
 
 		if(profile == mode)
 		{
@@ -1511,12 +1542,12 @@ int mttkrp_test(coo* dt, int mode, int r, matrix** mats)
 			}
 		}
 	}
-
-	printf("total diff is %d / %d. Sums are %lf and %lf \n", num_diff , size, sum_mat, sum_base);
+	if(num_diff)
+		printf("total diff is %d / %d. Sums are %lf and %lf \n", num_diff , size, sum_mat, sum_base);
 	//rem(vals);
 	rem(accum);
 	rem(vals);
-	return 0;
+	return num_diff;
 }
 
 
@@ -1609,6 +1640,30 @@ int mttkrp_hardwired_middle(csf* t, int mode, int r, matrix** mats, int profile)
 	else if(tt.nmode == 4)
 	{
 		return mttkrp_hardwired_last_vec_4(t,mode,r,mats,arr,profile);
+	}
+
+	return 1;
+}
+
+
+int mttkrp_hardwired_first_not_fused(csf* t, int mode, int r, matrix** mats, int profile)
+{
+	mutex_array* arr = NULL;
+	#ifdef OMP 
+	arr = mutex;
+	#endif
+
+	if(t -> nmode == 3)
+	{
+		return mttkrp_hardwired_first_not_fused_3(t,mode,r,mats,profile);
+	}
+	else if(t -> nmode == 4)
+	{
+		return mttkrp_hardwired_first_not_fused_4(t,mode,r,mats,profile);
+	}
+	else if(t -> nmode == 5)
+	{
+		return mttkrp_hardwired_first_not_fused_5(t,mode,r,mats,profile);
 	}
 
 	return 1;

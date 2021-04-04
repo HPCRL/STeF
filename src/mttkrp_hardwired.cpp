@@ -61,7 +61,7 @@ void find_thread_start(csf* t)
 
 	for(int i=0 ; i<= num_th ; i++)
 	{
-		printf("ths %d %lld\n  ",i,thread_start[i]);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("ths %d %lld\n  ",i,thread_start[i]);
 	}
 }
 
@@ -84,7 +84,7 @@ int reduce(csf* t, int r, matrix* mat)
 				for(int y=0; y<r ; y++)
 				{
 					outval[y] += reduceval[y];
-					//printf("reducing %lf %lf in th %d\n", outval[y], reduceval[y],i);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf("reducing %lf %lf in th %d\n", outval[y], reduceval[y],i);
 					//reduceval[y] = 0;
 				}
 			}	
@@ -103,7 +103,7 @@ int reduce(csf* t, int r, matrix* mat)
 				for(int y=0; y<r ; y++)
 				{
 					outval[y] += reduceval[y];
-					//printf("reducing %lf %lf in th %d\n", outval[y], reduceval[y],i);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf("reducing %lf %lf in th %d\n", outval[y], reduceval[y],i);
 					//reduceval[y] = 0;
 				}
 			}	
@@ -123,7 +123,7 @@ int mttkrp_hardwired_first_2(csf* t, int mode, int r, matrix** mats, int profile
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -134,7 +134,7 @@ int mttkrp_hardwired_first_2(csf* t, int mode, int r, matrix** mats, int profile
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -188,7 +188,7 @@ int mttkrp_hardwired_first_2(csf* t, int mode, int r, matrix** mats, int profile
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -199,7 +199,7 @@ int mttkrp_hardwired_first_2(csf* t, int mode, int r, matrix** mats, int profile
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -223,7 +223,7 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -234,7 +234,7 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -314,7 +314,7 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -325,7 +325,7 @@ int mttkrp_hardwired_first_3(csf* t, int mode, int r, matrix** mats, int profile
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -349,7 +349,7 @@ int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -360,7 +360,7 @@ int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -452,7 +452,7 @@ int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -463,7 +463,7 @@ int mttkrp_hardwired_first_4(csf* t, int mode, int r, matrix** mats, int profile
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -487,7 +487,7 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -498,7 +498,7 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -609,7 +609,7 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -620,7 +620,7 @@ int mttkrp_hardwired_first_5(csf* t, int mode, int r, matrix** mats, int profile
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -644,7 +644,7 @@ int mttkrp_hardwired_first_6(csf* t, int mode, int r, matrix** mats, int profile
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -655,7 +655,7 @@ int mttkrp_hardwired_first_6(csf* t, int mode, int r, matrix** mats, int profile
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -785,7 +785,7 @@ int mttkrp_hardwired_first_6(csf* t, int mode, int r, matrix** mats, int profile
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -796,7 +796,7 @@ int mttkrp_hardwired_first_6(csf* t, int mode, int r, matrix** mats, int profile
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -820,7 +820,7 @@ int mttkrp_hardwired_first_7(csf* t, int mode, int r, matrix** mats, int profile
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -831,7 +831,7 @@ int mttkrp_hardwired_first_7(csf* t, int mode, int r, matrix** mats, int profile
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -980,7 +980,7 @@ int mttkrp_hardwired_first_7(csf* t, int mode, int r, matrix** mats, int profile
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -991,7 +991,7 @@ int mttkrp_hardwired_first_7(csf* t, int mode, int r, matrix** mats, int profile
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -1015,7 +1015,7 @@ int mttkrp_hardwired_first_8(csf* t, int mode, int r, matrix** mats, int profile
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -1026,7 +1026,7 @@ int mttkrp_hardwired_first_8(csf* t, int mode, int r, matrix** mats, int profile
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -1194,7 +1194,7 @@ int mttkrp_hardwired_first_8(csf* t, int mode, int r, matrix** mats, int profile
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -1205,7 +1205,7 @@ int mttkrp_hardwired_first_8(csf* t, int mode, int r, matrix** mats, int profile
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -1229,7 +1229,7 @@ int mttkrp_hardwired_first_9(csf* t, int mode, int r, matrix** mats, int profile
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -1240,7 +1240,7 @@ int mttkrp_hardwired_first_9(csf* t, int mode, int r, matrix** mats, int profile
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -1427,7 +1427,7 @@ int mttkrp_hardwired_first_9(csf* t, int mode, int r, matrix** mats, int profile
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -1438,7 +1438,7 @@ int mttkrp_hardwired_first_9(csf* t, int mode, int r, matrix** mats, int profile
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -1462,7 +1462,7 @@ int mttkrp_hardwired_first_10(csf* t, int mode, int r, matrix** mats, int profil
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -1473,7 +1473,7 @@ int mttkrp_hardwired_first_10(csf* t, int mode, int r, matrix** mats, int profil
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -1679,7 +1679,7 @@ int mttkrp_hardwired_first_10(csf* t, int mode, int r, matrix** mats, int profil
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -1690,7 +1690,7 @@ int mttkrp_hardwired_first_10(csf* t, int mode, int r, matrix** mats, int profil
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		if(profile == mode)
 		{
 			LIKWID_MARKER_STOP("Compute");
@@ -1714,7 +1714,7 @@ int mttkrp_hardwired_first_not_fused_2(csf* t, int mode, int r, matrix** mats, i
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -1753,7 +1753,7 @@ int mttkrp_hardwired_first_not_fused_2(csf* t, int mode, int r, matrix** mats, i
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -1763,7 +1763,7 @@ int mttkrp_hardwired_first_not_fused_2(csf* t, int mode, int r, matrix** mats, i
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 	}
 	rem(partial_results_all);	
@@ -1780,7 +1780,7 @@ int mttkrp_hardwired_first_not_fused_3(csf* t, int mode, int r, matrix** mats, i
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -1817,7 +1817,7 @@ int mttkrp_hardwired_first_not_fused_3(csf* t, int mode, int r, matrix** mats, i
 				}	
 				// write to intval
 				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
-				TYPE* intval = t->intval[1] + i1*r;
+				
 				
 				#pragma omp simd
 				for(int y=0 ; y<r ; y++)
@@ -1837,7 +1837,7 @@ int mttkrp_hardwired_first_not_fused_3(csf* t, int mode, int r, matrix** mats, i
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -1847,7 +1847,7 @@ int mttkrp_hardwired_first_not_fused_3(csf* t, int mode, int r, matrix** mats, i
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 	}
 	rem(partial_results_all);	
@@ -1864,7 +1864,7 @@ int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, i
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -1903,7 +1903,7 @@ int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, i
 					}	
 					// write to intval
 					TYPE* matval = (mats[2]->val) + ((mats[2]) -> dim2) * t->ind[2][i2];
-					TYPE* intval = t->intval[2] + i2*r;
+					
 					
 					#pragma omp simd
 					for(int y=0 ; y<r ; y++)
@@ -1919,7 +1919,7 @@ int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, i
 				}
 				// write to intval
 				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
-				TYPE* intval = t->intval[1] + i1*r;
+				
 				
 				#pragma omp simd
 				for(int y=0 ; y<r ; y++)
@@ -1939,7 +1939,7 @@ int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, i
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -1949,7 +1949,7 @@ int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, i
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 	}
 	rem(partial_results_all);	
@@ -1966,7 +1966,7 @@ int mttkrp_hardwired_first_not_fused_5(csf* t, int mode, int r, matrix** mats, i
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -2007,7 +2007,7 @@ int mttkrp_hardwired_first_not_fused_5(csf* t, int mode, int r, matrix** mats, i
 						}	
 						// write to intval
 						TYPE* matval = (mats[3]->val) + ((mats[3]) -> dim2) * t->ind[3][i3];
-						TYPE* intval = t->intval[3] + i3*r;
+						
 						
 						#pragma omp simd
 						for(int y=0 ; y<r ; y++)
@@ -2023,7 +2023,7 @@ int mttkrp_hardwired_first_not_fused_5(csf* t, int mode, int r, matrix** mats, i
 					}
 					// write to intval
 					TYPE* matval = (mats[2]->val) + ((mats[2]) -> dim2) * t->ind[2][i2];
-					TYPE* intval = t->intval[2] + i2*r;
+					
 					
 					#pragma omp simd
 					for(int y=0 ; y<r ; y++)
@@ -2039,7 +2039,7 @@ int mttkrp_hardwired_first_not_fused_5(csf* t, int mode, int r, matrix** mats, i
 				}
 				// write to intval
 				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
-				TYPE* intval = t->intval[1] + i1*r;
+				
 				
 				#pragma omp simd
 				for(int y=0 ; y<r ; y++)
@@ -2059,7 +2059,7 @@ int mttkrp_hardwired_first_not_fused_5(csf* t, int mode, int r, matrix** mats, i
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -2069,7 +2069,7 @@ int mttkrp_hardwired_first_not_fused_5(csf* t, int mode, int r, matrix** mats, i
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 	}
 	rem(partial_results_all);	
@@ -2086,7 +2086,7 @@ int mttkrp_hardwired_first_not_fused_6(csf* t, int mode, int r, matrix** mats, i
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -2129,7 +2129,7 @@ int mttkrp_hardwired_first_not_fused_6(csf* t, int mode, int r, matrix** mats, i
 							}	
 							// write to intval
 							TYPE* matval = (mats[4]->val) + ((mats[4]) -> dim2) * t->ind[4][i4];
-							TYPE* intval = t->intval[4] + i4*r;
+							
 							
 							#pragma omp simd
 							for(int y=0 ; y<r ; y++)
@@ -2145,7 +2145,7 @@ int mttkrp_hardwired_first_not_fused_6(csf* t, int mode, int r, matrix** mats, i
 						}
 						// write to intval
 						TYPE* matval = (mats[3]->val) + ((mats[3]) -> dim2) * t->ind[3][i3];
-						TYPE* intval = t->intval[3] + i3*r;
+						
 						
 						#pragma omp simd
 						for(int y=0 ; y<r ; y++)
@@ -2161,7 +2161,7 @@ int mttkrp_hardwired_first_not_fused_6(csf* t, int mode, int r, matrix** mats, i
 					}
 					// write to intval
 					TYPE* matval = (mats[2]->val) + ((mats[2]) -> dim2) * t->ind[2][i2];
-					TYPE* intval = t->intval[2] + i2*r;
+					
 					
 					#pragma omp simd
 					for(int y=0 ; y<r ; y++)
@@ -2177,7 +2177,7 @@ int mttkrp_hardwired_first_not_fused_6(csf* t, int mode, int r, matrix** mats, i
 				}
 				// write to intval
 				TYPE* matval = (mats[1]->val) + ((mats[1]) -> dim2) * t->ind[1][i1];
-				TYPE* intval = t->intval[1] + i1*r;
+				
 				
 				#pragma omp simd
 				for(int y=0 ; y<r ; y++)
@@ -2197,7 +2197,7 @@ int mttkrp_hardwired_first_not_fused_6(csf* t, int mode, int r, matrix** mats, i
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -2207,7 +2207,7 @@ int mttkrp_hardwired_first_not_fused_6(csf* t, int mode, int r, matrix** mats, i
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 	}
 	rem(partial_results_all);	
@@ -2224,7 +2224,7 @@ int mttkrp_hardwired_first_not_fused_7(csf* t, int mode, int r, matrix** mats, i
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -2353,7 +2353,7 @@ int mttkrp_hardwired_first_not_fused_7(csf* t, int mode, int r, matrix** mats, i
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -2363,7 +2363,7 @@ int mttkrp_hardwired_first_not_fused_7(csf* t, int mode, int r, matrix** mats, i
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 	}
 	rem(partial_results_all);	
@@ -2380,7 +2380,7 @@ int mttkrp_hardwired_first_not_fused_8(csf* t, int mode, int r, matrix** mats, i
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -2527,7 +2527,7 @@ int mttkrp_hardwired_first_not_fused_8(csf* t, int mode, int r, matrix** mats, i
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -2537,7 +2537,7 @@ int mttkrp_hardwired_first_not_fused_8(csf* t, int mode, int r, matrix** mats, i
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 	}
 	rem(partial_results_all);	
@@ -2554,7 +2554,7 @@ int mttkrp_hardwired_first_not_fused_9(csf* t, int mode, int r, matrix** mats, i
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -2719,7 +2719,7 @@ int mttkrp_hardwired_first_not_fused_9(csf* t, int mode, int r, matrix** mats, i
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -2729,7 +2729,7 @@ int mttkrp_hardwired_first_not_fused_9(csf* t, int mode, int r, matrix** mats, i
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 	}
 	rem(partial_results_all);	
@@ -2746,7 +2746,7 @@ int mttkrp_hardwired_first_not_fused_10(csf* t, int mode, int r, matrix** mats, 
 	
 	#endif
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
 	TYPE* partial_results_all = (TYPE*) malloc(num_th*partial_results_size*sizeof(TYPE));
 	
@@ -2929,7 +2929,7 @@ int mttkrp_hardwired_first_not_fused_10(csf* t, int mode, int r, matrix** mats, 
 			#pragma omp simd
 			for(int y=0 ; y<r ; y++)
 			{
-				//	printf("0th level loop %lf\n",partial_results[y]);
+				//	if(VERBOSE >= VERBOSE_DEBUG) printf("0th level loop %lf\n",partial_results[y]);
 				matval[y] = partial_results[y];
 				partial_results[y] = 0;
 			}
@@ -2939,7 +2939,7 @@ int mttkrp_hardwired_first_not_fused_10(csf* t, int mode, int r, matrix** mats, 
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 	}
 	rem(partial_results_all);	
@@ -2962,12 +2962,12 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -2992,7 +2992,7 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -3040,7 +3040,7 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -3057,7 +3057,7 @@ int mttkrp_hardwired_last_2(csf* t, int mode, int r, matrix** mats, mutex_array*
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -3083,12 +3083,12 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	TYPE  * const __restrict__  partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 
@@ -3109,7 +3109,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 	#endif
 	{
 //		th = omp_get_thread_num();
-//                printf("th id is %d\n",th);
+//                if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 	}
 
 	TYPE const * const __restrict__ mat0 = mats[0]->val;	
@@ -3130,7 +3130,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 		const int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 //		TYPE * const __restrict__ partial_products = partial_products_all + th*partial_products_size;
@@ -3168,7 +3168,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 			for(idx_t i1 = i1_start ; i1 < i1_stop ; i1++)	
 			{
 				TYPE const * const __restrict__  matval1 = mat1 + (dim2 * ind1[i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 
 //				TYPE * const __restrict__ pp_out = partial_products + r;
 				//TYPE const * const __restrict__ in = partial_products;
@@ -3205,7 +3205,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-//		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+//		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -3222,7 +3222,7 @@ int mttkrp_hardwired_last_3(csf* t, int mode, int r, matrix** mats, mutex_array*
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 //	rem(partial_products_all);
@@ -3245,12 +3245,12 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -3275,7 +3275,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -3307,7 +3307,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -3317,7 +3317,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -3345,7 +3345,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -3362,7 +3362,7 @@ int mttkrp_hardwired_last_4(csf* t, int mode, int r, matrix** mats, mutex_array*
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -3384,12 +3384,12 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -3414,7 +3414,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -3446,7 +3446,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -3456,7 +3456,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -3466,7 +3466,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -3495,7 +3495,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -3512,7 +3512,7 @@ int mttkrp_hardwired_last_5(csf* t, int mode, int r, matrix** mats, mutex_array*
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -3534,12 +3534,12 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -3564,7 +3564,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -3596,7 +3596,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -3606,7 +3606,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -3616,7 +3616,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -3626,7 +3626,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -3656,7 +3656,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -3673,7 +3673,7 @@ int mttkrp_hardwired_last_6(csf* t, int mode, int r, matrix** mats, mutex_array*
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -3695,12 +3695,12 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -3725,7 +3725,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -3757,7 +3757,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -3767,7 +3767,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -3777,7 +3777,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -3787,7 +3787,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -3797,7 +3797,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 							for(idx_t i5 = t->ptr[4][i4]; i5 < t->ptr[4][i4+1] ; i5++)	
 							{
 								TYPE* matval5 = mats[5]->val + ((mats[5]->dim2) * t->ind[5][i5]);
-								//printf(" middle index is %d\n",i1);
+								//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 								
 								#pragma omp simd
 								for(int y=0; y<r ; y++)
@@ -3828,7 +3828,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -3845,7 +3845,7 @@ int mttkrp_hardwired_last_7(csf* t, int mode, int r, matrix** mats, mutex_array*
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -3867,12 +3867,12 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -3897,7 +3897,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -3929,7 +3929,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -3939,7 +3939,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -3949,7 +3949,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -3959,7 +3959,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -3969,7 +3969,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 							for(idx_t i5 = t->ptr[4][i4]; i5 < t->ptr[4][i4+1] ; i5++)	
 							{
 								TYPE* matval5 = mats[5]->val + ((mats[5]->dim2) * t->ind[5][i5]);
-								//printf(" middle index is %d\n",i1);
+								//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 								
 								#pragma omp simd
 								for(int y=0; y<r ; y++)
@@ -3979,7 +3979,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 								for(idx_t i6 = t->ptr[5][i5]; i6 < t->ptr[5][i5+1] ; i6++)	
 								{
 									TYPE* matval6 = mats[6]->val + ((mats[6]->dim2) * t->ind[6][i6]);
-									//printf(" middle index is %d\n",i1);
+									//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 									
 									#pragma omp simd
 									for(int y=0; y<r ; y++)
@@ -4011,7 +4011,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -4028,7 +4028,7 @@ int mttkrp_hardwired_last_8(csf* t, int mode, int r, matrix** mats, mutex_array*
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -4050,12 +4050,12 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -4080,7 +4080,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -4112,7 +4112,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -4122,7 +4122,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -4132,7 +4132,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -4142,7 +4142,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -4152,7 +4152,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 							for(idx_t i5 = t->ptr[4][i4]; i5 < t->ptr[4][i4+1] ; i5++)	
 							{
 								TYPE* matval5 = mats[5]->val + ((mats[5]->dim2) * t->ind[5][i5]);
-								//printf(" middle index is %d\n",i1);
+								//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 								
 								#pragma omp simd
 								for(int y=0; y<r ; y++)
@@ -4162,7 +4162,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 								for(idx_t i6 = t->ptr[5][i5]; i6 < t->ptr[5][i5+1] ; i6++)	
 								{
 									TYPE* matval6 = mats[6]->val + ((mats[6]->dim2) * t->ind[6][i6]);
-									//printf(" middle index is %d\n",i1);
+									//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 									
 									#pragma omp simd
 									for(int y=0; y<r ; y++)
@@ -4172,7 +4172,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 									for(idx_t i7 = t->ptr[6][i6]; i7 < t->ptr[6][i6+1] ; i7++)	
 									{
 										TYPE* matval7 = mats[7]->val + ((mats[7]->dim2) * t->ind[7][i7]);
-										//printf(" middle index is %d\n",i1);
+										//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 										
 										#pragma omp simd
 										for(int y=0; y<r ; y++)
@@ -4205,7 +4205,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -4222,7 +4222,7 @@ int mttkrp_hardwired_last_9(csf* t, int mode, int r, matrix** mats, mutex_array*
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -4244,12 +4244,12 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -4274,7 +4274,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -4306,7 +4306,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -4316,7 +4316,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -4326,7 +4326,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -4336,7 +4336,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -4346,7 +4346,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 							for(idx_t i5 = t->ptr[4][i4]; i5 < t->ptr[4][i4+1] ; i5++)	
 							{
 								TYPE* matval5 = mats[5]->val + ((mats[5]->dim2) * t->ind[5][i5]);
-								//printf(" middle index is %d\n",i1);
+								//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 								
 								#pragma omp simd
 								for(int y=0; y<r ; y++)
@@ -4356,7 +4356,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 								for(idx_t i6 = t->ptr[5][i5]; i6 < t->ptr[5][i5+1] ; i6++)	
 								{
 									TYPE* matval6 = mats[6]->val + ((mats[6]->dim2) * t->ind[6][i6]);
-									//printf(" middle index is %d\n",i1);
+									//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 									
 									#pragma omp simd
 									for(int y=0; y<r ; y++)
@@ -4366,7 +4366,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 									for(idx_t i7 = t->ptr[6][i6]; i7 < t->ptr[6][i6+1] ; i7++)	
 									{
 										TYPE* matval7 = mats[7]->val + ((mats[7]->dim2) * t->ind[7][i7]);
-										//printf(" middle index is %d\n",i1);
+										//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 										
 										#pragma omp simd
 										for(int y=0; y<r ; y++)
@@ -4376,7 +4376,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 										for(idx_t i8 = t->ptr[7][i7]; i8 < t->ptr[7][i7+1] ; i8++)	
 										{
 											TYPE* matval8 = mats[8]->val + ((mats[8]->dim2) * t->ind[8][i8]);
-											//printf(" middle index is %d\n",i1);
+											//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 											
 											#pragma omp simd
 											for(int y=0; y<r ; y++)
@@ -4410,7 +4410,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -4427,7 +4427,7 @@ int mttkrp_hardwired_last_10(csf* t, int mode, int r, matrix** mats, mutex_array
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -4449,12 +4449,12 @@ int mttkrp_hardwired_last_vec_2(csf* t, int mode, int r, matrix** mats, mutex_ar
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -4479,7 +4479,7 @@ int mttkrp_hardwired_last_vec_2(csf* t, int mode, int r, matrix** mats, mutex_ar
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -4527,7 +4527,7 @@ int mttkrp_hardwired_last_vec_2(csf* t, int mode, int r, matrix** mats, mutex_ar
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -4544,7 +4544,7 @@ int mttkrp_hardwired_last_vec_2(csf* t, int mode, int r, matrix** mats, mutex_ar
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -4566,12 +4566,12 @@ int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_ar
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -4596,7 +4596,7 @@ int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_ar
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -4628,7 +4628,7 @@ int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_ar
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -4655,7 +4655,7 @@ int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_ar
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -4672,7 +4672,7 @@ int mttkrp_hardwired_last_vec_3(csf* t, int mode, int r, matrix** mats, mutex_ar
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -4694,12 +4694,12 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -4724,7 +4724,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -4756,7 +4756,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -4766,7 +4766,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -4794,7 +4794,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -4811,7 +4811,7 @@ int mttkrp_hardwired_last_vec_4(csf* t, int mode, int r, matrix** mats, mutex_ar
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -4833,12 +4833,12 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -4863,7 +4863,7 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -4895,7 +4895,7 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -4905,7 +4905,7 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -4915,7 +4915,7 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -4944,7 +4944,7 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -4961,7 +4961,7 @@ int mttkrp_hardwired_last_vec_5(csf* t, int mode, int r, matrix** mats, mutex_ar
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -4983,12 +4983,12 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -5013,7 +5013,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -5045,7 +5045,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -5055,7 +5055,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -5065,7 +5065,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -5075,7 +5075,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -5105,7 +5105,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -5122,7 +5122,7 @@ int mttkrp_hardwired_last_vec_6(csf* t, int mode, int r, matrix** mats, mutex_ar
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -5144,12 +5144,12 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -5174,7 +5174,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -5206,7 +5206,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -5216,7 +5216,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -5226,7 +5226,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -5236,7 +5236,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -5246,7 +5246,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 							for(idx_t i5 = t->ptr[4][i4]; i5 < t->ptr[4][i4+1] ; i5++)	
 							{
 								TYPE* matval5 = mats[5]->val + ((mats[5]->dim2) * t->ind[5][i5]);
-								//printf(" middle index is %d\n",i1);
+								//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 								
 								#pragma omp simd
 								for(int y=0; y<r ; y++)
@@ -5277,7 +5277,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -5294,7 +5294,7 @@ int mttkrp_hardwired_last_vec_7(csf* t, int mode, int r, matrix** mats, mutex_ar
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -5316,12 +5316,12 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -5346,7 +5346,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -5378,7 +5378,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -5388,7 +5388,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -5398,7 +5398,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -5408,7 +5408,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -5418,7 +5418,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 							for(idx_t i5 = t->ptr[4][i4]; i5 < t->ptr[4][i4+1] ; i5++)	
 							{
 								TYPE* matval5 = mats[5]->val + ((mats[5]->dim2) * t->ind[5][i5]);
-								//printf(" middle index is %d\n",i1);
+								//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 								
 								#pragma omp simd
 								for(int y=0; y<r ; y++)
@@ -5428,7 +5428,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 								for(idx_t i6 = t->ptr[5][i5]; i6 < t->ptr[5][i5+1] ; i6++)	
 								{
 									TYPE* matval6 = mats[6]->val + ((mats[6]->dim2) * t->ind[6][i6]);
-									//printf(" middle index is %d\n",i1);
+									//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 									
 									#pragma omp simd
 									for(int y=0; y<r ; y++)
@@ -5460,7 +5460,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -5477,7 +5477,7 @@ int mttkrp_hardwired_last_vec_8(csf* t, int mode, int r, matrix** mats, mutex_ar
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -5499,12 +5499,12 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -5529,7 +5529,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -5561,7 +5561,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -5571,7 +5571,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -5581,7 +5581,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -5591,7 +5591,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -5601,7 +5601,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 							for(idx_t i5 = t->ptr[4][i4]; i5 < t->ptr[4][i4+1] ; i5++)	
 							{
 								TYPE* matval5 = mats[5]->val + ((mats[5]->dim2) * t->ind[5][i5]);
-								//printf(" middle index is %d\n",i1);
+								//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 								
 								#pragma omp simd
 								for(int y=0; y<r ; y++)
@@ -5611,7 +5611,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 								for(idx_t i6 = t->ptr[5][i5]; i6 < t->ptr[5][i5+1] ; i6++)	
 								{
 									TYPE* matval6 = mats[6]->val + ((mats[6]->dim2) * t->ind[6][i6]);
-									//printf(" middle index is %d\n",i1);
+									//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 									
 									#pragma omp simd
 									for(int y=0; y<r ; y++)
@@ -5621,7 +5621,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 									for(idx_t i7 = t->ptr[6][i6]; i7 < t->ptr[6][i6+1] ; i7++)	
 									{
 										TYPE* matval7 = mats[7]->val + ((mats[7]->dim2) * t->ind[7][i7]);
-										//printf(" middle index is %d\n",i1);
+										//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 										
 										#pragma omp simd
 										for(int y=0; y<r ; y++)
@@ -5654,7 +5654,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -5671,7 +5671,7 @@ int mttkrp_hardwired_last_vec_9(csf* t, int mode, int r, matrix** mats, mutex_ar
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);
@@ -5693,12 +5693,12 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 	
 	int partial_products_size = nmode*r + PAD;
 	
-	printf("num ths %d\n", num_th);
+	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	partial_products_all = (TYPE* ) malloc(num_th*(partial_products_size)*sizeof(TYPE));
 	
 	if(profile == mode)
 	{
-		printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+		if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
 		LIKWID_MARKER_INIT;
 	}
 	
@@ -5723,7 +5723,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 		#ifdef OMP
 		int th = omp_get_thread_num();
 		if(VERBOSE == VERBOSE_HIGH)
-		printf("th id is %d\n",th);
+		if(VERBOSE >= VERBOSE_DEBUG) printf("th id is %d\n",th);
 		#endif
 		
 		TYPE* partial_products;	
@@ -5755,7 +5755,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 			for(idx_t i1 = t->ptr[0][i0]; i1 < t->ptr[0][i0+1] ; i1++)	
 			{
 				TYPE* matval1 = mats[1]->val + ((mats[1]->dim2) * t->ind[1][i1]);
-				//printf(" middle index is %d\n",i1);
+				//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 				
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
@@ -5765,7 +5765,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 				for(idx_t i2 = t->ptr[1][i1]; i2 < t->ptr[1][i1+1] ; i2++)	
 				{
 					TYPE* matval2 = mats[2]->val + ((mats[2]->dim2) * t->ind[2][i2]);
-					//printf(" middle index is %d\n",i1);
+					//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 					
 					#pragma omp simd
 					for(int y=0; y<r ; y++)
@@ -5775,7 +5775,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 					for(idx_t i3 = t->ptr[2][i2]; i3 < t->ptr[2][i2+1] ; i3++)	
 					{
 						TYPE* matval3 = mats[3]->val + ((mats[3]->dim2) * t->ind[3][i3]);
-						//printf(" middle index is %d\n",i1);
+						//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 						
 						#pragma omp simd
 						for(int y=0; y<r ; y++)
@@ -5785,7 +5785,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 						for(idx_t i4 = t->ptr[3][i3]; i4 < t->ptr[3][i3+1] ; i4++)	
 						{
 							TYPE* matval4 = mats[4]->val + ((mats[4]->dim2) * t->ind[4][i4]);
-							//printf(" middle index is %d\n",i1);
+							//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 							
 							#pragma omp simd
 							for(int y=0; y<r ; y++)
@@ -5795,7 +5795,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 							for(idx_t i5 = t->ptr[4][i4]; i5 < t->ptr[4][i4+1] ; i5++)	
 							{
 								TYPE* matval5 = mats[5]->val + ((mats[5]->dim2) * t->ind[5][i5]);
-								//printf(" middle index is %d\n",i1);
+								//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 								
 								#pragma omp simd
 								for(int y=0; y<r ; y++)
@@ -5805,7 +5805,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 								for(idx_t i6 = t->ptr[5][i5]; i6 < t->ptr[5][i5+1] ; i6++)	
 								{
 									TYPE* matval6 = mats[6]->val + ((mats[6]->dim2) * t->ind[6][i6]);
-									//printf(" middle index is %d\n",i1);
+									//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 									
 									#pragma omp simd
 									for(int y=0; y<r ; y++)
@@ -5815,7 +5815,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 									for(idx_t i7 = t->ptr[6][i6]; i7 < t->ptr[6][i6+1] ; i7++)	
 									{
 										TYPE* matval7 = mats[7]->val + ((mats[7]->dim2) * t->ind[7][i7]);
-										//printf(" middle index is %d\n",i1);
+										//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 										
 										#pragma omp simd
 										for(int y=0; y<r ; y++)
@@ -5825,7 +5825,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 										for(idx_t i8 = t->ptr[7][i7]; i8 < t->ptr[7][i7+1] ; i8++)	
 										{
 											TYPE* matval8 = mats[8]->val + ((mats[8]->dim2) * t->ind[8][i8]);
-											//printf(" middle index is %d\n",i1);
+											//if(VERBOSE >= VERBOSE_DEBUG) printf(" middle index is %d\n",i1);
 											
 											#pragma omp simd
 											for(int y=0; y<r ; y++)
@@ -5859,7 +5859,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 		}
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
 		
 		if(profile == mode)
 		{
@@ -5876,7 +5876,7 @@ int mttkrp_hardwired_last_vec_10(csf* t, int mode, int r, matrix** mats, mutex_a
 		reduce(t,r,mats[mode]);
 		auto time_end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> time_diff = time_end-time_start;
-		printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
+		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for reducing mode %d is %lf \n",t->modeid[mode],time_diff.count());		
 	}
 	
 	rem(partial_products_all);

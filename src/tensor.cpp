@@ -65,8 +65,27 @@ int free_coo(coo* t)
 }
 
 
-int print_csf(csf* t)
+int print_csf(csf* t,const char* file)
 {
+
+	// Machine readable format
+	printf("%s,mode length",file);
+	for(int i=0; i<t->nmode ;i++)
+	{
+		printf(",%d", t->mlen[i]);	
+	}
+
+	printf("\n");
+	
+	printf("%s,fiber count",file);
+	for(int i=0; i<t->nmode ;i++)
+	{
+		printf(",%d", t->fiber_count[i]);	
+	}
+
+	printf("\n");
+
+	// Human readable format
 	for(int i=0; i<t->nmode ;i++)
 	{
 		printf("Mode %d fiber count %d\n", i, t->fiber_count[i]);

@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
 	
 	
-	print_csf(t);
+	print_csf(t,argv[1]);
 	
 	matrix** mats;
 	nmode = t->nmode;
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 			print_matrix(*mats[i]);
 	}
 
-	mttkrp_fused_init(t,r);
+	mttkrp_fused_init(t,r,true);
 
 	double total=0;
 
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 		random_matrix(*mats[mode],i);
 	}
 
-
+	if(false)
 	{
 		auto start = std::chrono::high_resolution_clock::now();
 		mttkrp_hardwired_first(t,0,r,mats,profile);

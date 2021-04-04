@@ -372,9 +372,9 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 	sort_order = (int*) malloc(nmode*sizeof(int));
 	fiber_count = (idx_t*) malloc(nmode*sizeof(idx_t));
 
-	if(order_num == -1)
+	if(order_num == -1)  // For SpTL1
 		order_modes(mlen, nmode, sort_order);
-	else if (order_num == -2)
+	else if (order_num == -2) // for SpTL1so
 	{
 		order_modes(mlen, nmode, sort_order);
 		int temp_mode_id = sort_order[nmode-1];
@@ -383,6 +383,44 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 		int temp_mode_len = mlen[nmode-1];
 		mlen[nmode-1] = mlen[nmode-2];
 		mlen[nmode-2] = temp_mode_len;
+	}
+	else if (order_num == -3) // for SpTL2
+	{
+		order_modes(mlen, nmode, sort_order);
+		int temp_mode_id = sort_order[nmode-1];
+		for (int i = nmode -1 ; i >= 0 ; i--)
+		{
+			sort_order[i+1] = sort_order[i];
+		}
+		sort_order[0] = temp_mode_id;
+		int temp_mode_len = mlen[nmode-1];
+		for (int i = nmode -1 ; i >= 0 ; i--)
+		{
+			mlen[i+1] = mlen[i];
+		}
+		mlen[0] = temp_mode_len;
+	}
+	else if (order_num == -4) // for SpTL2so
+	{
+		order_modes(mlen, nmode, sort_order);
+		int temp_mode_id = sort_order[nmode-1];
+		sort_order[nmode-1] = sort_order[nmode-2];
+		sort_order[nmode-2] = temp_mode_id;
+		int temp_mode_len = mlen[nmode-1];
+		mlen[nmode-1] = mlen[nmode-2];
+		mlen[nmode-2] = temp_mode_len;
+		temp_mode_id = sort_order[nmode-1];
+		for (int i = nmode -1 ; i >= 0 ; i--)
+		{
+			sort_order[i+1] = sort_order[i];
+		}
+		temp_mode_len = mlen[nmode-1];
+		for (int i = nmode -1 ; i >= 0 ; i--)
+		{
+			mlen[i+1] = mlen[i];
+		}
+		mlen[0] = temp_mode_len;
+
 	}
 	else
 	{

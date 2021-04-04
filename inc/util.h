@@ -36,14 +36,16 @@
 #include <omp.h>
 #endif
 
-#define idx_t uint64_t
+#define idx_t long long int
 #define MAX_MODE 10
 #define TYPE double
-#define VERBOSE VERBOSE_HIGH
+#define VERBOSE VERBOSE_LOW
 #define CORRECTNESS_THRESHOLD 1E-10
-#define DOT_PARALLEL_DEPTH 2	
-#define PAD 64
+#define DOT_PARALLEL_DEPTH 1	
+#define PAD 0
 #define ATOMIC_THRESH 0.8
+//#define PRIVATIZED_THRESH 10000000000 // 10 GW = 80 GB
+#define PRIVATIZED_THRESH 4000000000 // 4GB
 
 enum verbosity
 {

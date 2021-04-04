@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
 	
 	
-	print_csf(t);
+	print_csf(t,argv[1]);
 	
 	matrix** mats;
 	nmode = t->nmode;
