@@ -164,7 +164,7 @@ int main(int argc, char** argv)
 	
 
 	// Start for last mode 
-
+	t = malloc_csf();
 	order_num -= 2;
 	if(debug)
 	{

@@ -19,6 +19,8 @@ csf* malloc_csf()
 	res->modeid = NULL;
 	res->intval = NULL;
 	res->thread_start = NULL;
+	res->private_mats = NULL;
+	res->intval = NULL;
 	return res;
 }
 
@@ -76,7 +78,7 @@ int print_csf(csf* t,const char* file)
 	}
 
 	printf("\n");
-	
+
 	printf("%s,fiber count",file);
 	for(int i=0; i<t->nmode ;i++)
 	{

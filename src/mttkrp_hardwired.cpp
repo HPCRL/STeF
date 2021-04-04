@@ -20,7 +20,7 @@ void find_thread_start(csf* t)
 	idx_t total_work = 0;
 
 	idx_t nnz = t->fiber_count[nmode-1];
-	thread_start = new idx_t[num_th+1];
+	thread_start = (idx_t*) malloc(sizeof(idx_t)*(num_th+1));
 
 	memset(thread_start,0,sizeof(idx_t)*(num_th+1));
 

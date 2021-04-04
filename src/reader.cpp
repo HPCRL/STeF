@@ -388,13 +388,13 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 	{
 		order_modes(mlen, nmode, sort_order);
 		int temp_mode_id = sort_order[nmode-1];
-		for (int i = nmode -1 ; i >= 0 ; i--)
+		for (int i = nmode -2 ; i >= 0 ; i--)
 		{
 			sort_order[i+1] = sort_order[i];
 		}
 		sort_order[0] = temp_mode_id;
 		int temp_mode_len = mlen[nmode-1];
-		for (int i = nmode -1 ; i >= 0 ; i--)
+		for (int i = nmode -2 ; i >= 0 ; i--)
 		{
 			mlen[i+1] = mlen[i];
 		}
@@ -410,12 +410,12 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 		mlen[nmode-1] = mlen[nmode-2];
 		mlen[nmode-2] = temp_mode_len;
 		temp_mode_id = sort_order[nmode-1];
-		for (int i = nmode -1 ; i >= 0 ; i--)
+		for (int i = nmode -2 ; i >= 0 ; i--)
 		{
 			sort_order[i+1] = sort_order[i];
 		}
 		temp_mode_len = mlen[nmode-1];
-		for (int i = nmode -1 ; i >= 0 ; i--)
+		for (int i = nmode -2 ; i >= 0 ; i--)
 		{
 			mlen[i+1] = mlen[i];
 		}
