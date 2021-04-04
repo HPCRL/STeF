@@ -250,9 +250,9 @@ int main(int argc, char** argv)
 		printf("incorrect,");
 	}	
 
-	if(order_num == -1)
+	if(order_num == -3)
 		printf("SpTL2,");
-	if(order_num == -2)
+	if(order_num == -4)
 		printf("SpTL2so,");
 	printf("%s", argv[1]);
 	for(mode = 0 ; mode<nmode ; mode++)
