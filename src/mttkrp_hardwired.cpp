@@ -1872,11 +1872,33 @@ int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, i
 	partial_results_all[i] = 0;
 	
 	set_matrix(*mats[0],0);
+
+	if(profile == mode)
+        {
+                if(VERBOSE >= VERBOSE_DEBUG) printf("profiling mode %d  == %d\n",profile, t->modeid[profile] );
+                LIKWID_MARKER_INIT;
+        }
+
+        #ifdef OMP
+        #pragma omp parallel
+        #endif
+        {
+                if (profile == mode)
+                {
+                        LIKWID_MARKER_THREADINIT;
+                }
+        }
+
+
 	
 	#ifdef OMP
 	#pragma omp parallel 
 	#endif
 	{
+		if(profile == mode)
+                {
+                        LIKWID_MARKER_START("Compute");
+                }
 		int th = 0;
 		#ifdef OMP
 		th = omp_get_thread_num();
@@ -1950,8 +1972,16 @@ int mttkrp_hardwired_first_not_fused_4(csf* t, int mode, int r, matrix** mats, i
 		std::chrono::duration<double> time_diff = time_end-time_start;
 		
 		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
+
+		if(profile == mode)
+                {
+                        LIKWID_MARKER_STOP("Compute");
+                }
+        }
+
+        LIKWID_MARKER_CLOSE; 
+
 		
-	}
 	rem(partial_results_all);	
 	return 0;
 	
