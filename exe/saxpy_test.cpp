@@ -9,10 +9,63 @@ using namespace std;
 struct Reverse_Indices
 {
 	idx_t* krp;
+	idx_t* inds;
 	TYPE** vals;
 	idx_t* ptr;
+	idx_t tile_size
 };
 
+
+Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
+{
+	Reverse_Indices* res = new Reverse_Indices[1];
+        Reverse_Indices ri = *res;
+        int mode = t->nmode-1;
+        int mlen = t->mlen[mode];
+        ri.ptr = new idx_t[mlen+1];
+        idx_t fibcnt = t->fiber_count[mode];
+        idx_t* cnt = new idx_t[mlen];
+        ri.vals = new TYPE*[fibcnt];
+        ri.krp = new idx_t[fibcnt];
+	ri.inds = new idx_t[fibcnt];
+	ri.tile_size = tile;
+
+        memset(cnt,0,sizeof(idx_t)*(mlen));
+        memset(ri.ptr,0,sizeof(idx_t)*(mlen+1));
+
+	idx_t num_tiles = (t->fiber_count[mode-1] - 1) / ri.tile_size + 1;
+
+	
+        for(idx_t i=0 ; i< fibcnt; i++)
+        {
+                ri.ptr[t->ind[mode][i]+1] ++;
+	}
+
+        for(idx_t i=0; i<mlen; i++)
+        {
+                ri.ptr[i+1] += ri.ptr[i];
+                cnt[i] = ri.ptr[i];
+        }
+
+        cout<<ri.ptr[mlen]<<endl;
+
+
+        for(idx_t i = 0; i< t->fiber_count[mode-1]; i++)
+        {
+                for(idx_t j=t->ptr[mode-1][i] ; j< t->ptr[mode-1][i+1]; j++)
+                {
+                        idx_t row = t->ind[mode][j];
+                        idx_t loc = cnt[row];
+                        cnt[row]++;
+                        ri.krp[loc] = i;
+                        ri.vals[loc] = t->val + j;
+
+                }
+        }
+
+        *res = ri;
+        return res;
+}
 Reverse_Indices* find_reverse_indices(csf* t)
 {
 	Reverse_Indices* res = new Reverse_Indices[1];
@@ -30,12 +83,10 @@ Reverse_Indices* find_reverse_indices(csf* t)
 	for(idx_t i=0 ; i< t-> fiber_count[mode]; i++)
 	{
 		ri.ptr[t->ind[mode][i]+1] ++;
-		//cout<<t->ind[mode][i] <<endl;
 	}
 	
 	for(idx_t i=0; i<mlen; i++)
 	{
-		//cout<<ri.ptr[i]<<endl;
 		ri.ptr[i+1] += ri.ptr[i];
 		cnt[i] = ri.ptr[i];
 	}
@@ -249,25 +300,54 @@ int saxpy_reduce(csf * t, matrix** mats, int r, Reverse_Indices* ri)
 	int mode = nmode - 1;
 	
 	memset(mats[mode]->val, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
-		
+	LIKWID_MARKER_INIT;
+	
 	#ifdef OMP
-	#pragma omp parallel for
+	#pragma omp parallel
 	#endif
-	for(idx_t row=0; row< t->mlen[mode] ; row++ )
 	{
-		TYPE * const matval = mats[mode]->val + ((mats[mode]) -> dim2) * row;
-		for(idx_t nnz=ri->ptr[row] ; nnz < ri->ptr[row+1] ; nnz++)
 		{
-			const TYPE * krp = t->intval[mode-1] + ri->krp[nnz]*r;
-			const TYPE val = *(ri->vals[nnz]);
-			//cout<<ri->krp[nnz]<<" "<<(ri->vals[nnz]) <<endl;
-			for(int i=0 ; i< r ; i++)
+			LIKWID_MARKER_THREADINIT;	
+		}
+	}	
+
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+	//	if(profile == mode)
+		{
+			LIKWID_MARKER_START("Compute");
+		}
+	}	
+
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		#pragma omp for	schedule(guided,1024)
+		for(idx_t row=0; row< t->mlen[mode] ; row++ )
+		{
+			TYPE * __restrict__ const matval = mats[mode]->val + ((mats[mode]) -> dim2) * row;
+			for(idx_t nnz=ri->ptr[row] ; nnz < ri->ptr[row+1] ; nnz++)
 			{
-				matval[i] += krp[i]*val;
+				const TYPE * __restrict__ const krp = t->intval[mode-1] + ri->krp[nnz]*r;
+				const TYPE val = *(ri->vals[nnz]);
+			//cout<<ri->krp[nnz]<<" "<<(ri->vals[nnz]) <<endl;
+				#pragma omp simd
+				for(int i=0 ; i< r ; i++)
+				{
+					matval[i] += krp[i]*val;
+				}
 			}
 		}
+		{
+			LIKWID_MARKER_STOP("Compute");
+		}
 	}
+	LIKWID_MARKER_CLOSE;
 	return 0;
+	
 }
 
 

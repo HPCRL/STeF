@@ -13,6 +13,7 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
+
 	int nmode,i,r,mode;
 	int debug = 1;
 	csf* t = malloc_csf();
@@ -23,6 +24,12 @@ int main(int argc, char** argv)
 		order_num = atoi(argv[3]);
 	if (argc > 4)
 		profile = atoi(argv[4]);
+
+
+	if(order_num != -1 && order_num != -2)
+	{
+		exit(1);
+	}
 
 
 	if(debug)
