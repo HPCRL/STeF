@@ -19,11 +19,11 @@ OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 CPPFLAGS += -I/usr/local/include   
 CFLAGS = -Wall -Wno-write-strings -g -std=c++11 -O3 $(EXTRA) -march=native  -fopenmp -funroll-loops -fstrict-aliasing -fgnu89-inline -fPIC -I/$(LIKWID_INC)
-#CFLAGS += -Wall -Wno-write-strings -g -std=c++11 -O0 -fopenmp $(EXTRA) -march=native 
+#CFLAGS += -Wall -Wno-write-strings -g -std=c++11 -O0 -fopenmp $(EXTRA) 
 LDFLAGS += -L/usr/local/lib -L/$(LIKWID_LIB) -lpthread 
-LDLIBS += -llikwid
+#LDLIBS += -llikwid
 #CFLAGS += -D OMP
-CPPFLAGS += -D LIKWID_PERFMON
+#CPPFLAGS += -D LIKWID_PERFMON
 
 .PHONY: all clean
 

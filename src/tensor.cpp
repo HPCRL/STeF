@@ -554,7 +554,11 @@ int count_fiber_leaf_root_fast(csf* t)
 	#pragma omp parallel
 	#endif
 	{
+		#ifdef OMP
 		int th_id = omp_get_thread_num();
+		#else
+		int th_id = 0;
+		#endif
 		per_core [th_id] = 0;
 
 		std::unordered_set<idx_t> count_last;

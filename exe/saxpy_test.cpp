@@ -10,62 +10,254 @@ struct Reverse_Indices
 {
 	idx_t* krp;
 	idx_t* inds;
+	idx_t* tile_ptr;
 	TYPE** vals;
 	idx_t* ptr;
-	idx_t tile_size
+	idx_t tile_size;
+	idx_t num_tiles;
 };
 
 
 Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
 {
 	Reverse_Indices* res = new Reverse_Indices[1];
-        Reverse_Indices ri = *res;
-        int mode = t->nmode-1;
-        int mlen = t->mlen[mode];
-        ri.ptr = new idx_t[mlen+1];
-        idx_t fibcnt = t->fiber_count[mode];
-        idx_t* cnt = new idx_t[mlen];
-        ri.vals = new TYPE*[fibcnt];
-        ri.krp = new idx_t[fibcnt];
-	ri.inds = new idx_t[fibcnt];
+	Reverse_Indices ri = *res;
+	int mode = t->nmode-1;
+	int mlen = t->mlen[mode];
+	ri.ptr = new idx_t[mlen+1];
+	idx_t fibcnt = t->fiber_count[mode];
+	idx_t slccnt = t->fiber_count[mode-1];
+	idx_t* cnt = new idx_t[mlen];
+	ri.vals = new TYPE*[fibcnt];
+	ri.krp = new idx_t[fibcnt];
+	idx_t* inds = new idx_t[fibcnt];
 	ri.tile_size = tile;
 
-        memset(cnt,0,sizeof(idx_t)*(mlen));
-        memset(ri.ptr,0,sizeof(idx_t)*(mlen+1));
+	memset(cnt,0,sizeof(idx_t)*(mlen));
+	memset(ri.ptr,0,sizeof(idx_t)*(mlen+1));
 
 	idx_t num_tiles = (t->fiber_count[mode-1] - 1) / ri.tile_size + 1;
-
+	ri.num_tiles = num_tiles;
+		
 	
-        for(idx_t i=0 ; i< fibcnt; i++)
-        {
-                ri.ptr[t->ind[mode][i]+1] ++;
+//	cout<<ri.ptr[mlen]<<endl;
+	idx_t nnz_count = 0;
+
+	for(idx_t ii = 0; ii< slccnt; ii += ri.tile_size )
+	{
+
+		idx_t end = ii+ri.tile_size;
+		if (end > slccnt)
+			end = slccnt;
+	
+		memset(ri.ptr,0,sizeof(idx_t)*(mlen+1));
+		memset(cnt,0,sizeof(idx_t)*(mlen));
+		ri.ptr[0]=nnz_count;
+
+
+
+		for(idx_t i = t->ptr[mode-1][ii] ; i< t->ptr[mode-1][end]; i++)
+		{
+			ri.ptr[t->ind[mode][i]+1] ++;
+		}
+
+		for(idx_t i=0; i<mlen; i++)
+		{
+			ri.ptr[i+1] += ri.ptr[i];
+			cnt[i] = ri.ptr[i];
+		}
+
+		for(idx_t i = ii; i< end; i ++ )		
+		{
+			for(idx_t j=t->ptr[mode-1][i] ; j< t->ptr[mode-1][i+1]; j++)
+			{
+				idx_t row = t->ind[mode][j];
+				idx_t loc = cnt[row];
+				cnt[row]++;
+//				if(ii == 2)					cout<<"here "<<row<<" "<<loc<< " "<<cnt[row]<<endl;
+//				ri.krp[loc] = i;
+//				ri.vals[loc] = t->val + j;
+				inds[loc] = row;
+			}
+		}
+
+		nnz_count += t->ptr[mode-1][end] - t->ptr[mode-1][ii];
 	}
 
-        for(idx_t i=0; i<mlen; i++)
-        {
-                ri.ptr[i+1] += ri.ptr[i];
-                cnt[i] = ri.ptr[i];
-        }
+	cout<<"nnz count is "<<nnz_count<<endl;
+	/*
+	for(idx_t i = 0 ; i< fibcnt ; i++)
+	{
+		cout<<inds[i]<<endl;
+	}
+	*/
 
-        cout<<ri.ptr[mlen]<<endl;
+	// Count number of distinct rows in tiles
+	idx_t num_rows = 0;
+	for(idx_t ii = 0; ii< slccnt; ii += ri.tile_size )
+	{
+
+		idx_t end = ii+ri.tile_size;
+		if (end > slccnt)
+			end = slccnt;
+
+		//tile_ptr[ii/ri2.tile_size + 1] = end;
+		num_rows ++ ;
+		for(idx_t i = t->ptr[mode-1][ii]+1; i< t->ptr[mode-1][end]; i ++ )  
+		{
+			if(inds[i] != inds[i-1])
+			{
+				num_rows ++;
+			}
+		}
+	}
+
+	
+
+	ri.inds = new idx_t[num_rows];
+	delete [] ri.ptr;
+	//delete [] ri.krp;
+	ri.ptr = new idx_t[num_rows+1];
+	//ri.krp = new idx_t[num_rows];
+	//ri.vals = new TYPE*[num_rows];
+	ri.tile_ptr = new idx_t[num_tiles+1];
+	ri.tile_ptr[0] = 0;
+	ri.ptr[0] = 0;
+
+	idx_t cur_row_ctr = 0;
+
+	for(idx_t ii = 0; ii< slccnt; ii += ri.tile_size )
+	{
+
+		idx_t end = ii+ri.tile_size;
+		if (end > slccnt)
+			end = slccnt;
+
+		//tile_ptr[ii/ri2.tile_size + 1] = end;
+		ri.inds[cur_row_ctr] = inds[t->ptr[mode-1][ii]];
+		ri.ptr[cur_row_ctr+1] = 1;
+		for(idx_t i = t->ptr[mode-1][ii]+1; i< t->ptr[mode-1][end]; i ++ )  
+		{
+			if(inds[i] != inds[i-1])
+			{
+				cur_row_ctr ++;
+				ri.inds[cur_row_ctr] = inds[i];
+				ri.ptr[cur_row_ctr+1] = 1 ;
+			}
+			else
+			{
+				ri.ptr[cur_row_ctr+1] ++;
+			}
+
+		}
+
+		cur_row_ctr ++;
+		ri.tile_ptr[ii/ri.tile_size +1] = cur_row_ctr;
+	}
+
+	/*
+	for(int i=0; i<100 ; i++)
+	{
+		cout<<inds[i]<<" " <<ri.inds[i]<< " "<<ri.ptr[i]<<" "<<t->ptr[mode-1][i]<<endl;
+	}
+	*/
+
+	delete [] cnt;
+	cnt = new idx_t[num_rows];
+	memset(cnt,0,sizeof(idx_t)*(num_rows));
+
+	for(idx_t i=0; i<num_rows ; i++)
+	{
+		ri.ptr[i+1] += ri.ptr[i];
+		cnt[i] = ri.ptr[i];
+	}
+
+	cout<<ri.ptr[num_rows]<<" == "<<t->fiber_count[mode]<<endl;
+
+	nnz_count = 0;
+
+	cur_row_ctr = 0;
+
+	idx_t* ptr = new idx_t[mlen+1];
+
+	for(idx_t ii = 0; ii< slccnt; ii += ri.tile_size )
+	{
 
 
-        for(idx_t i = 0; i< t->fiber_count[mode-1]; i++)
-        {
-                for(idx_t j=t->ptr[mode-1][i] ; j< t->ptr[mode-1][i+1]; j++)
-                {
-                        idx_t row = t->ind[mode][j];
-                        idx_t loc = cnt[row];
-                        cnt[row]++;
-                        ri.krp[loc] = i;
-                        ri.vals[loc] = t->val + j;
 
-                }
-        }
+		idx_t end = ii+ri.tile_size;
+		if (end > slccnt)
+			end = slccnt;
 
-        *res = ri;
-        return res;
+	
+		memset(ptr,0,sizeof(idx_t)*(mlen+1));
+		//memset(cnt,0,sizeof(idx_t)*(mlen));
+		ptr[0]=ri.tile_ptr[ii/ri.tile_size];
+
+
+		idx_t row_id = 1;
+		for(idx_t i = ri.tile_ptr[ii/ri.tile_size] ; i< ri.tile_ptr[ii/ri.tile_size + 1] ; i++)
+		{
+			while(ri.inds[i] >= row_id)
+			{
+				ptr[row_id] = ptr[row_id - 1];
+				row_id ++;
+			}
+			ptr[row_id] = ptr[row_id - 1 ] + 1;
+			row_id ++ ;
+		}
+		while(row_id < mlen)
+		{
+			row_id ++;
+			ptr[row_id] = ptr[row_id - 1];
+		}
+
+		//cout<<ptr[mlen]<<" = "<<ri.tile_ptr[ii/ri.tile_size + 1] <<" "<<row_id<<endl;
+
+		for(idx_t i = ii; i< end; i ++ )		
+		{
+			for(idx_t j=t->ptr[mode-1][i] ; j< t->ptr[mode-1][i+1]; j++)
+			{
+				
+				idx_t row = t->ind[mode][j];
+				//cur_row_ctr = ri.tile_ptr[ii/ri.tile_size];
+				//while(ri.inds[cur_row_ctr] != row && cur_row_ctr < ri.tile_ptr[ii/ri.tile_size + 1] )					cur_row_ctr++;
+				cur_row_ctr = ptr[row];
+				/*
+				if (ri.inds[cur_row_ctr] != row)
+				{
+					cout<<"error at "<<i<< " "<<row << " "<<endl; 
+					for(idx_t k = ri.ptr[ri.tile_ptr[ii/ri.tile_size]] ; k < ri.ptr[ri.tile_ptr[ii/ri.tile_size + 1]] ; k++)
+					{
+						cout<<ri.inds[k]<<endl;
+					}
+
+					exit(1);
+				}
+				*/
+				idx_t loc = cnt[cur_row_ctr];
+				//cnt[row]++;
+
+				ri.krp[loc] = i;
+				ri.vals[loc] = t->val + j;
+
+				//cout<<loc<<" "<<ri.krp[loc]<<" "<<j<<endl;
+
+				cnt[cur_row_ctr] ++;
+
+				//ri.inds[cur_row_ctr] = inds[i];
+				//ri.ptr[cur_row_ctr] += ri.ptr[cur_row_ctr - 1];
+			}
+		}
+
+		nnz_count += t->ptr[mode-1][end] - t->ptr[mode-1][ii];
+	}
+
+	
+	*res = ri;
+	return res;
 }
+
 Reverse_Indices* find_reverse_indices(csf* t)
 {
 	Reverse_Indices* res = new Reverse_Indices[1];
@@ -294,6 +486,66 @@ int saxpy_krp(csf * t, matrix** mats,int r)
 	return 0;
 }
 
+int saxpy_reduce_tiled(csf * t, matrix** mats, int r, Reverse_Indices* ri)
+{
+	int nmode = t->nmode;
+	int mode = nmode - 1;
+	
+	memset(mats[mode]->val, 0 , mats[mode]->dim1*mats[mode]->dim2*sizeof(TYPE));
+	LIKWID_MARKER_INIT;
+	
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		{
+			LIKWID_MARKER_THREADINIT;	
+		}
+	}	
+
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		{
+			LIKWID_MARKER_START("Compute");
+		}
+	}	
+
+	#ifdef OMP
+	#pragma omp parallel
+	#endif
+	{
+		for(idx_t tile = 0 ; tile < ri->num_tiles ; tile ++)
+		{
+			#pragma omp for	//schedule(guided,1024)
+			for(idx_t rowp=ri->tile_ptr[tile]; rowp< ri->tile_ptr[tile+1] ; rowp++ )
+			{
+				const idx_t row = ri->inds[rowp];
+				TYPE * __restrict__ const matval = mats[mode]->val + ((mats[mode]) -> dim2) * row;
+				for(idx_t nnz=ri->ptr[rowp] ; nnz < ri->ptr[rowp+1] ; nnz++)
+				{
+					const TYPE * __restrict__ const krp = t->intval[mode-1] + ri->krp[nnz]*r;
+					const TYPE val = *(ri->vals[nnz]);
+					//cout<<ri->krp[nnz]<<" "<<(ri->vals[nnz]) - t->val <<endl;
+					#pragma omp simd
+					for(int i=0 ; i< r ; i++)
+					{
+						matval[i] += krp[i]*val;
+					}
+				}
+			}
+		}
+		{
+			LIKWID_MARKER_STOP("Compute");
+		}
+	}
+	LIKWID_MARKER_CLOSE;
+	return 0;
+	
+}
+
+
 int saxpy_reduce(csf * t, matrix** mats, int r, Reverse_Indices* ri)
 {
 	int nmode = t->nmode;
@@ -520,7 +772,7 @@ int main(int argc, char** argv)
 		saxpy(t,mats,r);
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
-		printf("saxpy %lf \n",diff.count());
+		printf("time saxpy %lf \n",diff.count());
 		if(debug)
 		{
 
@@ -553,7 +805,7 @@ int main(int argc, char** argv)
 		saxpy_krp(t,mats,r);
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
-		printf("saxpy krp %lf \n",diff.count());
+		printf("time saxpy krp %lf \n",diff.count());
 	}
 
 	{
@@ -561,7 +813,7 @@ int main(int argc, char** argv)
 		saxpy_reduce(t,mats,r,ri);
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
-		printf("saxpy reduce %lf \n",diff.count());
+		printf("time saxpy reduce %lf \n",diff.count());
 		if(debug)
 		{
 
@@ -582,7 +834,43 @@ int main(int argc, char** argv)
 		}
 	}		
 	
-	
+
+	// tiled
+	idx_t tile = 1024*1024/sizeof(TYPE)/r;
+	{
+		auto start = std::chrono::high_resolution_clock::now();
+		ri = find_reverse_indices(t,tile);
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> diff = end-start;
+		printf("time tiled reverse index computation %lf \n",diff.count());
+	}
+
+
+	{
+		auto start = std::chrono::high_resolution_clock::now();
+		saxpy_reduce_tiled(t,mats,r,ri);
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> diff = end-start;
+		printf("time saxpy tiled reduce %lf \n",diff.count());
+		if(debug)
+		{
+
+			auto start2 = std::chrono::high_resolution_clock::now();
+			int num_diff = mttkrp_test(dt,t->nmode-1,r,mats);
+			auto end2 = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double> diff = end2-start2;
+			//total += diff.count();
+			if(num_diff)
+			{
+				correctness_error = true;
+				//printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
+			}
+			else
+			{
+				cout<<"saxpy reduce correctness check passed"<<endl;
+			}
+		}
+	}		
 
 	free_csf(t);
 	if(debug)
