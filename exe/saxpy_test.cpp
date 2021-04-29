@@ -74,9 +74,6 @@ Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
 				idx_t row = t->ind[mode][j];
 				idx_t loc = cnt[row];
 				cnt[row]++;
-//				if(ii == 2)					cout<<"here "<<row<<" "<<loc<< " "<<cnt[row]<<endl;
-//				ri.krp[loc] = i;
-//				ri.vals[loc] = t->val + j;
 				inds[loc] = row;
 			}
 		}
@@ -85,12 +82,6 @@ Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
 	}
 
 	cout<<"nnz count is "<<nnz_count<<endl;
-	/*
-	for(idx_t i = 0 ; i< fibcnt ; i++)
-	{
-		cout<<inds[i]<<endl;
-	}
-	*/
 
 	// Count number of distinct rows in tiles
 	idx_t num_rows = 0;
@@ -111,8 +102,6 @@ Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
 			}
 		}
 	}
-
-	
 
 	ri.inds = new idx_t[num_rows];
 	delete [] ri.ptr;
@@ -155,12 +144,6 @@ Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
 		ri.tile_ptr[ii/ri.tile_size +1] = cur_row_ctr;
 	}
 
-	/*
-	for(int i=0; i<100 ; i++)
-	{
-		cout<<inds[i]<<" " <<ri.inds[i]<< " "<<ri.ptr[i]<<" "<<t->ptr[mode-1][i]<<endl;
-	}
-	*/
 
 	delete [] cnt;
 	cnt = new idx_t[num_rows];
@@ -180,6 +163,8 @@ Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
 
 	idx_t* ptr = new idx_t[mlen+1];
 
+	memset(ptr,0,sizeof(idx_t)*(mlen+1));
+
 	for(idx_t ii = 0; ii< slccnt; ii += ri.tile_size )
 	{
 
@@ -190,28 +175,24 @@ Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
 			end = slccnt;
 
 	
-		memset(ptr,0,sizeof(idx_t)*(mlen+1));
+		
 		//memset(cnt,0,sizeof(idx_t)*(mlen));
-		ptr[0]=ri.tile_ptr[ii/ri.tile_size];
+		//ptr[0]=ri.tile_ptr[ii/ri.tile_size];
 
 
-		idx_t row_id = 1;
-		for(idx_t i = ri.tile_ptr[ii/ri.tile_size] ; i< ri.tile_ptr[ii/ri.tile_size + 1] ; i++)
+		//idx_t row_id = 1;
+		//idx_t row_id = ri.tile_ptr[ii/ri.tile_size];
+
+		#ifdef OMP
+		#pragma omp parallel for
+		#endif
+		for(idx_t i = ri.tile_ptr[ii/ri.tile_size]  ; i< ri.tile_ptr[ii/ri.tile_size + 1] ; i++)
 		{
-			while(ri.inds[i] >= row_id)
-			{
-				ptr[row_id] = ptr[row_id - 1];
-				row_id ++;
-			}
-			ptr[row_id] = ptr[row_id - 1 ] + 1;
-			row_id ++ ;
+			idx_t row = ri.inds[i];
+			ptr[row] = i;
+			
 		}
-		while(row_id < mlen)
-		{
-			row_id ++;
-			ptr[row_id] = ptr[row_id - 1];
-		}
-
+		
 		//cout<<ptr[mlen]<<" = "<<ri.tile_ptr[ii/ri.tile_size + 1] <<" "<<row_id<<endl;
 
 		for(idx_t i = ii; i< end; i ++ )		
@@ -220,9 +201,12 @@ Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
 			{
 				
 				idx_t row = t->ind[mode][j];
-				//cur_row_ctr = ri.tile_ptr[ii/ri.tile_size];
-				//while(ri.inds[cur_row_ctr] != row && cur_row_ctr < ri.tile_ptr[ii/ri.tile_size + 1] )					cur_row_ctr++;
-				cur_row_ctr = ptr[row];
+				idx_t cur_row_ptr = ptr[row] ;
+				idx_t loc = cnt[cur_row_ptr];
+				ri.krp[loc] = i;
+				ri.vals[loc] = t->val + j;
+				cnt[cur_row_ptr] ++;
+
 				/*
 				if (ri.inds[cur_row_ctr] != row)
 				{
@@ -235,20 +219,21 @@ Reverse_Indices* find_reverse_indices(csf* t, idx_t tile )
 					exit(1);
 				}
 				*/
-				idx_t loc = cnt[cur_row_ctr];
-				//cnt[row]++;
 
-				ri.krp[loc] = i;
-				ri.vals[loc] = t->val + j;
+				
 
-				//cout<<loc<<" "<<ri.krp[loc]<<" "<<j<<endl;
-
-				cnt[cur_row_ctr] ++;
-
-				//ri.inds[cur_row_ctr] = inds[i];
-				//ri.ptr[cur_row_ctr] += ri.ptr[cur_row_ctr - 1];
 			}
 		}
+
+		/*
+		for(idx_t i = ri.tile_ptr[ii/ri.tile_size]  ; i< ri.tile_ptr[ii/ri.tile_size + 1] ; i++)
+		{
+			idx_t row = ri.inds[i];
+			ptr[row] = 0;
+			
+		}
+		*/
+
 
 		nnz_count += t->ptr[mode-1][end] - t->ptr[mode-1][ii];
 	}
