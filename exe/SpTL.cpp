@@ -179,7 +179,7 @@ int main(int argc, char** argv)
 		mttkrp_test(dt,nmode-1,r,mats);
 	}
 	*/
-	printf("Total MTTKRP time %lf \n",total);
+	printf("SpTL order=%d Total MTTKRP time %lf \n",order_num,total);
 
 	
 	

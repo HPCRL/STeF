@@ -262,11 +262,15 @@ int main(int argc, char** argv)
 	if(order_num == -4)
 		printf("SpTL2so,");
 	printf("%s", argv[1]);
+	double total_time = 0;
 	for(mode = 0 ; mode<nmode ; mode++)
 		printf(",%lf", times[mode]);
 
 	printf("\n");
 
+	for(mode = 0 ; mode<nmode ; mode++)
+		total_time += times[mode];
+	printf("SpTL2 order=%d Total MTTKRP time %lf\n",order_num+2,total_time);
 
 	free_csf(t);
 	if(debug)
