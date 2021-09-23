@@ -108,6 +108,7 @@ int main(int argc, char** argv)
         bool intv = false;
         if ( repeat)
             intv = true;
+        total = 0;
         for(int mode = 0 ; mode<nmode ; mode++)
         {
             clock_t cstart, cend;
@@ -150,8 +151,9 @@ int main(int argc, char** argv)
                 }
             }
         }
+        printf("Total Intermediate %s MTTKRP time %lf\n",(intv ? "saved" : "not saved"),total);
     }
-	printf("Total Hardwired MTTKRP time %lf\n",total);
+	
 	
 
 	
