@@ -8,7 +8,7 @@
 #include "../inc/mttkrp_hardwired.h"
 
 
-template <int mode, bool intv1>
+template <int mode, bool intv1, bool privatized>
 int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
 {
 	int nmode = t->nmode;
@@ -26,15 +26,17 @@ int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
 	for(int i = 0 ; i < num_th*partial_results_size ; i++)
 		partial_results_all[i] = 0;
 	
-	if (mode > 0)
+	if (mode > 0 && privatized)
 	{
 		for ( int i=0; i<num_th; i++)
 		{
 			memset(t->private_mats[i]->val ,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
 		}
 	}
-	else
-		set_matrix(*mats[0],0);
+    
+    mutex_array* mutex = t->mutex;
+
+	set_matrix(*mats[mode],0);
 	
 	if(profile == mode)
 	{
@@ -135,12 +137,34 @@ int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
 				}
 				else if (mode == 1)
 				{
-					TYPE* matval = t->private_mats[th]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
-					#pragma omp simd
-					for(int y=0 ; y<r ; y++)
-					{
-						matval[y] += pr[y] * mv1[y]; // saxpy
-					}
+                    if(privatized)
+                    {
+                        TYPE* matval = t->private_mats[th]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
+                        #pragma omp simd
+                        for(int y=0 ; y<r ; y++)
+                        {
+                            matval[y] += pr[y] * mv1[y]; // saxpy
+                        }
+                    }
+                    else
+                    {
+                        const int row_id = t->ind[1][i1];
+                        #ifdef OMP
+                        mutex_set_lock(mutex,row_id);
+                        #endif
+
+                        TYPE* matval = mats[1]->val + ((mats[1]) -> dim2) * row_id;
+                        #pragma omp simd
+                        for(int y=0 ; y<r ; y++)
+                        {
+                            matval[y] += pr[y] * mv1[y]; // saxpy
+                        }
+
+                        #ifdef OMP
+                        mutex_unset_lock(mutex,row_id);
+                        #endif
+                    }
+					
 				}
 			}
 		}

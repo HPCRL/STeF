@@ -55,7 +55,11 @@ int main(int argc, char** argv)
 
 	double total=0;
 
+	int num_th = 1;
 
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	#endif
     
 
 	for(int mode = 0 ; mode<nmode ; mode++)
@@ -64,12 +68,24 @@ int main(int argc, char** argv)
 		clock_t cstart, cend;
 		auto start = std::chrono::high_resolution_clock::now();
 		cstart = clock();
-        if (mode == 0)
-		    mttkrp_combined_3<0,false>(t,r,mats,profile);
-        else if (mode == 1)
-            mttkrp_combined_3<1,false>(t,r,mats,profile);
-        else if (mode == 2)
-            mttkrp_combined_3<2,false>(t,r,mats,profile);
+        if(mode > 0 && ((t->fiber_count[mode] / t->mlen[mode] < num_th * ATOMIC_THRESH) || (t->mlen[mode] * r * num_th >= PRIVATIZED_THRESH) ))	
+		{
+			if (mode == 0)
+				mttkrp_combined_3<0,true,false>(t,r,mats,profile);
+			else if (mode == 1)
+				mttkrp_combined_3<1,true,false>(t,r,mats,profile);
+			else if (mode == 2)
+				mttkrp_combined_3<2,true,false>(t,r,mats,profile);
+		}
+		else
+		{
+			if (mode == 0)
+				mttkrp_combined_3<0,true,true>(t,r,mats,profile);
+			else if (mode == 1)
+				mttkrp_combined_3<1,true,true>(t,r,mats,profile);
+			else if (mode == 2)
+				mttkrp_combined_3<2,true,true>(t,r,mats,profile);
+		}	
 		cend = clock();
 		//printf("here\n");
 		auto end = std::chrono::high_resolution_clock::now();
@@ -110,12 +126,24 @@ int main(int argc, char** argv)
 		clock_t cstart, cend;
 		auto start = std::chrono::high_resolution_clock::now();
 		cstart = clock();
-        if (mode == 0)
-		    mttkrp_combined_3<0,true>(t,r,mats,profile);
-        else if (mode == 1)
-            mttkrp_combined_3<1,true>(t,r,mats,profile);
-        else if (mode == 2)
-            mttkrp_combined_3<2,true>(t,r,mats,profile);
+		if(mode > 0 && ((t->fiber_count[mode] / t->mlen[mode] < num_th * ATOMIC_THRESH) || (t->mlen[mode] * r * num_th >= PRIVATIZED_THRESH) ))	
+		{
+			if (mode == 0)
+				mttkrp_combined_3<0,true,false>(t,r,mats,profile);
+			else if (mode == 1)
+				mttkrp_combined_3<1,true,false>(t,r,mats,profile);
+			else if (mode == 2)
+				mttkrp_combined_3<2,true,false>(t,r,mats,profile);
+		}
+		else
+		{
+			if (mode == 0)
+				mttkrp_combined_3<0,true,true>(t,r,mats,profile);
+			else if (mode == 1)
+				mttkrp_combined_3<1,true,true>(t,r,mats,profile);
+			else if (mode == 2)
+				mttkrp_combined_3<2,true,true>(t,r,mats,profile);
+		}	
 		cend = clock();
 		//printf("here\n");
 		auto end = std::chrono::high_resolution_clock::now();
@@ -150,7 +178,7 @@ int main(int argc, char** argv)
 	}
 	printf("Total Intermediate %s template MTTKRP time %lf\n",( "saved" ),total);
 
-	
+	/*
 	memset(t->intval[1],0,t->fiber_count[1]*r*sizeof(TYPE));
 
 
@@ -197,14 +225,15 @@ int main(int argc, char** argv)
                 
                 if(VERBOSE  == VERBOSE_DEBUG)
                 {
-                    print_matrix(*mats[i]);
-                    
-                }
-            }
-        }
+                    print_matriif (mode == 0)
+		    mttkrp_combined_3<0,false>(t,r,mats,profile);
+        else if (mode == 1)
+            mttkrp_combined_3<1,false>(t,r,mats,profile);
+        else if (mode == 2)
+            mttkrp_combined_3<2,false>(t,r,mats,profile);
         printf("Total Intermediate %s MTTKRP time %lf\n",(intv ? "saved" : "not saved"),total);
     }
-	
+	*/
 	
 
 	

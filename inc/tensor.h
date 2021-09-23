@@ -3,6 +3,7 @@
 #include "../inc/util.h"
 #include "../inc/matrix.h"
 #include "../inc/hash.h"
+#include "../inc/mutex.h"
 #include <unordered_set>
 #include <array>
 
@@ -21,6 +22,7 @@ struct tensor_csf
 	int nmode;
 	TYPE** intval;
 	idx_t * thread_start;
+	mutex_array* mutex;
 };
 
 struct tensor_coo
