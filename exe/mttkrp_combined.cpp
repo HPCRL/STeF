@@ -56,11 +56,57 @@ int main(int argc, char** argv)
 	double total=0;
 
 
-    //mttkrp_combined_3<0,true>(t,r,mats,profile);
-    //mttkrp_combined_3(t,r,mats,profile,0,true);
-    /*
-	for(mode = 0 ; mode<nmode ; mode++)
+    
+
+	for(int mode = 0 ; mode<nmode ; mode++)
 	{
+		const bool intv = false;
+		clock_t cstart, cend;
+		auto start = std::chrono::high_resolution_clock::now();
+		cstart = clock();
+        if (mode == 0)
+		    mttkrp_combined_3<0,false>(t,r,mats,profile);
+        else if (mode == 1)
+            mttkrp_combined_3<1,false>(t,r,mats,profile);
+        else if (mode == 2)
+            mttkrp_combined_3<2,false>(t,r,mats,profile);
+		cend = clock();
+		//printf("here\n");
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> diff = end-start;
+		total += diff.count();
+		printf("Combined not saved time for mode %d %lf \n",t->modeid[mode],diff.count());
+		double cdiff = ((double) (cend - cstart)) / CLOCKS_PER_SEC;
+		printf("Clock time for mode %d is %lf \n",t->modeid[mode],cdiff);
+		if(debug)
+		{
+			auto start2 = std::chrono::high_resolution_clock::now();
+			mttkrp_test(dt,mode,r,mats);
+			auto end2 = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double> diff = end2-start2;
+			//total += diff.count();
+			printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
+		}
+		random_matrix(*mats[mode],mode);
+
+		for(i=0 ; i<nmode ; i++)
+		{
+			
+			if(VERBOSE  == VERBOSE_DEBUG)
+			{
+				print_matrix(*mats[i]);
+				
+			}
+			//random_matrix(*mats[i],i+1);
+			//set_matrix(*mats[i],1);
+		}
+		
+	}
+	printf("Total Intermediate %s template MTTKRP time %lf\n",("not saved"),total);
+	total = 0;
+	for(int mode = 0 ; mode<nmode ; mode++)
+	{
+		const bool intv = true;
 		clock_t cstart, cend;
 		auto start = std::chrono::high_resolution_clock::now();
 		cstart = clock();
@@ -75,7 +121,7 @@ int main(int argc, char** argv)
 		auto end = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> diff = end-start;
 		total += diff.count();
-		printf("Hardwired time for mode %d %lf \n",t->modeid[mode],diff.count());
+		printf("Combined saved time for mode %d %lf \n",t->modeid[mode],diff.count());
 		double cdiff = ((double) (cend - cstart)) / CLOCKS_PER_SEC;
 		printf("Clock time for mode %d is %lf \n",t->modeid[mode],cdiff);
 		if(debug)
@@ -87,7 +133,7 @@ int main(int argc, char** argv)
 			//total += diff.count();
 			printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 		}
-		random_matrix(*mats[mode],i);
+		random_matrix(*mats[mode],mode);
 
 		for(i=0 ; i<nmode ; i++)
 		{
@@ -100,9 +146,14 @@ int main(int argc, char** argv)
 			//random_matrix(*mats[i],i+1);
 			//set_matrix(*mats[i],1);
 		}
+		
+	}
+	printf("Total Intermediate %s template MTTKRP time %lf\n",( "saved" ),total);
+
+	
+	memset(t->intval[1],0,t->fiber_count[1]*r*sizeof(TYPE));
 
 
-	}*/
     for (int repeat = 0 ; repeat < 2 ; repeat ++)
     {
         bool intv = false;
