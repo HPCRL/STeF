@@ -103,7 +103,6 @@ int main(int argc, char** argv)
 			//total += diff.count();
 			printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 		}
-		random_matrix(*mats[mode],mode);
 
 		for(i=0 ; i<nmode ; i++)
 		{
@@ -116,6 +115,8 @@ int main(int argc, char** argv)
 			//random_matrix(*mats[i],i+1);
 			//set_matrix(*mats[i],1);
 		}
+		random_matrix(*mats[mode],mode);
+
 		
 	}
 	printf("Total Intermediate %s template MTTKRP time %lf\n",("not saved"),total);
@@ -161,7 +162,6 @@ int main(int argc, char** argv)
 			//total += diff.count();
 			printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 		}
-		random_matrix(*mats[mode],mode);
 
 		for(i=0 ; i<nmode ; i++)
 		{
@@ -174,6 +174,7 @@ int main(int argc, char** argv)
 			//random_matrix(*mats[i],i+1);
 			//set_matrix(*mats[i],1);
 		}
+		random_matrix(*mats[mode],mode);
 		
 	}
 	printf("Total Intermediate %s template MTTKRP time %lf\n",( "saved" ),total);

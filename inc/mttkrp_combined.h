@@ -33,10 +33,11 @@ int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
 			memset(t->private_mats[i]->val ,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
 		}
 	}
-    
-    mutex_array* mutex = t->mutex;
+	
+	mutex_array* mutex = t->mutex;
 
-	set_matrix(*mats[mode],0);
+	//set_matrix(*mats[mode],0);
+	memset(mats[mode]->val,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
 	
 	if(profile == mode)
 	{
@@ -114,14 +115,30 @@ int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
 								pr[y] += tval * matval[y];	// dot TTM step			
 							}
 						}
-						else
-						{
+						else if (privatized)
+						{                            
 							TYPE* matval = t->private_mats[th]->val + ((mats[2]) -> dim2) * t->ind[2][i2];
 							#pragma omp simd
 							for(int y=0 ; y<r ; y++)
 							{
 								matval[y] += tval * pr[y];	// saxpy step			
 							}
+						}
+						else
+						{
+							const int row_id = t->ind[2][i2];
+							#ifdef OMP
+							mutex_set_lock(mutex,row_id);
+							#endif
+							TYPE* matval = mats[2]->val + ((mats[2]) -> dim2) * row_id;
+							#pragma omp simd
+							for(int y=0 ; y<r ; y++)
+							{
+								matval[y] += tval * pr[y];	// saxpy step			
+							}
+							#ifdef OMP
+							mutex_unset_lock(mutex,row_id);
+							#endif
 						}
 					}	
 				}			
@@ -137,33 +154,33 @@ int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
 				}
 				else if (mode == 1)
 				{
-                    if(privatized)
-                    {
-                        TYPE* matval = t->private_mats[th]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
-                        #pragma omp simd
-                        for(int y=0 ; y<r ; y++)
-                        {
-                            matval[y] += pr[y] * mv1[y]; // saxpy
-                        }
-                    }
-                    else
-                    {
-                        const int row_id = t->ind[1][i1];
-                        #ifdef OMP
-                        mutex_set_lock(mutex,row_id);
-                        #endif
+					if(privatized)
+					{
+						TYPE* matval = t->private_mats[th]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							matval[y] += pr[y] * mv1[y] + 1; // saxpy
+						}
+					}
+					else
+					{
+						const int row_id = t->ind[1][i1];
+						#ifdef OMP
+						mutex_set_lock(mutex,row_id);
+						#endif
 
-                        TYPE* matval = mats[1]->val + ((mats[1]) -> dim2) * row_id;
-                        #pragma omp simd
-                        for(int y=0 ; y<r ; y++)
-                        {
-                            matval[y] += pr[y] * mv1[y]; // saxpy
-                        }
+						TYPE* matval = mats[1]->val + ((mats[1]) -> dim2) * row_id;
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							matval[y] += pr[y] * mv1[y]; // saxpy
+						}
 
-                        #ifdef OMP
-                        mutex_unset_lock(mutex,row_id);
-                        #endif
-                    }
+						#ifdef OMP
+						mutex_unset_lock(mutex,row_id);
+						#endif
+					}
 					
 				}
 			}
@@ -183,10 +200,10 @@ int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
 	}
 	
 	
-    if (mode > 0)
-    {
-        reduce(t,r,mats[mode]);
-    }
+	if (mode > 0 && privatized)
+	{
+		reduce(t,r,mats[mode]);
+	}
 	LIKWID_MARKER_CLOSE;
 	rem(partial_results_all);	
 	return 0;
