@@ -208,13 +208,14 @@ int reorder_stat(int nmode, int nnz, idx_t** pindex, const char* file)
 }
 
 
-int order_modes(int* mlen, int nmode, int* sort_order)
+int order_modes(idx_t* mlen, int nmode, int* sort_order)
 {
 	// Simple bubble sort of the mlem array and the result written in sort_order
-	int i, ii, ind=-1, min, *len;
+	int i, ii, ind=-1, min;
+	idx_t *len;
 
 	int *sorted = (int* ) malloc(nmode*sizeof(int)) ;
-	len = (int* ) malloc(nmode*sizeof(int)) ;
+	len = (idx_t* ) malloc(nmode*sizeof(idx_t)) ;
 
 	ii = 0;
 	for(i = 0 ; i < nmode ; i++)
@@ -298,7 +299,7 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 	int size = sizestep;
 	int nmode = 0;
 	int nnz = 0;
-	int* mlen=NULL;
+	idx_t* mlen=NULL;
 	idx_t * fiber_count;
 	TYPE* vals=NULL;
 	srand(time(NULL));
@@ -324,7 +325,7 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 			index = (idx_t*) malloc(size*nmode*sizeof(idx_t));
 			vals = (TYPE*) malloc(size*sizeof(TYPE));
 			pindex =(idx_t**)  malloc((size+1)*sizeof(idx_t*));
-			mlen = (int*) malloc(nmode*sizeof(int));
+			mlen = (idx_t*) malloc(nmode*sizeof(idx_t));
 			for(i = 0; i<nmode ; i++)
 				mlen[i] = 0;
 			//pindex[0] = index;
@@ -361,8 +362,11 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 
 
 	fclose(fp);
+
 	for(i = 0; i<size+1 ; i++)
 		pindex[i] = index + nmode*i;
+
+
 
 	printf("Tensor has dimensions ");
 	for(i = 0; i<nmode-1 ; i++)
@@ -371,6 +375,174 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 
 	sort_order = (int*) malloc(nmode*sizeof(int));
 	fiber_count = (idx_t*) malloc(nmode*sizeof(idx_t));
+
+	if(order_num == -1)  // For SpTL1
+		order_modes(mlen, nmode, sort_order);
+	else if (order_num == -2) // for SpTL1so
+	{
+		order_modes(mlen, nmode, sort_order);
+		int temp_mode_id = sort_order[nmode-1];
+		sort_order[nmode-1] = sort_order[nmode-2];
+		sort_order[nmode-2] = temp_mode_id;
+		int temp_mode_len = mlen[nmode-1];
+		mlen[nmode-1] = mlen[nmode-2];
+		mlen[nmode-2] = temp_mode_len;
+	}
+	else if (order_num == -3) // for SpTL2
+	{
+		order_modes(mlen, nmode, sort_order);
+		int temp_mode_id = sort_order[nmode-1];
+		for (int i = nmode -2 ; i >= 0 ; i--)
+		{
+			sort_order[i+1] = sort_order[i];
+		}
+		sort_order[0] = temp_mode_id;
+		int temp_mode_len = mlen[nmode-1];
+		for (int i = nmode -2 ; i >= 0 ; i--)
+		{
+			mlen[i+1] = mlen[i];
+		}
+		mlen[0] = temp_mode_len;
+	}
+	else if (order_num == -4) // for SpTL2so
+	{
+		order_modes(mlen, nmode, sort_order);
+		int temp_mode_id = sort_order[nmode-1];
+		sort_order[nmode-1] = sort_order[nmode-2];
+		sort_order[nmode-2] = temp_mode_id;
+		int temp_mode_len = mlen[nmode-1];
+		mlen[nmode-1] = mlen[nmode-2];
+		mlen[nmode-2] = temp_mode_len;
+		temp_mode_id = sort_order[nmode-1];
+		for (int i = nmode -2 ; i >= 0 ; i--)
+		{
+			sort_order[i+1] = sort_order[i];
+		}
+		sort_order[0] = temp_mode_id;
+		temp_mode_len = mlen[nmode-1];
+		for (int i = nmode -2 ; i >= 0 ; i--)
+		{
+			mlen[i+1] = mlen[i];
+		}
+		mlen[0] = temp_mode_len;
+
+	}
+	else
+	{
+		idx_t* len = (idx_t*) malloc(sizeof(idx_t)*nmode);
+		create_perm(order_num, sort_order, nmode);
+		printf("Trying order ");
+		for(int i = 0; i<nmode ; i++)
+		{
+			printf("-> %d ",sort_order[i] );
+		}		
+		printf("\n");
+
+		for(int i = 0; i<nmode ; i++)
+		{
+			len[i] = mlen[sort_order[i]];
+		}
+
+		for(int i = 0; i<nmode ; i++)
+		{
+			mlen[i] = len[i];
+		}
+		rem(len);
+	}
+
+	printf("Tensor has dimensions ");
+	for(i = 0; i<nmode-1 ; i++)
+		printf("%dx",mlen[i]);
+	printf("%d and %d nnz\n",mlen[i],nnz);
+	/*
+	sort_order[0] = 2;
+	sort_order[1] = 0;
+	sort_order[2] = 1;
+	sort_order[3] = 3;
+	*/
+	// COO reading is finished
+	{	
+		auto start = std::chrono::high_resolution_clock::now();
+		qsort(pindex,nnz,sizeof(idx_t*),compare_nnz);
+		auto end = std::chrono::high_resolution_clock::now();
+		std::chrono::duration<double> dif = end-start;
+		
+		printf("time for sorting COO is %lf \n",dif.count());
+	}
+	count_fiber(pindex,nnz,nmode,ii,fiber_count,sort_order);
+
+	if(VERBOSE > VERBOSE_HIGH)
+		print_stats(sort_order, fiber_count, file, nmode, nnz);
+
+
+	//reorder_stat(nmode, nnz,  pindex, file );
+
+	csf *t = res;
+
+
+	coo2csf(pindex, index, vals, nnz,nmode,fiber_count,t,mlen,sort_order);
+
+	if(VERBOSE == VERBOSE_DEBUG)
+	{
+		printt(pindex , nnz , nmode, vals);
+
+		printf("nmode %d \n ",t->nmode);
+	}
+
+
+	if(debugt == NULL)
+	{
+		rem(index);
+		rem(vals);
+		rem(mlen)
+		
+	}
+	else
+	{
+		
+		sort_coo(pindex,index,vals,sort_order,nnz,nmode);
+
+
+		debugt -> ind = index;
+		debugt -> val = vals;
+		debugt -> nnz = nnz;
+		debugt -> nmode = nmode;
+		debugt -> mlen = mlen;
+		//debugt -> sort_order = sort_order;
+		
+	}
+	rem(pindex);
+	rem(sort_order);
+	
+	rem(fiber_count);
+
+	return 0;
+}
+
+
+int coo2csf_tensor(const char* file, csf* res,  coo* debugt, int order_num)
+{
+	idx_t nnz = debugt->nnz;
+	idx_t* index = debugt->ind;
+	TYPE* vals = debugt->val;
+	int nmode = debugt->nmode;
+	idx_t* mlen = debugt -> mlen;
+	int i;
+	int ii = -1;
+
+	idx_t** pindex =(idx_t**)  malloc((nnz+1)*sizeof(idx_t*));
+	for(i = 0; i<nnz+1 ; i++)
+		pindex[i] = index + nmode*i;
+
+
+
+	printf("Tensor has dimensions ");
+	for(i = 0; i<nmode-1 ; i++)
+		printf("%dx",mlen[i]);
+	printf("%d and %d nnz\n",mlen[i],nnz);
+
+	sort_order = (int*) malloc(nmode*sizeof(int));
+	idx_t* fiber_count = (idx_t*) malloc(nmode*sizeof(idx_t));
 
 	if(order_num == -1)  // For SpTL1
 		order_modes(mlen, nmode, sort_order);
@@ -490,10 +662,13 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 		rem(index);
 		
 		rem(vals);
+
+		rem(mlen);
 		
 	}
 	else
 	{
+		
 		sort_coo(pindex,index,vals,sort_order,nnz,nmode);
 
 
@@ -501,16 +676,17 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 		debugt -> val = vals;
 		debugt -> nnz = nnz;
 		debugt -> nmode = nmode;
+		debugt -> mlen = mlen;
 		//debugt -> sort_order = sort_order;
+		
 	}
 	rem(pindex);
 	rem(sort_order);
-	rem(mlen)
+	
 	rem(fiber_count);
 
 	return 0;
 }
-
 
 
 #endif

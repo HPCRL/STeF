@@ -29,6 +29,7 @@ coo* malloc_coo()
 	coo* res = (coo*) malloc(sizeof(coo));
 	res -> ind = NULL;
 	res -> val = NULL;
+	res -> mlen = NULL;
 	return res;
 }
 
@@ -62,6 +63,7 @@ int free_coo(coo* t)
 {
 	rem(t->ind);
 	rem(t->val);
+	rem(t->mlen);
 	rem(t);
 	return 0;
 }
@@ -158,7 +160,7 @@ int find_inds(idx_t* inds ,csf* t,idx_t it)
 
 
 
-int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_t* fiber_count, csf* res,int* mlen, int* sort_order)
+int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_t* fiber_count, csf* res, idx_t* mlen, int* sort_order)
 {
 	csf t;
 	int i, j, jj , ii, ilen, plen,  *ind, *dimlen;
@@ -390,7 +392,7 @@ int coo2csf(coo* dt, csf* t, int* sort_order)
 
 	idx_t** pindex = &(dt->ind);
 	idx_t* fiber_count = (idx_t*) malloc(sizeof(idx_t)*nmode);
-	int* mlen = (int*) malloc(sizeof(int)*nmode);
+	idx_t* mlen = (idx_t*) malloc(sizeof(idx_t)*nmode);
 
 	qsort(pindex,nnz,sizeof(idx_t*),tensor_compare_nnz);
 	count_fiber(pindex,nnz,nmode,-1,fiber_count,sort_order);
