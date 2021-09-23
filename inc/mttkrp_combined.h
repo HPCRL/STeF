@@ -160,7 +160,7 @@ int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
 						#pragma omp simd
 						for(int y=0 ; y<r ; y++)
 						{
-							matval[y] += pr[y] * mv1[y] + 1; // saxpy
+							matval[y] += pr[y] * mv1[y]; // saxpy
 						}
 					}
 					else
