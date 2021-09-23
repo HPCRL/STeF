@@ -59,6 +59,9 @@ int random_matrix(matrix mat, TYPE val)
 int set_matrix(matrix mat, TYPE val)
 {
 	idx_t i,j;
+	#ifdef OMP
+	#pragma omp parallel for
+	#endif
 	for(i = 0; i < mat.dim1 ; i++ )
 	{
 		for(j = 0; j < mat.dim2 ; j++)

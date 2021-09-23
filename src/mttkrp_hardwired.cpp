@@ -68,11 +68,14 @@ void find_thread_start(csf* t)
 
 int reduce(csf* t, int r, matrix* mat)
 {
+	// Reset the values in the result matrix to 0
 	memset (mat->val, 0 , sizeof(TYPE)*(mat->dim1)*(mat->dim2));
 	int parallel_threshold = 1000;
 	if (mat->dim1 > parallel_threshold)
 	{
+		#ifdef OMP
 		#pragma omp parallel for
+		#endif
 		for(int row_id = 0; row_id < mat->dim1 ; row_id++)
 		{
 			TYPE* outval = mat->val + row_id * (mat->dim2);

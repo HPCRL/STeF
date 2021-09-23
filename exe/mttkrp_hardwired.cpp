@@ -122,7 +122,7 @@ int main(int argc, char** argv)
 			//total += diff.count();
 			printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 		}
-		random_matrix(*mats[mode],i);
+		random_matrix(*mats[mode],mode);
 
 		for(i=0 ; i<nmode ; i++)
 		{
