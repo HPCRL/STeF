@@ -71,20 +71,20 @@ int main(int argc, char** argv)
         if(mode > 0 && ((t->fiber_count[mode] / t->mlen[mode] < num_th * ATOMIC_THRESH) || (t->mlen[mode] * r * num_th >= PRIVATIZED_THRESH) ))	
 		{
 			if (mode == 0)
-				mttkrp_combined_3<0,true,false>(t,r,mats,profile);
+				mttkrp_combined_3<0,false,false>(t,r,mats,profile);
 			else if (mode == 1)
-				mttkrp_combined_3<1,true,false>(t,r,mats,profile);
+				mttkrp_combined_3<1,false,false>(t,r,mats,profile);
 			else if (mode == 2)
-				mttkrp_combined_3<2,true,false>(t,r,mats,profile);
+				mttkrp_combined_3<2,false,false>(t,r,mats,profile);
 		}
 		else
 		{
 			if (mode == 0)
-				mttkrp_combined_3<0,true,true>(t,r,mats,profile);
+				mttkrp_combined_3<0,false,true>(t,r,mats,profile);
 			else if (mode == 1)
-				mttkrp_combined_3<1,true,true>(t,r,mats,profile);
+				mttkrp_combined_3<1,false,true>(t,r,mats,profile);
 			else if (mode == 2)
-				mttkrp_combined_3<2,true,true>(t,r,mats,profile);
+				mttkrp_combined_3<2,false,true>(t,r,mats,profile);
 		}	
 		cend = clock();
 		//printf("here\n");
