@@ -103,7 +103,7 @@ int main(int argc, char** argv)
 
 
 	}*/
-    for (int repeat = 0 ; repeat < 1 ; repeat ++)
+    for (int repeat = 0 ; repeat < 2 ; repeat ++)
     {
         bool intv = false;
         if ( repeat)
