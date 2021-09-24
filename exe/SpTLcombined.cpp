@@ -4,6 +4,7 @@
 #include "../inc/mttkrp_combined.h"
 #include "../inc/mttkrp_hardwired.h"
 #include <time.h>
+#include <string>
 
 int main(int argc, char** argv)
 {
@@ -63,7 +64,7 @@ int main(int argc, char** argv)
 
 	if (nmode > 3)
 		return 0;
-
+/*
 	for(int mode = 0 ; mode<nmode ; mode++)
 	{
 		const bool intv = false;
@@ -180,34 +181,43 @@ int main(int argc, char** argv)
 		
 	}
 	printf("Total Intermediate %s template MTTKRP time %lf\n",( "saved" ),total);
-
-	/*
-	memset(t->intval[1],0,t->fiber_count[1]*r*sizeof(TYPE));
-
-
-    for (int repeat = 0 ; repeat < 2 ; repeat ++)
+*/
+    int num_cases = 1;
+    for(int i = 0 ; i< nmode-2; i++)
+        num_cases *= 2;
+    for (int repeat = 0 ; repeat < num_cases ; repeat ++)
     {
-        bool intv = false;
-        if ( repeat)
-            intv = true;
+        bool* intv = new bool[nmode-2];
+        {
+            int rem = repeat;
+            for(int i = 0; i < nmode-2 ; i++)
+            {
+                intv[i] = (rem % 2 == 0);
+                rem /= 2;
+            }
+        }
+
+        char* save_str = new char[nmode-1];
+        for(int i = 0; i < nmode-2 ; i++)
+            if (intv[i])
+                save_str[i] = 's';
+            else
+                save_str[i] = 'n';
+
+        save_str[nmode-2] = '\0';
         total = 0;
         for(int mode = 0 ; mode<nmode ; mode++)
         {
             clock_t cstart, cend;
+            bool is_atomic = (mode > 0 && ((t->fiber_count[mode] / t->mlen[mode] < num_th * ATOMIC_THRESH) || (t->mlen[mode] * r * num_th >= PRIVATIZED_THRESH) ))	;
             auto start = std::chrono::high_resolution_clock::now();
             cstart = clock();
-            if (mode == 0)
-                mttkrp_combined_3(t,r,mats,profile,0,intv);
-            else if (mode == 1)
-                mttkrp_combined_3(t,r,mats,profile,1,intv);
-            else if (mode == 2)
-                mttkrp_combined_3(t,r,mats,profile,2,intv);
+            mttkrp_combined(t,r,mats,profile,mode,is_atomic,intv);            
             cend = clock();
-            //printf("here\n");
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> diff = end-start;
             total += diff.count();
-            printf("Intermediate save is %s, combined time for mode %d %lf \n",(intv ? "on" : "off"),t->modeid[mode],diff.count());
+            printf("IS is %s, for mode %d %lf \n",save_str,t->modeid[mode],diff.count());
             double cdiff = ((double) (cend - cstart)) / CLOCKS_PER_SEC;
             printf("Clock time for mode %d is %lf \n",t->modeid[mode],cdiff);
             if(debug)
@@ -220,23 +230,22 @@ int main(int argc, char** argv)
                 //total += diff.count();
                 printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
             }
-            random_matrix(*mats[mode],mode);
 
             for(i=0 ; i<nmode ; i++)
             {
-                //random_matrix(*mats[i],i);
                 
                 if(VERBOSE  == VERBOSE_DEBUG)
                 {
-                    print_matriif (mode == 0)
-		    mttkrp_combined_3<0,false>(t,r,mats,profile);
-        else if (mode == 1)
-            mttkrp_combined_3<1,false>(t,r,mats,profile);
-        else if (mode == 2)
-            mttkrp_combined_3<2,false>(t,r,mats,profile);
-        printf("Total Intermediate %s MTTKRP time %lf\n",(intv ? "saved" : "not saved"),total);
+                    print_matrix(*mats[i]);
+                    
+                }
+                //random_matrix(*mats[i],i+1);
+                //set_matrix(*mats[i],1);
+            }
+            random_matrix(*mats[mode],mode);
+        }
+        printf("Total Intermediate Save %s combined time template MTTKRP time %lf\n",save_str,total);
     }
-	*/
 	
 
 	

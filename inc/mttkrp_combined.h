@@ -218,4 +218,6 @@ int mttkrp_combined_4(csf* t, int r, matrix** mats, int profile );
 template <int mode, bool intv1, bool intv2, bool intv3>
 int mttkrp_combined_5(csf* t, int r, matrix** mats, int profile );
 
+int mttkrp_combined(csf* t, int r, matrix** mats, int profile , int mode, bool privatized, bool* intv );
+
 #endif

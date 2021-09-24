@@ -167,6 +167,7 @@ int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile , int mode, bool
 	
 }
 
+/*
 template <int mode, bool intv1, bool intv2>
 int mttkrp_combined_4(csf* t, int r, matrix** mats, int profile )
 {
@@ -449,13 +450,7 @@ int mttkrp_combined_5(csf* t, int r, matrix** mats, int profile )
 		}
 		
 		auto time_end = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> time_diff = time_end-time_start;
-		
-		
-		if(VERBOSE >= VERBOSE_DEBUG) printf("Hardwired time for mode %d thread %d %lf \n",t->modeid[mode],th,time_diff.count());		
-		if(profile == mode)
-		{
-			LIKWID_MARKER_STOP("Compute");
+		std:IKWID_MARKER_STOP("Compute");
 		}
 	}
 	
@@ -465,6 +460,47 @@ int mttkrp_combined_5(csf* t, int r, matrix** mats, int profile )
 	rem(partial_results_all);	
 	return 0;
 	
+}
+*/
+
+int mttkrp_combined(csf* t, int r, matrix** mats, int profile , int mode, bool privatized, bool* intv )
+{
+	if(t->nmode == 3)
+		if(mode == 0)
+			if(intv[0])			
+				if(privatized)
+					mttkrp_combined_3<0,true,true>(t,r,mats,profile);
+				else
+					mttkrp_combined_3<0,true,false>(t,r,mats,profile);
+			else
+				if(privatized)
+					mttkrp_combined_3<0,false,true>(t,r,mats,profile);
+				else
+					mttkrp_combined_3<0,false,false>(t,r,mats,profile);
+		else if (mode == 1)
+			if(intv[0])			
+				if(privatized)
+					mttkrp_combined_3<1,true,true>(t,r,mats,profile);
+				else
+					mttkrp_combined_3<1,true,false>(t,r,mats,profile);
+			else
+				if(privatized)
+					mttkrp_combined_3<1,false,true>(t,r,mats,profile);
+				else
+					mttkrp_combined_3<1,false,false>(t,r,mats,profile);
+		else 
+			if(intv[0])			
+				if(privatized)
+					mttkrp_combined_3<2,true,true>(t,r,mats,profile);
+				else
+					mttkrp_combined_3<2,true,false>(t,r,mats,profile);
+			else
+				if(privatized)
+					mttkrp_combined_3<2,false,true>(t,r,mats,profile);
+				else
+					mttkrp_combined_3<2,false,false>(t,r,mats,profile);
+
+	return 0;
 }
 
 #endif
