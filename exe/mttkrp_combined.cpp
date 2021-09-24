@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 			print_matrix(*mats[i]);
 	}
 
-	mttkrp_fused_init(t,r);
+	mttkrp_fused_init(t,r,true);
 
 	double total=0;
 
