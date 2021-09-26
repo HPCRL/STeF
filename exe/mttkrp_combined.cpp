@@ -182,7 +182,7 @@ int main(int argc, char** argv)
 		}
 		printf("Total Intermediate %s template MTTKRP time %lf\n",( "saved" ),total);
 	}
-	else if (4 == 4)
+	else if (nmode == 4)
 	{
 		int num_cases = 1;
 		for(int i = 0 ; i< 4-2; i++)
