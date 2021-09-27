@@ -296,7 +296,7 @@ int mttkrp_combined_4(csf* t, int r, matrix** mats, int profile )
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
 				TYPE* mv1 = mats[1]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
-				if(intv1)
+				if(intv1 && mode < 2)
 					pr0 = t->intval[1] + i1*r ; // Set the location for intermediate value for T(i_1,i_2)
 				else
 					memset(pr0,0,sizeof(TYPE)*r); // Reset the previous values otherwise
@@ -315,7 +315,7 @@ int mttkrp_combined_4(csf* t, int r, matrix** mats, int profile )
 					for(idx_t i2 = t->ptr[1][i1] ; i2< t->ptr[1][i1+1]; i2++)
 					{	
 						TYPE* mv2 = mats[2]->val + ((mats[2]) -> dim2) * t->ind[2][i2];						
-						if(intv2)
+						if(intv2 && mode < 3)
 							pr1 = t->intval[2] + i2*r; // Set the location for intermediate value for T(i_1,i_2,i_3)
 						else
 							memset(pr1,0,sizeof(TYPE)*r); // Reset the previous values otherwise							
@@ -333,7 +333,7 @@ int mttkrp_combined_4(csf* t, int r, matrix** mats, int profile )
 							for(idx_t i3 = t->ptr[2][i2] ; i3< t->ptr[2][i2+1]; i3++)
 							{	
 								TYPE* mv3 = mats[3]->val + ((mats[3] -> dim2) * t->ind[3][i3]);
-								TYPE tval = t->val[i2];													
+								TYPE tval = t->val[i3];													
 							
 								if(mode < 3)
 								{				
