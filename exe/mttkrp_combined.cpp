@@ -69,9 +69,10 @@ int main(int argc, char** argv)
 		{
 			const bool intv = false;
 			clock_t cstart, cend;
+			bool is_atomic = mode > 0 && ((t->fiber_count[mode] / t->mlen[mode] < num_th * ATOMIC_THRESH) || (t->mlen[mode] * r * num_th >= PRIVATIZED_THRESH) );
 			auto start = std::chrono::high_resolution_clock::now();
 			cstart = clock();
-			if(mode > 0 && ((t->fiber_count[mode] / t->mlen[mode] < num_th * ATOMIC_THRESH) || (t->mlen[mode] * r * num_th >= PRIVATIZED_THRESH) ))	
+			if(is_atomic)	
 			{
 				if (mode == 0)
 					mttkrp_combined_3<0,false,false>(t,r,mats,profile);
@@ -94,9 +95,9 @@ int main(int argc, char** argv)
 			auto end = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double> diff = end-start;
 			total += diff.count();
-			printf("Combined not saved time for mode %d %lf \n",t->modeid[mode],diff.count());
+			printf("Combined %s not saved time for mode %d %lf \n",(is_atomic ? "atomic    " : "privatized"),t->modeid[mode],diff.count());
 			double cdiff = ((double) (cend - cstart)) / CLOCKS_PER_SEC;
-			printf("Clock time for mode %d is %lf \n",t->modeid[mode],cdiff);
+			// printf("Clock time for mode %d is %lf \n",t->modeid[mode],cdiff);
 			if(debug)
 			{
 				auto start2 = std::chrono::high_resolution_clock::now();
