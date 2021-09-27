@@ -61,10 +61,13 @@ int main(int argc, char** argv)
 	num_th = omp_get_max_threads();
 	#endif
 
-	
+	int run_saved = 0;
+	if (argc > 5)
+		run_saved = atoi(argv[5]);
 		
 	if (nmode == 3)
 	{
+		if(run_saved != 2)
 		for(int mode = 0 ; mode<nmode ; mode++)
 		{
 			const bool intv = false;
@@ -125,6 +128,7 @@ int main(int argc, char** argv)
 		}
 		printf("Total Intermediate %s template MTTKRP time %lf\n",("not saved"),total);
 		total = 0;
+		if(run_saved != 1)
 		for(int mode = 0 ; mode<nmode ; mode++)
 		{
 			const bool intv = true;
