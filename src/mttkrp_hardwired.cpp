@@ -31,16 +31,19 @@ void find_thread_start(csf* t)
 
 	idx_t sid = 0;
 	idx_t partial_work = 0;
+	idx_t max_slice_work = 0;
+
 	for(int th = 0 ; th < num_th ; th++)
 	{
 		//idx_t partial_work = 0;
 		while(sid < t->fiber_count[0] && partial_work < (total_work/ num_th) * (th+1) )
 		{
 			idx_t loc1 = sid, loc2 = sid + 1;
+			idx_t local_work = 0;
 			for ( int d = 0; d < nmode ; d++)
 			{
 				partial_work += loc2 - loc1;
-
+				local_work += loc2 - loc1;
 
 				if(d < nmode-1)
 				{
@@ -49,6 +52,8 @@ void find_thread_start(csf* t)
 					loc2 = t->ptr[d][loc2];
 					
 				}	
+				if(local_work > max_slice_work)
+					max_slice_work = local_work;
 			}	
 			sid ++;
 		}
@@ -58,6 +63,7 @@ void find_thread_start(csf* t)
 	t->thread_start = thread_start;
 	thread_start[num_th] = t->fiber_count[0];
 
+	printf("Max work per slice is %lld, total work is %lld, avg work per thread is %lld \n",max_slice_work,total_work,total_work/num_th);
 
 	for(int i=0 ; i<= num_th ; i++)
 	{
