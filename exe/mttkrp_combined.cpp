@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 				auto end2 = std::chrono::high_resolution_clock::now();
 				std::chrono::duration<double> diff = end2-start2;
 				//total += diff.count();
-				printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
+				// printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 			}
 
 			for(i=0 ; i<nmode ; i++)
@@ -166,7 +166,7 @@ int main(int argc, char** argv)
 				auto end2 = std::chrono::high_resolution_clock::now();
 				std::chrono::duration<double> diff = end2-start2;
 				//total += diff.count();
-				printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
+				// printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 			}
 
 			for(i=0 ; i<nmode ; i++)
@@ -237,7 +237,7 @@ int main(int argc, char** argv)
 				auto end2 = std::chrono::high_resolution_clock::now();
 				std::chrono::duration<double> diff = end2-start2;
 				//total += diff.count();
-				printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
+				// printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
 			}
 
 			for(i=0 ; i<nmode ; i++)
