@@ -1,12 +1,30 @@
 
 
-tns=~/tensors/nell-2.tns
+tns=$1
 mode=2
 
-export OMP_NUM_THREADS=2
-for g in FLOPS_DP L2 L3 MEM_DP CACHES L2CACHE L3CACHE ;
+#export OMP_NUM_THREADS=2
+
+for order in 0 1 2 3 4 5 ;
 do
-	cmd="likwid-perfctr -m -g $g -O -C 0-27 ./bin/SpTL.exe $tns 32 -1 $mode"
-	echo $cmd
-	$cmd
+
+	for core in 1 18 ;
+	do
+		C=$(( $core - 1 ))
+		for g in MEM_DP ;
+		do
+			for mode in 0 1 2 ;
+			do
+				for saved in 1 2 ;
+				do
+
+					cmd="likwid-perfctr -m -g $g -O -C 0-$C ./bin/SpTL.exe $tns 32 -1 $mode $saved"
+					echo $cmd
+					$cmd
+					date
+				done
+			done
+		done
+	done
+
 done
