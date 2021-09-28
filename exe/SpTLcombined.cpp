@@ -94,7 +94,7 @@ int main(int argc, char** argv)
             bool is_atomic = (mode > 0 && ((t->fiber_count[mode] / t->mlen[mode] < num_th * ATOMIC_THRESH) || (t->mlen[mode] * r * num_th >= PRIVATIZED_THRESH) ))	;
             auto start = std::chrono::high_resolution_clock::now();
             cstart = clock();
-            mttkrp_combined(t,r,mats,profile,mode,is_atomic,intv);            
+            mttkrp_combined(t,r,mats,profile,mode,!is_atomic,intv);            
             cend = clock();
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> diff = end-start;
