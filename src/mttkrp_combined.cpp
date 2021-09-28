@@ -503,4 +503,32 @@ int mttkrp_combined(csf* t, int r, matrix** mats, int profile , int mode, bool p
 	return 0;
 }
 
+int b_thread_start(csf* t)
+{
+	int nmode = t->nmode;
+	int num_th = 1;
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	#endif
+
+	idx_t** bth = new idx_t*[num_th+1];
+	for(int i = 0 ; i<num_th + 1; i++)
+	{
+		bth[i] = new idx_t[nmode];
+	}
+
+	for(int i = 0 ; i < nmode ; i++)
+	{
+		bth[0][i] = 0;
+		bth[num_th][i] = t->fiber_count[i];
+	}
+
+	for(int i = 1 ; i<num_th; i++)
+	{
+		bth[i][nmode-1] = t->fiber_count[nmode-1]/num_th*i;
+	}
+
+	return 0;
+}
+
 #endif
