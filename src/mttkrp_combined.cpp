@@ -1020,23 +1020,83 @@ int b_thread_start(csf* t)
 		}
 	}
 
+	int method = 2;
 
-	#pragma omp parallel for
-	for(int th = 1; th < num_th ; th++)
-	{	// Search and put into the correct positions
-		for(int d = nmode - 1; d > 0 ; d--)
-		{
-			while(t->ptr[d-1][bth[th][d-1]] > bth[th][d])
-				bth[th][d-1] --;
-			
-			while(t->ptr[d-1][bth[th][d-1]+1] <= bth[th][d])
-				bth[th][d-1] ++;
-		}
+	if(method == 1)
+	{
+		#pragma omp parallel for
+		for(int th = 1; th < num_th ; th++)
+		{	// Search and put into the correct positions
+			for(int d = nmode - 1; d > 0 ; d--)
+			{	// Do binary search for faster speeds
+				while(t->ptr[d-1][bth[th][d-1]] > bth[th][d])
+					bth[th][d-1] --;
+				
+				while(t->ptr[d-1][bth[th][d-1]+1] <= bth[th][d])
+					bth[th][d-1] ++;
+			}
+		}		
 	}
+	else if (method == 2)
+	{
+		idx_t** count_tree = new idx_t*[nmode-1];
+		for(int i = 0 ; i<nmode-1 ; i++)
+		{
+			count_tree[i] = new idx_t[ t->fiber_count[i] ];
+			//memset(count_tree[i],0,sizeof(int)*t->fiber_count[i]);
+		}
+		for(int mode = nmode - 2; mode >= 0 ; mode--)
+		{
+			#ifdef OMP
+			#pragma omp parallel for
+			#endif
+			for(idx_t i = 0 ; i<t->fiber_count[mode] ; i++)
+			{
+				if(mode == nmode -2)
+					count_tree[mode][i] = t->ptr[mode][i+1] - t->ptr[mode][i] + 1; // +1 for self
+				else
+				{
+					count_tree[mode][i] = 1;
+					for(int j = t->ptr[mode][i] ; j < t->ptr[mode][i+1] ; j++)
+					{
+						count_tree[mode][i] += count_tree[mode+1][j];
+					}
 
-	t->b_thread_start = bth;
+				}					
+			}
+		} 
+		// Found work per node
 
-	/*
+		for(int mode = nmode - 2; mode >= 0 ; mode--)
+		{
+			// Prefix sum, can be optimized later
+			idx_t total_work = 0;
+			for(idx_t i = 0 ; i < t->fiber_count[mode] ; i++)
+			{
+				total_work += count_tree[mode][i];
+			}
+			
+			// Distribute the work between threads
+			int th = 1;
+			idx_t work = 0;
+			for(idx_t i = 0 ; i < t->fiber_count[mode] ; i++)
+			{
+				work += count_tree[mode][i];
+				if (work > (total_work * th)/num_th)
+				{
+					bth[th][mode] = i;
+					th += 1;
+				}
+			}
+		}
+
+		for(int th = 0; th < num_th ; th ++)
+		{
+			bth[th][nmode-1] = t->ptr[nmode-2][bth[th][nmode-2]];
+		}
+
+	}
+	
 	for(int i = 0 ; i < nmode ; i++)
 	{	// Each thread is going to go throung nnz/num_th nnz's for even work distribution
 		for(int th = 0; th < num_th + 1; th++)
@@ -1045,8 +1105,9 @@ int b_thread_start(csf* t)
 		}
 		printf("\n");
 	}
-	*/
+	
 
+	t->b_thread_start = bth;		
 	return 0;
 }
 
