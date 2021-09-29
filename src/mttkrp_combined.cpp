@@ -1034,6 +1034,7 @@ int b_thread_start(csf* t)
 
 	t->b_thread_start = bth;
 
+	/*
 	for(int i = 0 ; i < nmode ; i++)
 	{	// Each thread is going to go throung nnz/num_th nnz's for even work distribution
 		for(int th = 0; th < num_th + 1; th++)
@@ -1042,6 +1043,7 @@ int b_thread_start(csf* t)
 		}
 		printf("\n");
 	}
+	*/
 
 	return 0;
 }
