@@ -1025,7 +1025,7 @@ int mttkrp_fused_init(csf* t,int r,bool cap)
 		t->intval[(t->nmode)-1] = NULL;
 		for(int i = 1; i < (t->nmode)-1 ; i++)
 		{
-			t->intval[i] = (TYPE*) malloc((t->fiber_count[i])*r*sizeof(TYPE));
+			t->intval[i] = (TYPE*) malloc((t->fiber_count[i] + num_th)*r*sizeof(TYPE));
 			if(t->intval[i] == NULL)
 			{
 				printf("SpTL ERROR: Allocation error in mttkrp fused init\n");
@@ -1036,7 +1036,7 @@ int mttkrp_fused_init(csf* t,int r,bool cap)
 	}
 	for(int i = 1; i < (t->nmode)-1 ; i++)
 	{
-		memset(t->intval[i],0,sizeof(TYPE)*(t->fiber_count[i])*r);
+		memset(t->intval[i],0,sizeof(TYPE)*(t->fiber_count[i]+num_th)*r);
 
 //		for(idx_t j=0; j<(t->fiber_count[i])*r ; j++)
 //		{

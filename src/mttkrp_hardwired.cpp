@@ -92,7 +92,7 @@ int reduce(csf* t, int r, matrix* mat)
 				#pragma omp simd
 				for(int y=0; y<r ; y++)
 				{
-					outval[y] += reduceval[y];
+					outval[y] += reduceval[y];				
 					//if(VERBOSE >= VERBOSE_DEBUG) printf("reducing %lf %lf in th %d\n", outval[y], reduceval[y],i);
 					//reduceval[y] = 0;
 				}

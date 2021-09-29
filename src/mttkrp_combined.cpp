@@ -735,6 +735,267 @@ int mttkrp_combined(csf* t, int r, matrix** mats, int profile , int mode, bool p
 	return 0;
 }
 
+int mttkrp_combined_lb(csf* t, int r, matrix** mats, int profile , int mode, bool privatized, bool* intv )
+{
+	if(t->nmode == 3)
+	{
+		if( mode == 0 && !intv[0] && !privatized)
+			mttkrp_combined_lb_3<0, false, false>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && privatized)
+			mttkrp_combined_lb_3<0, false, true>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && !privatized)
+			mttkrp_combined_lb_3<0, true, false>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && privatized)
+			mttkrp_combined_lb_3<0, true, true>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && !privatized)
+			mttkrp_combined_lb_3<1, false, false>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && privatized)
+			mttkrp_combined_lb_3<1, false, true>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && !privatized)
+			mttkrp_combined_lb_3<1, true, false>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && privatized)
+			mttkrp_combined_lb_3<1, true, true>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && !privatized)
+			mttkrp_combined_lb_3<2, false, false>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && privatized)
+			mttkrp_combined_lb_3<2, false, true>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && !privatized)
+			mttkrp_combined_lb_3<2, true, false>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && privatized)
+			mttkrp_combined_lb_3<2, true, true>(t,r,mats,profile);
+	}
+	if(t->nmode == 4)
+	{
+		if( mode == 0 && !intv[0] && !intv[1] && !privatized)
+			mttkrp_combined_lb_4<0, false, false, false>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && !intv[1] && privatized)
+			mttkrp_combined_lb_4<0, false, false, true>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && intv[1] && !privatized)
+			mttkrp_combined_lb_4<0, false, true, false>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && intv[1] && privatized)
+			mttkrp_combined_lb_4<0, false, true, true>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && !intv[1] && !privatized)
+			mttkrp_combined_lb_4<0, true, false, false>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && !intv[1] && privatized)
+			mttkrp_combined_lb_4<0, true, false, true>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && intv[1] && !privatized)
+			mttkrp_combined_lb_4<0, true, true, false>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && intv[1] && privatized)
+			mttkrp_combined_lb_4<0, true, true, true>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && !intv[1] && !privatized)
+			mttkrp_combined_lb_4<1, false, false, false>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && !intv[1] && privatized)
+			mttkrp_combined_lb_4<1, false, false, true>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && intv[1] && !privatized)
+			mttkrp_combined_lb_4<1, false, true, false>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && intv[1] && privatized)
+			mttkrp_combined_lb_4<1, false, true, true>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && !intv[1] && !privatized)
+			mttkrp_combined_lb_4<1, true, false, false>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && !intv[1] && privatized)
+			mttkrp_combined_lb_4<1, true, false, true>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && intv[1] && !privatized)
+			mttkrp_combined_lb_4<1, true, true, false>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && intv[1] && privatized)
+			mttkrp_combined_lb_4<1, true, true, true>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && !intv[1] && !privatized)
+			mttkrp_combined_lb_4<2, false, false, false>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && !intv[1] && privatized)
+			mttkrp_combined_lb_4<2, false, false, true>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && intv[1] && !privatized)
+			mttkrp_combined_lb_4<2, false, true, false>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && intv[1] && privatized)
+			mttkrp_combined_lb_4<2, false, true, true>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && !intv[1] && !privatized)
+			mttkrp_combined_lb_4<2, true, false, false>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && !intv[1] && privatized)
+			mttkrp_combined_lb_4<2, true, false, true>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && intv[1] && !privatized)
+			mttkrp_combined_lb_4<2, true, true, false>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && intv[1] && privatized)
+			mttkrp_combined_lb_4<2, true, true, true>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && !intv[1] && !privatized)
+			mttkrp_combined_lb_4<3, false, false, false>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && !intv[1] && privatized)
+			mttkrp_combined_lb_4<3, false, false, true>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && intv[1] && !privatized)
+			mttkrp_combined_lb_4<3, false, true, false>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && intv[1] && privatized)
+			mttkrp_combined_lb_4<3, false, true, true>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && !intv[1] && !privatized)
+			mttkrp_combined_lb_4<3, true, false, false>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && !intv[1] && privatized)
+			mttkrp_combined_lb_4<3, true, false, true>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && intv[1] && !privatized)
+			mttkrp_combined_lb_4<3, true, true, false>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && intv[1] && privatized)
+			mttkrp_combined_lb_4<3, true, true, true>(t,r,mats,profile);
+	}
+	if(t->nmode == 5)
+	{
+		if( mode == 0 && !intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<0, false, false, false, false>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<0, false, false, false, true>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<0, false, false, true, false>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<0, false, false, true, true>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<0, false, true, false, false>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<0, false, true, false, true>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<0, false, true, true, false>(t,r,mats,profile);
+		else if( mode == 0 && !intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<0, false, true, true, true>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<0, true, false, false, false>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<0, true, false, false, true>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<0, true, false, true, false>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<0, true, false, true, true>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<0, true, true, false, false>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<0, true, true, false, true>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<0, true, true, true, false>(t,r,mats,profile);
+		else if( mode == 0 && intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<0, true, true, true, true>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<1, false, false, false, false>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<1, false, false, false, true>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<1, false, false, true, false>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<1, false, false, true, true>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<1, false, true, false, false>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<1, false, true, false, true>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<1, false, true, true, false>(t,r,mats,profile);
+		else if( mode == 1 && !intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<1, false, true, true, true>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<1, true, false, false, false>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<1, true, false, false, true>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<1, true, false, true, false>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<1, true, false, true, true>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<1, true, true, false, false>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<1, true, true, false, true>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<1, true, true, true, false>(t,r,mats,profile);
+		else if( mode == 1 && intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<1, true, true, true, true>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<2, false, false, false, false>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<2, false, false, false, true>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<2, false, false, true, false>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<2, false, false, true, true>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<2, false, true, false, false>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<2, false, true, false, true>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<2, false, true, true, false>(t,r,mats,profile);
+		else if( mode == 2 && !intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<2, false, true, true, true>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<2, true, false, false, false>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<2, true, false, false, true>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<2, true, false, true, false>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<2, true, false, true, true>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<2, true, true, false, false>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<2, true, true, false, true>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<2, true, true, true, false>(t,r,mats,profile);
+		else if( mode == 2 && intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<2, true, true, true, true>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<3, false, false, false, false>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<3, false, false, false, true>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<3, false, false, true, false>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<3, false, false, true, true>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<3, false, true, false, false>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<3, false, true, false, true>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<3, false, true, true, false>(t,r,mats,profile);
+		else if( mode == 3 && !intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<3, false, true, true, true>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<3, true, false, false, false>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<3, true, false, false, true>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<3, true, false, true, false>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<3, true, false, true, true>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<3, true, true, false, false>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<3, true, true, false, true>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<3, true, true, true, false>(t,r,mats,profile);
+		else if( mode == 3 && intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<3, true, true, true, true>(t,r,mats,profile);
+		else if( mode == 4 && !intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<4, false, false, false, false>(t,r,mats,profile);
+		else if( mode == 4 && !intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<4, false, false, false, true>(t,r,mats,profile);
+		else if( mode == 4 && !intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<4, false, false, true, false>(t,r,mats,profile);
+		else if( mode == 4 && !intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<4, false, false, true, true>(t,r,mats,profile);
+		else if( mode == 4 && !intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<4, false, true, false, false>(t,r,mats,profile);
+		else if( mode == 4 && !intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<4, false, true, false, true>(t,r,mats,profile);
+		else if( mode == 4 && !intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<4, false, true, true, false>(t,r,mats,profile);
+		else if( mode == 4 && !intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<4, false, true, true, true>(t,r,mats,profile);
+		else if( mode == 4 && intv[0] && !intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<4, true, false, false, false>(t,r,mats,profile);
+		else if( mode == 4 && intv[0] && !intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<4, true, false, false, true>(t,r,mats,profile);
+		else if( mode == 4 && intv[0] && !intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<4, true, false, true, false>(t,r,mats,profile);
+		else if( mode == 4 && intv[0] && !intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<4, true, false, true, true>(t,r,mats,profile);
+		else if( mode == 4 && intv[0] && intv[1] && !intv[2] && !privatized)
+			mttkrp_combined_lb_5<4, true, true, false, false>(t,r,mats,profile);
+		else if( mode == 4 && intv[0] && intv[1] && !intv[2] && privatized)
+			mttkrp_combined_lb_5<4, true, true, false, true>(t,r,mats,profile);
+		else if( mode == 4 && intv[0] && intv[1] && intv[2] && !privatized)
+			mttkrp_combined_lb_5<4, true, true, true, false>(t,r,mats,profile);
+		else if( mode == 4 && intv[0] && intv[1] && intv[2] && privatized)
+			mttkrp_combined_lb_5<4, true, true, true, true>(t,r,mats,profile);
+	}
+}
+
 int b_thread_start(csf* t)
 {
 	int nmode = t->nmode;
