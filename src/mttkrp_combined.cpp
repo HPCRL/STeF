@@ -1067,7 +1067,7 @@ int b_thread_start(csf* t)
 		} 
 		// Found work per node
 
-		for(int mode = nmode - 2; mode >= 0 ; mode--)
+		for(int mode = 0; mode < nmode -1 ; mode++)
 		{
 			// Prefix sum, can be optimized later
 			idx_t total_work = 0;
