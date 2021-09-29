@@ -1020,7 +1020,7 @@ int b_thread_start(csf* t)
 		}
 	}
 
-	int method = 2;
+	int method = 1;
 
 	if(method == 1)
 	{
