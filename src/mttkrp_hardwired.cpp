@@ -118,8 +118,6 @@ int reduce(csf* t, int r, matrix* mat)
 			}	
 		}
 	}
-
-
 	return 0;
 }
 int mttkrp_hardwired_first_2(csf* t, int mode, int r, matrix** mats, int profile )

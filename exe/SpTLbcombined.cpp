@@ -66,6 +66,7 @@ int main(int argc, char** argv)
 
 	if (nmode > 5)
 		return 0;
+
     int num_cases = 1;
     for(int i = 0 ; i< nmode-2; i++)
         num_cases *= 2;
@@ -114,7 +115,6 @@ int main(int argc, char** argv)
                 //total += diff.count();
                 //printf("COO sequential time for mode %d %lf \n",t->modeid[mode],diff.count());
             }
-
             for(i=0 ; i<nmode ; i++)
             {
                 

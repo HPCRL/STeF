@@ -1323,8 +1323,7 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 			LIKWID_MARKER_STOP("Compute");
 		}
 	} // End of parallel region
-	
-	
+
 	if (privatized)
 	{
 		reduce(t,r,mats[mode]);

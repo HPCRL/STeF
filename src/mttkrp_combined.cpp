@@ -994,6 +994,8 @@ int mttkrp_combined_lb(csf* t, int r, matrix** mats, int profile , int mode, boo
 		else if( mode == 4 && intv[0] && intv[1] && intv[2] && privatized)
 			mttkrp_combined_lb_5<4, true, true, true, true>(t,r,mats,profile);
 	}
+
+	return 0;
 }
 
 int b_thread_start(csf* t)
