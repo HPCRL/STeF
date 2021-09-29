@@ -1082,7 +1082,7 @@ int b_thread_start(csf* t)
 			for(idx_t i = 0 ; i < t->fiber_count[mode] ; i++)
 			{
 				work += count_tree[mode][i];
-				if (work > (total_work * th)/num_th)
+				while (work > (total_work * th)/num_th)
 				{
 					bth[th][mode] = i;
 					th += 1;
@@ -1097,6 +1097,7 @@ int b_thread_start(csf* t)
 
 	}
 	
+	/*
 	for(int i = 0 ; i < nmode ; i++)
 	{	// Each thread is going to go throung nnz/num_th nnz's for even work distribution
 		for(int th = 0; th < num_th + 1; th++)
@@ -1105,7 +1106,7 @@ int b_thread_start(csf* t)
 		}
 		printf("\n");
 	}
-	
+	*/
 
 	t->b_thread_start = bth;		
 	return 0;
