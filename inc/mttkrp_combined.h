@@ -2,6 +2,7 @@
 #define MTTKRP_COMBINED
 
 #include "../inc/matrix.h"
+#include <stdlib.h> 
 #include "../inc/tensor.h"
 #include "../inc/util.h"
 #include "../inc/mutex.h"
@@ -10,6 +11,7 @@
 int mttkrp_combined(csf* t, int r, matrix** mats, int profile , int mode, bool privatized, bool* intv );
 int mttkrp_combined_lb(csf* t, int r, matrix** mats, int profile , int mode, bool privatized, bool* intv );
 int b_thread_start(csf* t);
+double atomic_thresh(int r,mutex_array* mutex);
 
 template <int mode, bool intv1, bool privatized>
 int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )

@@ -1112,4 +1112,115 @@ int b_thread_start(csf* t)
 	return 0;
 }
 
+
+double atomic_thresh(int r,mutex_array* mutex)
+{
+	int num_th = 1;
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	#endif
+	double thresh = 1;
+	if (num_th == 1)
+		return thresh;
+	
+	idx_t small_array_size = 10000;
+	idx_t max_search_limit = 128;
+	idx_t min_coef = 1;
+	idx_t max_coef = max_search_limit;
+	idx_t coef = min_coef;
+	idx_t big_array_size = coef*small_array_size;
+	bool atomic_better = true;
+	TYPE* res_array = new TYPE[small_array_size*r];
+	TYPE** priv_array = new TYPE*[num_th];
+	for(int i=0; i<num_th ; i++)
+	{
+		priv_array[i] = new TYPE[small_array_size*r];
+	}
+	
+	idx_t* rand_array  = new idx_t[small_array_size*max_search_limit];
+	srand(0);
+	for(idx_t i=0; i<small_array_size*max_search_limit ; i++)
+	{
+		rand_array[i] = rand()%small_array_size;
+	}
+	while(atomic_better &&  max_coef > min_coef + 1)
+	{
+		double atomic_time, privatized_time;
+		{
+			auto start = std::chrono::high_resolution_clock::now();
+			// Do atomic computation
+			#pragma omp parallel for
+			for(idx_t i=0 ; i< big_array_size ; i++)
+			{
+				idx_t row_id = rand_array[i];
+				#ifdef OMP
+				mutex_set_lock(mutex,row_id);
+				#endif
+				#pragma omp simd
+				for(int y = 0 ; y<r ; y++)
+				{	
+					res_array[row_id*r + y] += i*y;
+				}
+				#ifdef OMP
+				mutex_unset_lock(mutex,row_id);
+				#endif
+			}
+			auto end = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double> diff = end-start;
+			atomic_time = diff.count();
+		}	
+		{
+			auto start = std::chrono::high_resolution_clock::now();
+			// Do privatized computation
+			#pragma omp parallel
+			{
+				int th = omp_get_thread_num();
+				#pragma omp for
+				for(idx_t i=0 ; i< big_array_size ; i++)
+				{
+					idx_t row_id = rand_array[i];
+					#pragma omp simd
+					for(int y = 0 ; y<r ; y++)
+					{	
+						priv_array[th][row_id*r + y] += i*y;
+					}
+				}
+			}
+			// reduction step
+			#pragma omp parallel for
+			for(idx_t i = 0 ; i<small_array_size ; i++)
+			{
+				for(int th = 0; th<num_th ; th++)
+				{
+					for(int y=0; y<r ;y++)
+						res_array[i*r + y] += priv_array[th][i*r + y];
+				}
+			}
+			auto end = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double> diff = end-start;
+			privatized_time = diff.count();
+		}
+
+		if(privatized_time < atomic_time)
+		{
+			max_coef = coef;
+		}
+		else
+		{
+			min_coef = coef;
+		}
+		
+		if(max_coef > min_coef + 1)
+		{
+			coef = (max_coef + min_coef ) / 2;
+			big_array_size = coef*small_array_size;
+		}		
+	}
+
+	thresh = 1/((double) coef);
+	
+
+	return thresh;
+}
+
 #endif
