@@ -1,7 +1,7 @@
 
 
 tns=$1
-mode=2
+#mode=2
 
 #export OMP_NUM_THREADS=2
 
@@ -18,7 +18,7 @@ do
 				for saved in 1 2 ;
 				do
 
-					cmd="likwid-perfctr -m -g $g -O -C 0-$C ./bin/mttkrp_combined.exe $tns 32 -1 $mode $saved"
+					cmd="likwid-perfctr -m -g $g -O -C 0-$C ./bin/mttkrp_combined.exe $tns 32 $order $mode $saved"
 					echo $cmd
 					$cmd
 					date
