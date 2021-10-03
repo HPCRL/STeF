@@ -54,10 +54,10 @@ int free_csf(csf* t)
 			free_matrix(t->private_mats[i]);
 	if(t->b_thread_start != NULL)
 		for (i=0 ; i< (t->num_th);i++)
-			rem(t->b_thread_start[i])
+			delete [] t->b_thread_start[i];
 	rem(t->private_mats);
 	rem(t->intval);
-	rem(t->b_thread_start);
+	delete [] t->b_thread_start;
 	rem(t->thread_start);
 	rem(t);
 	return 0;
