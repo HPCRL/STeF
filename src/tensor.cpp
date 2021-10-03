@@ -19,6 +19,7 @@ csf* malloc_csf()
 	res->modeid = NULL;
 	res->intval = NULL;
 	res->thread_start = NULL;
+	res->b_thread_start = NULL;
 	res->private_mats = NULL;
 	res->intval = NULL;
 	return res;
@@ -53,11 +54,11 @@ int free_csf(csf* t)
 		for (i=0; i< (t->num_th) ; i++)
 			free_matrix(t->private_mats[i]);
 	if(t->b_thread_start != NULL)
-		for (i=0 ; i< (t->num_th);i++)
-			delete [] t->b_thread_start[i];
+		delete [] t->b_thread_start[0];
 	rem(t->private_mats);
 	rem(t->intval);
-	delete [] t->b_thread_start;
+	if(t->b_thread_start != NULL)
+		delete [] t->b_thread_start;
 	rem(t->thread_start);
 	rem(t);
 	return 0;

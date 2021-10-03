@@ -1006,10 +1006,15 @@ int b_thread_start(csf* t)
 	num_th = omp_get_max_threads();
 	#endif
 
+	//printf("%d\n",num_th);
+
 	idx_t** bth = new idx_t*[num_th+1];
+
+	idx_t* res = new idx_t[nmode*(num_th+1)];
+
 	for(int i = 0 ; i<num_th + 1; i++)
 	{
-		bth[i] = new idx_t[nmode];
+		bth[i] = res + i*nmode;
 	}
 
 	for(int i = 0 ; i < nmode ; i++)
@@ -1225,32 +1230,36 @@ double atomic_thresh(int r,mutex_array* mutex)
 
 int reduce_mode_0(csf* t, matrix* mat)
 {
+	#pragma omp barrier
+
 	idx_t** thread_start = t->b_thread_start;
 	int num_th = 1;
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	#endif
 	// Handle boundaries first
-	for(idx_t th=num_th -1 ; th>0 ; th--)
+	for(int th=num_th -1 ; th>0 ; th--)
 	{
 		idx_t loc = t->ind[0][ thread_start[th][0] ];
-		TYPE* target = mat->val + ( loc + th - 1)*mat->dim2;
-		TYPE* source = mat->val + (loc + th)*mat->dim2;
+		TYPE* target = mat->val + ( loc + th - 1)*(mat->dim2);
+		TYPE* source = mat->val + (loc + th)* (mat->dim2);
 		for(int y = 0 ; y<mat->dim2 ; y++)
 		{
 			target[y] += source[y];
 			source[y] = 0;
 		}
 	}
-
-	for(idx_t th=1;th<num_th ; th++)
+	
+	for(int th = 1; th < num_th ; th++)
 	{
-		idx_t end = MIN(thread_start[th+1][0]+1,t->fiber_count[0]);
+		idx_t a = thread_start[th+1][0]+1;
+		idx_t b = t->fiber_count[0];
+		idx_t end = MIN(a,b);
 		idx_t start = thread_start[th][0]+1;
 		for(idx_t i=start; i<end; i ++)
 		{
 			TYPE* target = mat->val + (t->ind[0][i])*mat->dim2;
-			TYPE* source = mat->val + (t->ind[0][i]+th)*mat->dim2;
+			TYPE* source = mat->val + (t->ind[0][i] + th)*mat->dim2;
 			for(int y = 0 ; y<mat->dim2 ; y++)
 			{
 				target[y] = source[y];
@@ -1258,7 +1267,7 @@ int reduce_mode_0(csf* t, matrix* mat)
 			}
 		}
 	}
-
+	return 0;
 }
 
 
