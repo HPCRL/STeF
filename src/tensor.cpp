@@ -164,7 +164,7 @@ int find_inds(idx_t* inds ,csf* t,idx_t it)
 
 
 
-int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_t* fiber_count, csf* res, idx_t* mlen, int* sort_order)
+int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_t* fiber_count, csf* res, idx_t* mlen, int* sort_order,bool switch_order)
 {
 	csf t;
 	int i, j, jj , ii, ilen, plen,  *ind, *dimlen;
@@ -190,9 +190,10 @@ int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_
 
 	ii = 0;
 	
-
-	printf("nmode is %d \n",nmode);
-	count_fiber_leaf_root(pindex,nnz, mlen[sort_order[nmode-1]], nmode,sort_order);
+	if(VERBOSE > VERBOSE_LOW)
+		printf("nmode is %d \n",nmode);
+	if(switch_order)
+		count_fiber_leaf_root(pindex,nnz, mlen[sort_order[nmode-1]], nmode,sort_order);
 
 	total_space = ilen*sizeof(idx_t);
 	total_space += 2*(nmode+1)*sizeof(idx_t*);
@@ -223,8 +224,8 @@ int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_
 		// B
 		space_sign = "B";
 	}
-
-	printf("Total space requirement of the CSF is %llu%s \n",total_space,space_sign);
+	if(VERBOSE > VERBOSE_SILENT)
+		printf("Total space requirement of the CSF is %llu%s \n",total_space,space_sign);
 
 	for( i=0 ; i< plen ; i++)	
 	{
@@ -349,6 +350,7 @@ int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_
 		t.modeid[i] = sort_order[i];
 	}
 
+	count_fiber_leaf_root_fast(&t);
 
 	*res = t;
 
@@ -488,8 +490,8 @@ int count_fiber_leaf_root(idx_t** pindex, idx_t nnz, idx_t modelen, int nmode, i
 
 	//count_last.insert(pindex[0][sort_order[nmode-1]]);
 
-
-	printf("last mode id is %d\n", sort_order[nmode-1]);
+	if(VERBOSE > VERBOSE_SILENT)
+		printf("last mode id is %d\n", sort_order[nmode-1]);
 	#ifdef OMP
 	#pragma omp parallel
 	#endif
@@ -566,22 +568,27 @@ int count_fiber_leaf_root_fast(csf* t)
 		int th_id = 0;
 		#endif
 		per_core [th_id] = 0;
+		idx_t cnt = 0;
 
-		std::unordered_set<idx_t> count_last;
-
-		#pragma omp for
+		//std::unordered_set<idx_t> count_last;
+		idx_t* count_last = new idx_t[t->mlen[nmode-1]];
+		memset(count_last,-1,sizeof(idx_t)*t->mlen[nmode-1]);
+		#pragma omp for schedule(guided)
 		for(idx_t j = 0 ; j < t->fiber_count[nmode - 3]; j++ )
 		{
-			for(idx_t i = t->ptr[nmode - 3][j] ; i < t->ptr[nmode - 3][j+1]; i++)
+			idx_t start = t->ptr[nmode-2][t->ptr[nmode-3][j]];
+			idx_t end = t->ptr[nmode-2][t->ptr[nmode-3][j+1]];
+			for(idx_t i = start ; i < end; i++)
 			{
-				for(idx_t i1 = t->ptr[nmode - 2][i] ; i1 < t->ptr[nmode - 2][i+1]; i1++)
+				idx_t row_id = t->ind[nmode-1][i];
+				if(count_last[row_id] != j)
 				{
-					count_last.insert(t->ind[nmode - 1][i1]);	
-				}				
-			}
-			per_core[th_id]	+= count_last.size();
-			count_last.clear();
+					count_last[row_id] = j;
+					cnt ++;
+				}
+			}			
 		}
+		per_core[th_id] += cnt;
 
 	}
 

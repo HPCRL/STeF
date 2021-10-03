@@ -30,6 +30,10 @@ int main(int argc, char** argv)
 
 	t->intval = NULL;
 
+	int num_th = 1;
+	#ifdef OMP
+	num_th = omp_get_max_threads();
+	#endif
 
 	print_csf(t,argv[1]);
 	
@@ -43,7 +47,10 @@ int main(int argc, char** argv)
 	mats = (matrix **) malloc(nmode*sizeof(matrix*));
 	for(i=0 ; i<nmode ; i++)
 	{
-		mats[i] = create_matrix(t->mlen[i],r,1);
+		if(i == 0)
+			mats[i] = create_matrix(t->mlen[i]+num_th,r,1);
+		else
+			mats[i] = create_matrix(t->mlen[i],r,1);
 	}
 	for(i=0 ; i<nmode ; i++)
 	{
@@ -56,13 +63,10 @@ int main(int argc, char** argv)
 
 	double total=0;
 
-	int num_th = 1;
+	
 
 	b_thread_start(t);
-
-	#ifdef OMP
-	num_th = omp_get_max_threads();
-	#endif
+	
 
 	if (nmode > 5)
 		return 0;

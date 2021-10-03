@@ -367,11 +367,14 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 		pindex[i] = index + nmode*i;
 
 
-
-	printf("Tensor has dimensions ");
-	for(i = 0; i<nmode-1 ; i++)
-		printf("%dx",mlen[i]);
-	printf("%d and %d nnz\n",mlen[i],nnz);
+	if(VERBOSE > VERBOSE_LOW)
+	{
+		printf("Tensor has dimensions ");
+		for(i = 0; i<nmode-1 ; i++)
+			printf("%dx",mlen[i]);
+		printf("%d and %d nnz\n",mlen[i],nnz);
+	}
+	
 
 	sort_order = (int*) malloc(nmode*sizeof(int));
 	fiber_count = (idx_t*) malloc(nmode*sizeof(idx_t));
@@ -450,10 +453,13 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 		rem(len);
 	}
 
-	printf("Tensor has dimensions ");
-	for(i = 0; i<nmode-1 ; i++)
-		printf("%dx",mlen[i]);
-	printf("%d and %d nnz\n",mlen[i],nnz);
+	if(VERBOSE > VERBOSE_LOW)
+	{	
+		printf("Tensor has dimensions ");
+		for(i = 0; i<nmode-1 ; i++)
+			printf("%dx",mlen[i]);
+		printf("%d and %d nnz\n",mlen[i],nnz);
+	}
 	/*
 	sort_order[0] = 2;
 	sort_order[1] = 0;
@@ -480,7 +486,7 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 	csf *t = res;
 
 
-	coo2csf(pindex, index, vals, nnz,nmode,fiber_count,t,mlen,sort_order);
+	coo2csf(pindex, index, vals, nnz,nmode,fiber_count,t,mlen,sort_order,order_num==-1);
 
 	if(VERBOSE == VERBOSE_DEBUG)
 	{

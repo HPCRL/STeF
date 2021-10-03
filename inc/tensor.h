@@ -53,7 +53,7 @@ int print_fiber(csf* t, int modeid);
 int find_inds(idx_t* inds ,csf* t,idx_t it);
 int count_fiber(idx_t** pindex, idx_t nnz, int nmode, int shift, idx_t* fiber_count, int* sort_order);
 int coo2csf(coo* dt, csf* t, int* sort_order);
-int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_t* fiber_count, csf* res,idx_t* mlen, int* sort_order);
+int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_t* fiber_count, csf* res,idx_t* mlen, int* sort_order,bool switch_order=false);
 int count_fiber(coo* dt, int* sort_order, int hmode);
 int count_fiber_leaf_root(idx_t** pindex, idx_t nnz, idx_t modelen, int nmode, int* sort_order);
 int count_fiber_leaf_root_fast(csf* t);
