@@ -102,7 +102,7 @@ int main(int argc, char** argv)
 			for(int mode = 0 ; mode<nmode ; mode++)
 			{
 				clock_t cstart, cend;
-				bool is_atomic = (mode > 0 && (t->mlen[mode] * r * num_th >= PRIVATIZED_THRESH) ) || (force_atomic == 1);
+				bool is_atomic = (mode > 0 && (t->mlen[mode] > t->private_mats[0]->dim1 ) ) || (force_atomic == 1);
 				auto start = std::chrono::high_resolution_clock::now();
 				cstart = clock();
 				mttkrp_combined_lb(t,r,mats,profile,mode,!is_atomic,intv);            
