@@ -96,9 +96,10 @@ int main(int argc, char** argv)
                 save_str[i] = 'n';
 
         save_str[nmode-2] = '\0';
-        total = 0;
+        
 		for(int force_atomic = 0; force_atomic < 2 ; force_atomic++)
 		{
+			total = 0;
 			for(int mode = 0 ; mode<nmode ; mode++)
 			{
 				clock_t cstart, cend;
