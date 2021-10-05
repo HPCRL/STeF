@@ -898,7 +898,7 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 				{
 					pr = t->intval[1] + (i1+th)*r;
 				}
-				else
+				if(mode == 0 || !(intv1 && mode<2))
 					memset(pr,0,sizeof(TYPE)*r);
 					
 
@@ -1114,7 +1114,7 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 				TYPE* mv1 = mats[1]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
 				if(intv1 && mode < 2)
 					pr0 = t->intval[1] + (th + i1)*r ; // Set the location for intermediate value for T(i_1,i_2)
-				else
+				if(mode == 0 || !(intv1 && mode<2))
 					memset(pr0,0,sizeof(TYPE)*r); // Reset the previous values otherwise
 
 
@@ -1135,7 +1135,7 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 						TYPE* mv2 = mats[2]->val + ((mats[2]) -> dim2) * t->ind[2][i2];						
 						if(intv2 && mode < 3)
 							pr1 = t->intval[2] + (th + i2)*r; // Set the location for intermediate value for T(i_1,i_2,i_3)
-						else
+						if(mode == 0 || !(intv2 && mode<3))
 							memset(pr1,0,sizeof(TYPE)*r); // Reset the previous values otherwise							
 
 						if(mode > 2)
@@ -1389,7 +1389,7 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 				TYPE* mv1 = mats[1]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
 				if(intv1 && mode < 2)
 					pr0 = t->intval[1] + (th + i1)*r ; // Set the location for intermediate value for T(i_1,i_2)
-				else
+				if(mode == 0 || !(intv1 && mode<2))
 					memset(pr0,0,sizeof(TYPE)*r); // Reset the previous values otherwise
 
 
@@ -1410,7 +1410,7 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 						TYPE* mv2 = mats[2]->val + ((mats[2]) -> dim2) * t->ind[2][i2];						
 						if(intv2 && mode < 3)
 							pr1 = t->intval[2] + (th + i2)*r; // Set the location for intermediate value for T(i_1,i_2,i_3)
-						else
+						if(mode == 0 || !(intv2 && mode<3))
 							memset(pr1,0,sizeof(TYPE)*r); // Reset the previous values otherwise							
 
 						if(mode > 2)
@@ -1430,7 +1430,7 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 								TYPE* mv3 = mats[3]->val + ((mats[3] -> dim2) * t->ind[3][i3]);
 								if(intv3 && mode < 4)
 									pr2 = t->intval[3] + (th + i3)*r; // Set the location for intermediate value for T(i_1,i_2,i_3,i_4)
-								else
+								if(mode == 0 || !(intv3 && mode<4))
 									memset(pr2,0,sizeof(TYPE)*r); // Reset the previous values otherwise	
 								//TYPE tval = t->val[i3];													
 							
