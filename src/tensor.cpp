@@ -193,8 +193,7 @@ int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_
 	
 	if(VERBOSE > VERBOSE_LOW)
 		printf("nmode is %d \n",nmode);
-	if(switch_order)
-		count_fiber_leaf_root(pindex,nnz, mlen[sort_order[nmode-1]], nmode,sort_order);
+	//if(switch_order)		count_fiber_leaf_root(pindex,nnz, mlen[sort_order[nmode-1]], nmode,sort_order);
 
 	total_space = ilen*sizeof(idx_t);
 	total_space += 2*(nmode+1)*sizeof(idx_t*);
@@ -350,8 +349,8 @@ int coo2csf(idx_t** pindex, idx_t* index, TYPE* vals, idx_t nnz, int nmode, idx_
 	{
 		t.modeid[i] = sort_order[i];
 	}
-
-	count_fiber_leaf_root_fast(&t);
+	if(switch_order)
+		count_fiber_leaf_root_fast(&t);
 
 	*res = t;
 
