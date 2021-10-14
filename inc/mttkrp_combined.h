@@ -81,20 +81,22 @@ int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = partial_results_all + th*partial_results_size;
+		TYPE* pr = partial_results;
 		for(idx_t i0 = thread_start[th] ; i0 < thread_start[th+1] ; i0++)
 		{
 			TYPE* mv1 = mats[0]->val + ((mats[0]) -> dim2) * t->ind[0][i0];
 			for(idx_t i1 = t->ptr[0][i0] ; i1< t->ptr[0][i0+1]; i1++)
 			{
-				TYPE* pr;
+				
 				TYPE* mv2 = mats[1]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
-				if (!intv1 || mode == 2)
+				if (intv1)
 				{
-					pr = partial_results;
-					memset(pr,0,sizeof(TYPE)*r);
+					pr = t->intval[1] + i1*r ;
+					//memset(pr,0,sizeof(TYPE)*r);
 				}
-				else
-					pr = t->intval[1] + i1*r;
+
+				if(mode == 0 || !(intv1 && mode<2))
+					memset(pr,0,sizeof(TYPE)*r);
 
 				if(mode == 2)
 				{
@@ -304,9 +306,8 @@ int mttkrp_combined_4(csf* t, int r, matrix** mats, int profile )
 				TYPE* mv1 = mats[1]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
 				if(intv1 && mode < 2)
 					pr0 = t->intval[1] + i1*r ; // Set the location for intermediate value for T(i_1,i_2)
-				else
+				if(mode == 0 || !(intv1 && mode<2))
 					memset(pr0,0,sizeof(TYPE)*r); // Reset the previous values otherwise
-
 
 				if(mode >= 2)
 				{
@@ -323,8 +324,8 @@ int mttkrp_combined_4(csf* t, int r, matrix** mats, int profile )
 						TYPE* mv2 = mats[2]->val + ((mats[2]) -> dim2) * t->ind[2][i2];						
 						if(intv2 && mode < 3)
 							pr1 = t->intval[2] + i2*r; // Set the location for intermediate value for T(i_1,i_2,i_3)
-						else
-							memset(pr1,0,sizeof(TYPE)*r); // Reset the previous values otherwise							
+						if(mode == 0 || !(intv2 && mode<3))
+							memset(pr1,0,sizeof(TYPE)*r); // Reset the previous values otherwise									
 
 						if(mode > 2)
 						{
@@ -566,7 +567,7 @@ int mttkrp_combined_5(csf* t, int r, matrix** mats, int profile )
 				TYPE* mv1 = mats[1]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
 				if(intv1 && mode < 2)
 					pr0 = t->intval[1] + i1*r ; // Set the location for intermediate value for T(i_1,i_2)
-				else
+				if(mode == 0 || !(intv1 && mode<2))
 					memset(pr0,0,sizeof(TYPE)*r); // Reset the previous values otherwise
 
 
@@ -585,8 +586,8 @@ int mttkrp_combined_5(csf* t, int r, matrix** mats, int profile )
 						TYPE* mv2 = mats[2]->val + ((mats[2]) -> dim2) * t->ind[2][i2];						
 						if(intv2 && mode < 3)
 							pr1 = t->intval[2] + i2*r; // Set the location for intermediate value for T(i_1,i_2,i_3)
-						else
-							memset(pr1,0,sizeof(TYPE)*r); // Reset the previous values otherwise							
+						if(mode == 0 || !(intv2 && mode<3))
+							memset(pr1,0,sizeof(TYPE)*r); // Reset the previous values otherwise						
 
 						if(mode > 2)
 						{
@@ -603,7 +604,7 @@ int mttkrp_combined_5(csf* t, int r, matrix** mats, int profile )
 								TYPE* mv3 = mats[3]->val + ((mats[3] -> dim2) * t->ind[3][i3]);
 								if(intv3 && mode < 4)
 									pr2 = t->intval[3] + i3*r; // Set the location for intermediate value for T(i_1,i_2,i_3,i_4)
-								else
+								if(mode == 0 || !(intv3 && mode<4))
 									memset(pr2,0,sizeof(TYPE)*r); // Reset the previous values otherwise	
 								//TYPE tval = t->val[i3];													
 							
