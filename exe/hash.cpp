@@ -30,10 +30,10 @@ idx_t hash_dim(coo* dt,int* modes, int nmodes)
 
     idx_t* nnz_ptr = dt->ind;
     idx_t pro_cnt = 0;
+    #pragma omp parallel for reduction(+:pro_cnt)
     for (int i=0; i<dt->nnz; i++)
     {
-        idx_t hv = hash_index(nnz_ptr,pad,modes,nmodes,prime);
-        nnz_ptr += dt->nmode;
+        idx_t hv = hash_index(dt->ind + (i * dt->nmode),pad,modes,nmodes,prime);        
         if(hash_table[hv] == 0)
         {
             hash_table[hv] = 1;
