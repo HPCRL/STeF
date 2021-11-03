@@ -17,15 +17,16 @@ inline idx_t  hash_index(idx_t* nnz, idx_t* pad, int* modes, int nmodes, idx_t p
 idx_t hash_dim(coo* dt,int* modes, int nmodes)
 {
     idx_t* pad = new idx_t[nmodes];
+    idx_t prime = dt->nnz+1;
     pad[0] = 1;
     for (int i = 0 ; i<nmodes-1 ; i++)
     {
-        pad[i+1] = pad[i]*dt->mlen[modes[i]];
+        pad[i+1] = (pad[i]*dt->mlen[modes[i]]) % prime;
     }
 
-    idx_t prime = dt->nnz+1;
+    
 
-    idx_t* hash_table = new idx_t[dt->nnz];
+    idx_t* hash_table = new idx_t[prime];
     memset(hash_table,0,sizeof(idx_t)*dt->nnz);
 
     idx_t* nnz_ptr = dt->ind;
