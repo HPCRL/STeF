@@ -1179,7 +1179,11 @@ double atomic_thresh(int r,mutex_array* mutex)
 			// Do privatized computation
 			#pragma omp parallel
 			{
+				#ifdef OMP
 				int th = omp_get_thread_num();
+				#else
+				int th = 0;
+				#endif
 				#pragma omp for
 				for(idx_t i=0 ; i< big_array_size ; i++)
 				{

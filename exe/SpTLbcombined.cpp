@@ -66,8 +66,10 @@ int main(int argc, char** argv)
 	
 
 	b_thread_start(t);
+	mttkrp_fused_init_ms(t,r,true,NULL);
 	
 
+	printf("here\n");
 	if (nmode > 5)
 		return 0;
 
@@ -134,9 +136,10 @@ int main(int argc, char** argv)
         }
         printf("Total Intermediate Save %s combined time template MTTKRP time %lf\n",save_str,total);
 		// 0 intval caches
+		
 		for(int i=1;i<nmode-1;i++)
 		{
-			if(intv[i-1])
+			if(t->intval != NULL && intv[i-1])
 				memset(t->intval[i],0,sizeof(TYPE)*(t->fiber_count[i] + t->num_th)*r);
 		}
     }

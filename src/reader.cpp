@@ -333,7 +333,7 @@ int read_tensor(const char* file, csf* res,  coo* debugt, int order_num)
 		}
 		else if(nnz == size)
 		{
-			size += sizestep;
+			size += size;
 			index = (idx_t*) realloc(index,size*nmode*sizeof(idx_t));
 			pindex = (idx_t**) realloc(pindex,(size+1)*sizeof(idx_t*));
 			vals = (TYPE*) realloc(vals,size*sizeof(TYPE));

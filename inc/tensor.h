@@ -21,6 +21,7 @@ struct tensor_csf
 	int num_th;
 	int nmode;
 	TYPE** intval;
+	TYPE*** intval_th;
 	idx_t * thread_start;
 	idx_t ** b_thread_start;
 	mutex_array* mutex;

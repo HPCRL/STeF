@@ -833,6 +833,9 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 	
 	if (mode > 0 && privatized)
 	{
+		#ifdef OMP
+		#pragma omp parallel for
+		#endif
 		for ( int i=0; i<num_th; i++)
 		{
 			memset(t->private_mats[i]->val ,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
@@ -880,7 +883,8 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 		#endif
 
 		auto time_start = std::chrono::high_resolution_clock::now();
-		TYPE* partial_results = partial_results_all + th*partial_results_size;
+		TYPE* partial_results = (TYPE*) malloc(partial_results_size*sizeof(TYPE));
+		memset(partial_results,0,sizeof(TYPE)*partial_results_size);
 
 		TYPE* pr = partial_results;
 
@@ -897,7 +901,8 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 				
 				if(intv1 && mode < 2)
 				{
-					pr = t->intval[1] + (i1+th)*r;
+					//pr = t->intval[1] + (i1+th)*r;
+					pr = t->intval_th[th][1] + (i1 - thread_start[th][1])*r;
 				}
 				if(mode == 0 || !(intv1 && mode<2))
 					memset(pr,0,sizeof(TYPE)*r);
@@ -1097,7 +1102,7 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 		th = omp_get_thread_num();
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
-		TYPE* partial_results = partial_results_all + th*partial_results_size;
+		TYPE* partial_results = (TYPE*) malloc(partial_results_size*sizeof(TYPE));
 		// TYPE* dot_partial_results = dot_partial_results_all + th*partial_results_size;
 
 		TYPE* pr0 = partial_results;
@@ -1114,7 +1119,8 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 			{
 				TYPE* mv1 = mats[1]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
 				if(intv1 && mode < 2)
-					pr0 = t->intval[1] + (th + i1)*r ; // Set the location for intermediate value for T(i_1,i_2)
+					//pr0 = t->intval[1] + (th + i1)*r ; // Set the location for intermediate value for T(i_1,i_2)
+					pr0 = t->intval_th[th][1] + (i1-thread_start[th][1])*r;
 				if(mode == 0 || !(intv1 && mode<2))
 					memset(pr0,0,sizeof(TYPE)*r); // Reset the previous values otherwise
 
@@ -1135,7 +1141,8 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 					{	
 						TYPE* mv2 = mats[2]->val + ((mats[2]) -> dim2) * t->ind[2][i2];						
 						if(intv2 && mode < 3)
-							pr1 = t->intval[2] + (th + i2)*r; // Set the location for intermediate value for T(i_1,i_2,i_3)
+							//pr1 = t->intval[2] + (th + i2)*r; // Set the location for intermediate value for T(i_1,i_2,i_3)
+							pr1 = t->intval_th[th][2] + (i2-thread_start[th][2])*r;
 						if(mode == 0 || !(intv2 && mode<3))
 							memset(pr1,0,sizeof(TYPE)*r); // Reset the previous values otherwise							
 
@@ -1372,7 +1379,7 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 		th = omp_get_thread_num();
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
-		TYPE* partial_results = partial_results_all + th*partial_results_size;
+		TYPE* partial_results = (TYPE*) malloc(partial_results_size*sizeof(TYPE));
 		TYPE* pr0 = partial_results;
 		TYPE* pr1 = partial_results + r;
 		TYPE* pr2 = partial_results + 2*r;
@@ -1389,7 +1396,8 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 			{
 				TYPE* mv1 = mats[1]->val + ((mats[1]) -> dim2) * t->ind[1][i1];
 				if(intv1 && mode < 2)
-					pr0 = t->intval[1] + (th + i1)*r ; // Set the location for intermediate value for T(i_1,i_2)
+					//pr0 = t->intval[1] + (th + i1)*r ; // Set the location for intermediate value for T(i_1,i_2)
+					pr0 = t->intval_th[th][1] + (i1-thread_start[th][1])*r;
 				if(mode == 0 || !(intv1 && mode<2))
 					memset(pr0,0,sizeof(TYPE)*r); // Reset the previous values otherwise
 
@@ -1410,7 +1418,8 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 					{	
 						TYPE* mv2 = mats[2]->val + ((mats[2]) -> dim2) * t->ind[2][i2];						
 						if(intv2 && mode < 3)
-							pr1 = t->intval[2] + (th + i2)*r; // Set the location for intermediate value for T(i_1,i_2,i_3)
+							//pr1 = t->intval[2] + (th + i2)*r; // Set the location for intermediate value for T(i_1,i_2,i_3)
+							pr1 = t->intval_th[th][2] + (i2-thread_start[th][2])*r;
 						if(mode == 0 || !(intv2 && mode<3))
 							memset(pr1,0,sizeof(TYPE)*r); // Reset the previous values otherwise							
 
@@ -1430,7 +1439,8 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 							{	
 								TYPE* mv3 = mats[3]->val + ((mats[3] -> dim2) * t->ind[3][i3]);
 								if(intv3 && mode < 4)
-									pr2 = t->intval[3] + (th + i3)*r; // Set the location for intermediate value for T(i_1,i_2,i_3,i_4)
+									//pr2 = t->intval[3] + (th + i3)*r; // Set the location for intermediate value for T(i_1,i_2,i_3,i_4)
+									pr2 = t->intval_th[th][3] + (i3-thread_start[th][3])*r;
 								if(mode == 0 || !(intv3 && mode<4))
 									memset(pr2,0,sizeof(TYPE)*r); // Reset the previous values otherwise	
 								//TYPE tval = t->val[i3];													

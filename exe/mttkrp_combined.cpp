@@ -46,12 +46,14 @@ int main(int argc, char** argv)
 	}
 	for(i=0 ; i<nmode ; i++)
 	{
-		random_matrix(*mats[i],i);
+		//random_matrix(*mats[i],i);
+		set_matrix(*mats[i],1);
 		if(VERBOSE  == VERBOSE_DEBUG)
 			print_matrix(*mats[i]);
 	}
 
 	mttkrp_fused_init(t,r,true);
+	b_thread_start(t);
 
 	double total=0;
 
@@ -75,6 +77,7 @@ int main(int argc, char** argv)
 			bool is_atomic = mode > 0 && ((t->fiber_count[mode] / t->mlen[mode] < num_th * ATOMIC_THRESH) || (t->mlen[mode] * r * num_th >= PRIVATIZED_THRESH) );
 			auto start = std::chrono::high_resolution_clock::now();
 			cstart = clock();
+			/*
 			if(is_atomic)	
 			{
 				if (mode == 0)
@@ -92,7 +95,28 @@ int main(int argc, char** argv)
 					mttkrp_combined_3<1,false,true>(t,r,mats,profile);
 				else if (mode == 2)
 					mttkrp_combined_3<2,false,true>(t,r,mats,profile);
-			}	
+			}
+			*/	
+			const bool saved = true;
+
+			if(is_atomic)	
+			{
+				if (mode == 0)
+					mttkrp_combined_lb_3<0,saved,false>(t,r,mats,profile);
+				else if (mode == 1)
+					mttkrp_combined_lb_3<1,saved,false>(t,r,mats,profile);
+				else if (mode == 2)
+					mttkrp_combined_lb_3<2,saved,false>(t,r,mats,profile);
+			}
+			else
+			{
+				if (mode == 0)
+					mttkrp_combined_lb_3<0,saved,true>(t,r,mats,profile);
+				else if (mode == 1)
+					mttkrp_combined_lb_3<1,saved,true>(t,r,mats,profile);
+				else if (mode == 2)
+					mttkrp_combined_lb_3<2,saved,true>(t,r,mats,profile);
+			}
 			cend = clock();
 			//printf("here\n");
 			auto end = std::chrono::high_resolution_clock::now();
@@ -103,6 +127,11 @@ int main(int argc, char** argv)
 			// printf("Clock time for mode %d is %lf \n",t->modeid[mode],cdiff);
 			if(debug)
 			{
+				/*
+				set_matrix(*mats[0],1);
+				set_matrix(*mats[1],1);
+				set_matrix(*mats[2],1);
+				*/
 				auto start2 = std::chrono::high_resolution_clock::now();
 				mttkrp_test(dt,mode,r,mats);
 				auto end2 = std::chrono::high_resolution_clock::now();
@@ -122,11 +151,16 @@ int main(int argc, char** argv)
 				//random_matrix(*mats[i],i+1);
 				//set_matrix(*mats[i],1);
 			}
-			random_matrix(*mats[mode],mode);
+			//random_matrix(*mats[mode],mode);
+			set_matrix(*mats[mode],1);
+			set_matrix(*mats[0],1);
+			set_matrix(*mats[1],1);
+			set_matrix(*mats[2],1);
 
 			
 		}
 		printf("Total Intermediate %s template MTTKRP time %lf\n",("not saved"),total);
+		memset(t->intval[1],0,sizeof(TYPE)*t->fiber_count[1]);
 		total = 0;
 		if(run_saved != 1)
 		for(int mode = 0 ; mode<nmode ; mode++)

@@ -934,6 +934,150 @@ int mttkrp_private_last_vec(csf* t, int mode, int r, matrix** mats, int vec, int
 }
 
 
+int mttkrp_fused_init_ms(csf* t,int r,bool cap,bool* memo)
+{
+	// Distribute intval to each thread. Do local initializations.
+	long long total_space = 0;
+	char* space_sign;
+
+
+	//find_thread_start(t);
+
+	#ifdef OMP
+	if (mutex == NULL)
+	{
+		mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
+		t->mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
+		//mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
+	}
+
+	idx_t num_th = omp_get_max_threads();
+	t->private_mats = (matrix** ) malloc(num_th*sizeof(matrix*));
+
+	for(int i = 1; i < (t->nmode)-1 ; i++)
+	{
+		total_space += (t->fiber_count[i])*r*sizeof(TYPE); // Space for intvals
+	}	
+
+	idx_t max_len = 1;
+
+	idx_t remaining_memory_space = 0;
+	if( cap && PRIVATIZED_THRESH > total_space )
+		remaining_memory_space = PRIVATIZED_THRESH - total_space;
+
+
+	for(int i=0; i<t->nmode ; i++)
+	{	
+		if(t->mlen[i] > max_len && ( !cap || t->mlen[i] * r * num_th * sizeof(TYPE) < remaining_memory_space ))
+		{			
+			max_len = t->mlen[i];
+		}
+	}
+	total_space += max_len*r*num_th*sizeof(TYPE);
+
+	// Print total space requirement
+	if(total_space >= 1073741824)
+	{
+		// GB
+		space_sign = "GB";
+		total_space /= 1073741824;
+	}
+	else if(total_space >= 1048576)
+	{
+		// MB
+		space_sign = "MB";
+		total_space /= 1048576;
+	}
+	else if(total_space >= 1024)
+	{
+		// KB
+		space_sign = "KB";
+		total_space /= 1024;
+	}
+	else
+	{
+		// B
+		space_sign = "B";
+	}
+
+	printf("Additional space requirement for the intermediate tensors is %llu%s \n",total_space,space_sign);
+
+
+	// Allocate arrays
+	#ifdef OMP
+	#pragma omp parallel for
+	#endif
+	for(int i=0; i<num_th ; i++)
+	{
+		t->private_mats[i] = create_matrix(max_len, r, 0);
+	}
+	t->num_th = num_th;
+	
+	#else
+	t->num_th = 1;
+	#endif
+
+
+
+	if(t->intval_th == NULL)
+	{
+		t->intval_th = (TYPE***) malloc((t->num_th)*sizeof(TYPE**));
+		#ifdef OMP
+		#pragma omp parallel for
+		#endif
+		for(int th = 0 ; th < t->num_th ; th++)
+		{
+			t->intval_th[th] = (TYPE**) malloc((t->nmode)*sizeof(TYPE*));
+			t->intval_th[th][0] = NULL;
+			for(int i = 1; i < (t->nmode)-1 ; i++)
+			{
+				idx_t intval_size = t->b_thread_start[th+1][i] - t->b_thread_start[th][i] + 1;
+				//printf("%llu\n",intval_size);
+				t->intval_th[th][i] = (TYPE*) malloc((intval_size)*r*sizeof(TYPE));
+				if(t->intval_th[th][i] == NULL)
+				{
+					printf("SpTL ERROR: Allocation error in mttkrp fused init\n");
+					exit(1);
+				}
+			}
+		}
+	}
+
+	/*
+	if(t->intval == NULL)
+	{
+		t->intval = (TYPE**) malloc((t->nmode)*sizeof(TYPE));
+		t->intval[0] = NULL;
+		t->intval[(t->nmode)-1] = NULL;
+		for(int i = 1; i < (t->nmode)-1 ; i++)
+		{
+			t->intval[i] = (TYPE*) malloc((t->fiber_count[i] + num_th)*r*sizeof(TYPE));
+			if(t->intval[i] == NULL)
+			{
+				printf("SpTL ERROR: Allocation error in mttkrp fused init\n");
+				exit(1);
+			}
+		}
+		
+	}
+	for(int i = 1; i < (t->nmode)-1 ; i++)
+	{
+		memset(t->intval[i],0,sizeof(TYPE)*(t->fiber_count[i]+num_th)*r);
+
+//		for(idx_t j=0; j<(t->fiber_count[i])*r ; j++)
+//		{
+//			t->intval[i][j] = 0;
+//		}
+	}
+	*/
+
+
+
+
+	return 0;
+	return 0;
+}
+
 int mttkrp_fused_init(csf* t,int r,bool cap)
 {
 	//int i,j;
@@ -1025,7 +1169,7 @@ int mttkrp_fused_init(csf* t,int r,bool cap)
 		t->intval[(t->nmode)-1] = NULL;
 		for(int i = 1; i < (t->nmode)-1 ; i++)
 		{
-			t->intval[i] = (TYPE*) malloc((t->fiber_count[i] + num_th)*r*sizeof(TYPE));
+			t->intval[i] = (TYPE*) malloc((t->fiber_count[i] + t->num_th)*r*sizeof(TYPE));
 			if(t->intval[i] == NULL)
 			{
 				printf("SpTL ERROR: Allocation error in mttkrp fused init\n");
@@ -1036,7 +1180,7 @@ int mttkrp_fused_init(csf* t,int r,bool cap)
 	}
 	for(int i = 1; i < (t->nmode)-1 ; i++)
 	{
-		memset(t->intval[i],0,sizeof(TYPE)*(t->fiber_count[i]+num_th)*r);
+		memset(t->intval[i],0,sizeof(TYPE)*(t->fiber_count[i]+t->num_th)*r);
 
 //		for(idx_t j=0; j<(t->fiber_count[i])*r ; j++)
 //		{
