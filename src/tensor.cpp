@@ -18,6 +18,7 @@ csf* malloc_csf()
 	res->mlen = NULL;
 	res->modeid = NULL;
 	res->intval = NULL;
+	res->intval_th = NULL;
 	res->thread_start = NULL;
 	res->b_thread_start = NULL;
 	res->private_mats = NULL;

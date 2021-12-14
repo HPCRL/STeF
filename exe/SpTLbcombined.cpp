@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 			print_matrix(*mats[i]);
 	}
 
-	mttkrp_fused_init(t,r,true);
+	//mttkrp_fused_init(t,r,true);
 
 	double total=0;
 
@@ -68,8 +68,6 @@ int main(int argc, char** argv)
 	b_thread_start(t);
 	mttkrp_fused_init_ms(t,r,true,NULL);
 	
-
-	printf("here\n");
 	if (nmode > 5)
 		return 0;
 

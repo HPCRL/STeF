@@ -1075,7 +1075,6 @@ int mttkrp_fused_init_ms(csf* t,int r,bool cap,bool* memo)
 
 
 	return 0;
-	return 0;
 }
 
 int mttkrp_fused_init(csf* t,int r,bool cap)
