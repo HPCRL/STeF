@@ -63,8 +63,6 @@ int main(int argc, char** argv)
 
 	double total=0;
 
-	
-
 	b_thread_start(t);
 	mttkrp_fused_init_ms(t,r,true,NULL);
 	

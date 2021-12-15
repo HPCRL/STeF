@@ -1004,15 +1004,24 @@ int mttkrp_fused_init_ms(csf* t,int r,bool cap,bool* memo)
 
 
 	// Allocate arrays
-	#ifdef OMP
-	#pragma omp parallel for
-	#endif
+	
+	#pragma omp parallel for	
 	for(int i=0; i<num_th ; i++)
 	{
 		t->private_mats[i] = create_matrix(max_len, r, 0);
 	}
 	t->num_th = num_th;
-	
+
+	if(getenv("NS"))
+	{
+		t->num_sockets = atoi(getenv("NS"));		
+	}
+	else
+	{
+		t->num_sockets = 1;
+	}
+	t->cps = t->num_th /  t->num_sockets ;
+			
 	#else
 	t->num_th = 1;
 	#endif

@@ -1275,4 +1275,23 @@ int reduce_mode_0(csf* t, matrix* mat)
 }
 
 
+int reduce_socket(csf* t, int r, matrix* mat)
+{
+	#pragma omp parallel for	
+	for(int i = 0 ; i < mat->dim1 ; i ++)
+	{
+		TYPE* out = mat->val + (mat->dim2)*i;
+		for(int socket = 1 ; socket < t->num_sockets ; socket++)
+		{
+			TYPE* in = t->private_mats[socket*t->cps]->val + (mat->dim2)*i;
+			for(int j = 0 ; j < r ; j++)
+			{
+				out[j] += in[j];
+			}
+		}
+	}
+
+	return 0;
+}
+
 #endif

@@ -51,6 +51,13 @@ int free_csf(csf* t)
 	if(t->intval != NULL)
 		for (i=0; i< (t->nmode) ; i++)
 			rem(t->intval[i]);
+	if(t->intval_th != NULL)
+		for (int th=0 ; th<(t->num_th) ; th++)
+		{
+			for (i=0; i< (t->nmode) ; i++)
+				rem(t->intval_th[th][i]);
+			rem(t->intval_th[th]);	
+		}
 	if(t->private_mats != NULL)
 		for (i=0; i< (t->num_th) ; i++)
 			free_matrix(t->private_mats[i]);

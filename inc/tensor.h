@@ -20,6 +20,8 @@ struct tensor_csf
 	matrix** private_mats;
 	int num_th;
 	int nmode;
+	int cps;
+	int num_sockets;
 	TYPE** intval;
 	TYPE*** intval_th;
 	idx_t * thread_start;

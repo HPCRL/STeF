@@ -13,6 +13,7 @@ int mttkrp_combined_lb(csf* t, int r, matrix** mats, int profile , int mode, boo
 int b_thread_start(csf* t);
 double atomic_thresh(int r,mutex_array* mutex);
 int reduce_mode_0(csf* t, matrix* mat);
+int reduce_socket(csf* t, int r, matrix* mat);
 
 template <int mode, bool intv1, bool privatized>
 int mttkrp_combined_3(csf* t, int r, matrix** mats, int profile )
@@ -823,6 +824,10 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 	num_th = omp_get_max_threads();
 	
 	#endif
+
+	matrix* temp = t->private_mats[0];
+	if(!privatized && mode > 0)
+		t->private_mats[0] = mats[mode];
 	
 	if(VERBOSE >= VERBOSE_DEBUG) printf("num ths %d\n", num_th);
 	
@@ -839,6 +844,13 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 		for ( int i=0; i<num_th; i++)
 		{
 			memset(t->private_mats[i]->val ,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
+		}
+	}
+	if( mode > 0 && !privatized)
+	{
+		for ( int i=1; i<t->num_sockets; i++)
+		{
+			memset(t->private_mats[i*t->cps]->val ,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
 		}
 	}
 	
@@ -949,7 +961,7 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 							#ifdef OMP
 							mutex_set_lock(mutex,row_id);
 							#endif
-							TYPE* matval = mats[2]->val + ((mats[2]) -> dim2) * row_id;
+							TYPE* matval = t->private_mats[(th/t->cps)*(t->cps)]->val + ((mats[mode]) -> dim2) * row_id;
 							#pragma omp simd
 							for(int y=0 ; y<r ; y++)
 							{
@@ -989,7 +1001,7 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 						mutex_set_lock(mutex,row_id);
 						#endif
 
-						TYPE* matval = mats[1]->val + ((mats[1]) -> dim2) * row_id;
+						TYPE* matval = t->private_mats[(th/t->cps)*(t->cps)]->val + ((mats[mode]) -> dim2) * row_id;
 						#pragma omp simd
 						for(int y=0 ; y<r ; y++)
 						{
@@ -1018,18 +1030,23 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 	}
 	if(mode == 0)
 	{
-		reduce_mode_0(t,mats[0]);
+		reduce_mode_0(t,mats[mode]);
 	}
-
-	if (mode > 0 && privatized)
+	else if (privatized)
 	{
 		reduce(t,r,mats[mode]);
 	}
+	else
+	{
+		reduce_socket(t,r,mats[mode]);
+	}
+
 	if(profile == mode)
 	{
 		LIKWID_MARKER_CLOSE;
 	}
 	rem(partial_results_all);	
+	t->private_mats[0] = temp;
 	return 0;
 	
 }
@@ -1041,6 +1058,9 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 	int num_th = 1;
 	int partial_results_size = nmode*r+PAD; 
 	idx_t** thread_start = t->b_thread_start;
+	matrix* temp = t->private_mats[0];
+	if(!privatized && mode > 0)
+		t->private_mats[0] = mats[mode];
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	#endif
@@ -1060,6 +1080,13 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 		for ( int i=0; i<num_th; i++)
 		{
 			memset(t->private_mats[i]->val ,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
+		}
+	}
+	if( mode > 0 && !privatized)
+	{
+		for ( int i=1; i<t->num_sockets; i++)
+		{
+			memset(t->private_mats[i*t->cps]->val ,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
 		}
 	}
 	
@@ -1183,9 +1210,9 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 									}
 								}
 								else
-								{
-									TYPE* matval = mv3;
+								{	
 									idx_t row_id = t->ind[3][i3] ; 
+									TYPE* matval = t->private_mats[(th/t->cps)*(t->cps)]->val + ((mats[mode]) -> dim2) * row_id;
 									#ifdef OMP
 									mutex_set_lock(mutex,row_id);
 									#endif									
@@ -1224,7 +1251,7 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 							else
 							{
 								idx_t row_id = t->ind[2][i2] ; 
-								TYPE* matval = mv2;
+								TYPE* matval = t->private_mats[(th/t->cps)*(t->cps)]->val + ((mats[mode]) -> dim2) * row_id;
 								#ifdef OMP
 								mutex_set_lock(mutex,row_id);
 								#endif
@@ -1264,8 +1291,8 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 					}
 					else
 					{
-						TYPE* matval = mv1;
 						idx_t row_id = t->ind[1][i1] ; 
+						TYPE* matval = t->private_mats[(th/t->cps)*(t->cps)]->val + ((mats[mode]) -> dim2) * row_id;
 						#ifdef OMP
 						mutex_set_lock(mutex,row_id);
 						#endif
@@ -1298,16 +1325,20 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 
 	if(mode == 0)
 	{
-		reduce_mode_0(t,mats[0]);
+		reduce_mode_0(t,mats[mode]);
 	}
-
-	if (mode > 0 && privatized)	
+	else if (privatized)
 	{
 		reduce(t,r,mats[mode]);
+	}
+	else
+	{
+		reduce_socket(t,r,mats[mode]);
 	}
 
 	LIKWID_MARKER_CLOSE;
 	rem(partial_results_all);	
+	t->private_mats[0] = temp;
 	return 0;
 	
 }
@@ -1320,6 +1351,9 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 	int num_th = 1;
 	int partial_results_size = nmode*r+PAD; 
 	idx_t** thread_start = t->b_thread_start;
+	matrix* temp = t->private_mats[0];
+	if(!privatized && mode > 0)
+		t->private_mats[0] = mats[mode];
 	#ifdef OMP
 	num_th = omp_get_max_threads();
 	#endif
@@ -1337,6 +1371,13 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 		for ( int i=0; i<num_th; i++)
 		{
 			memset(t->private_mats[i]->val ,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
+		}
+	}
+	if( mode > 0 && !privatized)
+	{
+		for ( int i=1; i<t->num_sockets; i++)
+		{
+			memset(t->private_mats[i*t->cps]->val ,0,sizeof(TYPE)*mats[mode]->dim1 * mats[mode]->dim2);
 		}
 	}
 	
@@ -1484,9 +1525,9 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 												}
 											}
 											else
-											{
-												TYPE* matval = mv4;
+											{												
 												idx_t row_id = t->ind[4][i4] ; 
+												TYPE* matval = t->private_mats[(th/t->cps)*(t->cps)]->val + ((mats[mode]) -> dim2) * row_id;
 												#ifdef OMP
 												mutex_set_lock(mutex,row_id);
 												#endif									
@@ -1527,8 +1568,9 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 									}
 									else
 									{
-										TYPE* matval = mv3;
+										
 										idx_t row_id = t->ind[3][i3] ; 
+										TYPE* matval = t->private_mats[(th/t->cps)*(t->cps)]->val + ((mats[mode]) -> dim2) * row_id;
 										#ifdef OMP
 										mutex_set_lock(mutex,row_id);
 										#endif									
@@ -1566,9 +1608,9 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 								}
 							}
 							else
-							{
-								idx_t row_id = t->ind[2][i2] ; 
-								TYPE* matval = mv2;
+							{				
+								idx_t row_id = t->ind[2][i2] ; 				
+								TYPE* matval = t->private_mats[(th/t->cps)*(t->cps)]->val + ((mats[mode]) -> dim2) * row_id;
 								#ifdef OMP
 								mutex_set_lock(mutex,row_id);
 								#endif
@@ -1607,9 +1649,9 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 						}
 					}
 					else
-					{
-						TYPE* matval = mv1;
+					{						
 						idx_t row_id = t->ind[1][i1] ; 
+						TYPE* matval = t->private_mats[(th/t->cps)*(t->cps)]->val + ((mats[mode]) -> dim2) * row_id;
 						#ifdef OMP
 						mutex_set_lock(mutex,row_id);
 						#endif
@@ -1642,16 +1684,20 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 	
 	if(mode == 0)
 	{
-		reduce_mode_0(t,mats[0]);
+		reduce_mode_0(t,mats[mode]);
 	}
-	
-	if (mode > 0 && privatized)	
+	else if (privatized)
 	{
 		reduce(t,r,mats[mode]);
+	}
+	else
+	{
+		reduce_socket(t,r,mats[mode]);
 	}
 
 	LIKWID_MARKER_CLOSE;
 	rem(partial_results_all);	
+	t->private_mats[0] = temp;
 	return 0;
 }
 
