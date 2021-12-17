@@ -598,6 +598,8 @@ int count_fiber_leaf_root_fast(csf* t)
 		}
 		per_core[th_id] += cnt;
 
+		delete [] count_last;
+
 	}
 
 	for(int i=0; i<num_th; i++)
