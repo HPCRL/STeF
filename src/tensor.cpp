@@ -65,6 +65,7 @@ int free_csf(csf* t)
 		delete [] t->b_thread_start[0];
 	rem(t->private_mats);
 	rem(t->intval);
+	rem(t->intval_th);
 	if(t->b_thread_start != NULL)
 		delete [] t->b_thread_start;
 	rem(t->thread_start);
