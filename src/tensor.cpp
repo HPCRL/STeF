@@ -54,7 +54,7 @@ int free_csf(csf* t)
 	if(t->intval_th != NULL)
 		for (int th=0 ; th<(t->num_th) ; th++)
 		{
-			for (i=0; i< (t->nmode) ; i++)
+			for (i=1; i< (t->nmode)-1 ; i++)
 				rem(t->intval_th[th][i]);
 			rem(t->intval_th[th]);	
 		}
