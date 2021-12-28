@@ -946,7 +946,7 @@ int mttkrp_fused_init_ms(csf* t,int r,bool cap,bool* memo)
 	#ifdef OMP
 	if (mutex == NULL)
 	{
-		mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
+		//mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
 		t->mutex = mutex_alloc_custom((t->mlen)[t->nmode-1] , 16);
 		//mutex = mutex_alloc_custom(1024 , 16); // This is what splatt is using
 	}

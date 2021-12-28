@@ -69,6 +69,7 @@ int free_csf(csf* t)
 	if(t->b_thread_start != NULL)
 		delete [] t->b_thread_start;
 	rem(t->thread_start);
+	rem(t->mutex);
 	rem(t);
 	return 0;
 }

@@ -975,13 +975,36 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 				}			
 				
 				if(mode == 0)
-				{
-					TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]+th);
-					#pragma omp simd
-					for(int y=0 ; y<r ; y++)
+				{					
+					if(i0 == thread_start[th][0] || i0 == i0_end)
 					{
-						matval[y] += pr[y] * mv2[y]; // dot TTV
-					}				
+						const int row_id = t->ind[0][i0];
+						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (row_id);
+						#ifdef OMP
+						mutex_set_lock(mutex,row_id);
+						//if(row_id == 2)							printf("locking %d",th);
+						#endif						
+						//printf("lock %d",row_id);
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							matval[y] += pr[y] * mv2[y]; // saxpy
+						}
+
+						#ifdef OMP
+						//if(row_id == 2)							printf("unlocking %d\n",th);
+						mutex_unset_lock(mutex,row_id);
+						#endif
+					}
+					else
+					{
+						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]);
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							matval[y] += pr[y] * mv2[y]; // dot TTV
+						}				
+					}
 				}
 				else if (mode == 1)
 				{
@@ -1030,7 +1053,7 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 	}
 	if(mode == 0)
 	{
-		reduce_mode_0(t,mats[mode]);
+		//reduce_mode_0(t,mats[mode]);
 	}
 	else if (privatized)
 	{
@@ -1269,14 +1292,34 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 					}	
 				} // End of the loop for traversing mode 2	
 				
-				if(mode < 1)
-				{
-					TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]+th);
-					#pragma omp simd
-					for(int y=0 ; y<r ; y++)
+				if(mode == 0)
+				{					
+					if(i0 == thread_start[th][0] || i0 == i0_end)
 					{
-						matval[y] += pr0[y] * mv1[y]; // dot TTV
-					}	
+						const int row_id = t->ind[0][i0];
+						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]);
+						#ifdef OMP
+						mutex_set_lock(mutex,row_id);
+						#endif						
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							matval[y] += pr0[y] * mv1[y]; // saxpy
+						}
+
+						#ifdef OMP
+						mutex_unset_lock(mutex,row_id);
+						#endif
+					}
+					else
+					{
+						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]);
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							matval[y] += pr0[y] * mv1[y]; // dot TTV
+						}			
+					}
 				}
 				else if (mode == 1)
 				{	// MTTKRP for mode 1
@@ -1325,7 +1368,7 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 
 	if(mode == 0)
 	{
-		reduce_mode_0(t,mats[mode]);
+		//reduce_mode_0(t,mats[mode]);
 	}
 	else if (privatized)
 	{
@@ -1628,14 +1671,34 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 					}	
 				} // End of the loop for traversing mode 2	
 				
-				if(mode < 1)
-				{
-					TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]+th);
-					#pragma omp simd
-					for(int y=0 ; y<r ; y++)
+				if(mode == 0)
+				{					
+					if(i0 == thread_start[th][0] || i0 == i0_end)
 					{
-						matval[y] += pr0[y] * mv1[y]; // dot TTV
-					}	
+						const int row_id = t->ind[0][i0];
+						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]);
+						#ifdef OMP
+						mutex_set_lock(mutex,row_id);
+						#endif						
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							matval[y] += pr0[y] * mv1[y]; // saxpy
+						}
+
+						#ifdef OMP
+						mutex_unset_lock(mutex,row_id);
+						#endif
+					}
+					else
+					{
+						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]);
+						#pragma omp simd
+						for(int y=0 ; y<r ; y++)
+						{
+							matval[y] += pr0[y] * mv1[y]; // dot TTV
+						}			
+					}
 				}
 				else if (mode == 1)
 				{	// MTTKRP for mode 1
@@ -1684,7 +1747,7 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 	
 	if(mode == 0)
 	{
-		reduce_mode_0(t,mats[mode]);
+		//reduce_mode_0(t,mats[mode]);
 	}
 	else if (privatized)
 	{

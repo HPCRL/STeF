@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 	for(i=0 ; i<nmode ; i++)
 	{
 		if(i == 0)
-			mats[i] = create_matrix(t->mlen[i]+num_th,r,1);
+			mats[i] = create_matrix(t->mlen[i],r,1);
 		else
 			mats[i] = create_matrix(t->mlen[i],r,1);
 	}
