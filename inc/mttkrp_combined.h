@@ -899,6 +899,7 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 		memset(partial_results,0,sizeof(TYPE)*partial_results_size);
 
 		TYPE* pr = partial_results;
+		TYPE* p0 = partial_results+(nmode-1)*r;
 
 		idx_t i0_end = MIN(thread_start[th+1][0] + 1 , t->fiber_count[0]);
 		for(idx_t i0 = thread_start[th][0] ; i0 < i0_end ; i0++)
@@ -978,23 +979,12 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 				{					
 					if(i0 == thread_start[th][0] || i0 == i0_end-1)
 					{
-						const int row_id = t->ind[0][i0];
-						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (row_id);
-						#ifdef OMP
-						mutex_set_lock(mutex,row_id);
-						//if(row_id == 2)							printf("locking %d",th);
-						#endif						
-						//printf("lock %d",row_id);
+						TYPE* matval = p0 ; 
 						#pragma omp simd
 						for(int y=0 ; y<r ; y++)
 						{
-							matval[y] += pr[y] * mv2[y]; // saxpy
+							matval[y] += pr[y] * mv2[y]; // TTV for first mode
 						}
-
-						#ifdef OMP
-						//if(row_id == 2)							printf("unlocking %d\n",th);
-						mutex_unset_lock(mutex,row_id);
-						#endif
 					}
 					else
 					{
@@ -1036,6 +1026,25 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 						#endif
 					}					
 				}
+			}
+
+			if(mode == 0 && (i0 == thread_start[th][0] || i0 == i0_end-1))
+			{
+				const int row_id = t->ind[0][i0];
+				TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]);
+				#ifdef OMP
+				mutex_set_lock(mutex,row_id);				
+				#endif
+				#pragma omp simd
+				for(int y=0 ; y<r ; y++)
+				{
+					matval[y] += p0[y]; 
+				}
+
+				#ifdef OMP				
+				mutex_unset_lock(mutex,row_id);
+				#endif
+				memset(p0,0,sizeof(TYPE)*r);
 			}
 		}
 		
@@ -1157,6 +1166,8 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 
 		TYPE* pr0 = partial_results;
 		TYPE* pr1 = partial_results + r;
+		TYPE* p0  = partial_results + 2*r;
+		memset(p0,0,sizeof(TYPE)*r);
 
 		idx_t i0_end = MIN(thread_start[th+1][0]+1,t->fiber_count[0]);
 		for(idx_t i0 = thread_start[th][0] ; i0 < i0_end ; i0++)
@@ -1295,21 +1306,13 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 				if(mode == 0)
 				{					
 					if(i0 == thread_start[th][0] || i0 == i0_end -1 )
-					{
-						const int row_id = t->ind[0][i0];
-						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]);
-						#ifdef OMP
-						mutex_set_lock(mutex,row_id);
-						#endif						
+					{						
+						TYPE* matval = p0;									
 						#pragma omp simd
 						for(int y=0 ; y<r ; y++)
 						{
 							matval[y] += pr0[y] * mv1[y]; // saxpy
 						}
-
-						#ifdef OMP
-						mutex_unset_lock(mutex,row_id);
-						#endif
 					}
 					else
 					{
@@ -1351,6 +1354,25 @@ int mttkrp_combined_lb_4(csf* t, int r, matrix** mats, int profile )
 					
 				}
 			} // End of loop for traversing mode 1
+
+			if(mode == 0 && (i0 == thread_start[th][0] || i0 == i0_end-1))
+			{
+				const int row_id = t->ind[0][i0];
+				TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (row_id);
+				#ifdef OMP
+				mutex_set_lock(mutex,row_id);				
+				#endif
+				#pragma omp simd
+				for(int y=0 ; y<r ; y++)
+				{
+					matval[y] += p0[y]; 
+				}
+
+				#ifdef OMP				
+				mutex_unset_lock(mutex,row_id);
+				#endif
+				memset(p0,0,sizeof(TYPE)*r);
+			}
 		} // End of loop for traversing mode 0
 		
 
@@ -1464,10 +1486,12 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 		#endif
 		auto time_start = std::chrono::high_resolution_clock::now();
 		TYPE* partial_results = (TYPE*) malloc(partial_results_size*sizeof(TYPE));
+
 		TYPE* pr0 = partial_results;
 		TYPE* pr1 = partial_results + r;
 		TYPE* pr2 = partial_results + 2*r;
-
+		TYPE* p0  = partial_results + 3*r;
+		memset(p0,0,sizeof(TYPE)*r);
 
 		idx_t i0_end = MIN(thread_start[th+1][0]+1,t->fiber_count[0]);
 		for(idx_t i0 = thread_start[th][0] ; i0 < i0_end ; i0++)
@@ -1675,20 +1699,12 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 				{					
 					if(i0 == thread_start[th][0] || i0 == i0_end - 1)
 					{
-						const int row_id = t->ind[0][i0];
-						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]);
-						#ifdef OMP
-						mutex_set_lock(mutex,row_id);
-						#endif						
+						TYPE* matval = p0;					
 						#pragma omp simd
 						for(int y=0 ; y<r ; y++)
 						{
 							matval[y] += pr0[y] * mv1[y]; // saxpy
 						}
-
-						#ifdef OMP
-						mutex_unset_lock(mutex,row_id);
-						#endif
 					}
 					else
 					{
@@ -1730,6 +1746,24 @@ int mttkrp_combined_lb_5(csf* t, int r, matrix** mats, int profile )
 					
 				}
 			} // End of loop for traversing mode 1
+			if(mode == 0 && (i0 == thread_start[th][0] || i0 == i0_end-1))
+			{
+				const int row_id = t->ind[0][i0];
+				TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (t->ind[0][i0]);
+				#ifdef OMP
+				mutex_set_lock(mutex,row_id);				
+				#endif
+				#pragma omp simd
+				for(int y=0 ; y<r ; y++)
+				{
+					matval[y] += p0[y]; 
+				}
+
+				#ifdef OMP				
+				mutex_unset_lock(mutex,row_id);
+				#endif
+				memset(p0,0,sizeof(TYPE)*r);
+			}
 		} // End of loop for traversing mode 0
 		
 
