@@ -976,7 +976,7 @@ int mttkrp_combined_lb_3(csf* t, int r, matrix** mats, int profile )
 				
 				if(mode == 0)
 				{					
-					if(i0 == thread_start[th][0] || i0 == i0_end)
+					if(i0 == thread_start[th][0] || i0 == i0_end-1)
 					{
 						const int row_id = t->ind[0][i0];
 						TYPE* matval = mats[0]->val + ((mats[0]) -> dim2) * (row_id);
