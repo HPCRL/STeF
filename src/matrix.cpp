@@ -8,7 +8,7 @@ matrix* create_matrix(int dim1, int dim2, TYPE val)
 	matrix* res =(matrix*) malloc(sizeof(matrix));
 	res->dim1 = dim1;
 	res->dim2 = dim2;
-	res->val = (TYPE*) malloc(dim1*dim2*sizeof(TYPE));
+	res->val = (TYPE*) malloc(res->dim1*res->dim2*((idx_t)sizeof(TYPE)));
 
 	if (res->val == NULL)
 	{
