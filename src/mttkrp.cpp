@@ -958,7 +958,10 @@ int mttkrp_fused_init_ms(csf* t,int r,bool cap,bool* memo)
 	{
 		total_space += (t->fiber_count[i])*r*sizeof(TYPE); // Space for intvals
 	}	
-
+	for(int i=0 ; i< t->nmode ; i++)
+	{
+		total_space += (t->mlen[i])*r*sizeof(TYPE); // Space for factorization matrices
+	}
 	idx_t max_len = 1;
 
 	idx_t remaining_memory_space = 0;
@@ -974,6 +977,7 @@ int mttkrp_fused_init_ms(csf* t,int r,bool cap,bool* memo)
 		}
 	}
 	total_space += max_len*r*num_th*sizeof(TYPE);
+	//printf("%llu\n",max_len);
 
 	// Print total space requirement
 	if(total_space >= 1073741824)
