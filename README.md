@@ -8,7 +8,7 @@ Sparse tensor decomposition, such as Canonical Polyadic Decomposition (CPD), pla
 
 In this code, we present an innovative design space exploration for sparse CPD. Our exploration covers various factors, including whether partial MTTKRP results should be saved, different mode permutations, and modeling the total volume of data movement to and from memory. Additionally, we propose a fine-grained load balancing method that supports higher levels of parallelization.
 
-This repository houses the C++ implementation of our proposed techniques and optimizations discussed in the paper. By leveraging this code, you can explore different strategies to enhance the performance and efficiency of sparse CPD. Our implementations include features such as saving partial MTTKRP results, mode permutations, and minimizing data movement to and from memory. Furthermore, we introduce a fine-grained load balancing method that enables efficient parallelization.
+This repository houses the C++ implementation of our proposed techniques and optimizations discussed in the paper. By leveraging this code, you can explore different strategies to enhance the performance and efficiency of sparse CPD. Our implementations include features such as saving partial MTTKRP results, mode permutations, and minimizing data movement to and from memory. Furthermore, we introduce a fine-grained load-balancing method that enables efficient parallelization.
 
 ## Paper
 
@@ -27,3 +27,9 @@ To utilize the STeF framework, follow the instructions below:
 
 ``` make ```
 
+## How to Use 
+
+Currently, a clean-up is in progress. You can use the version described as `STeF` in "Sparsity-Aware Tensor Decomposition" paper as follows. Changing the cache size parameter will only affect the model data size movement and it should be in Bytes. 
+```
+./bin/STeF.exe <tensor name> <number of ranks (optional, defaults to 32)> <cache size (optional, defaults to 1MB)>
+```
