@@ -120,9 +120,11 @@ int main(int argc, char** argv)
 	if(argc > 2)
 		r = atoi(argv[2]);
 
-	long cache_size = 8*1024*1024;
+	long cache_size = 32*1024*1024;
 	if(argc > 3)
 		cache_size = atoi(argv[3]);
+
+	cache_size /= sizeof(TYPE);
 
 	t->intval = NULL;
 
