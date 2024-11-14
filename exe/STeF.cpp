@@ -95,7 +95,7 @@ bool* get_model(long cache_size, csf* t, int r)
 int main(int argc, char** argv)
 {
 	int nmode,i,r;
-	int debug = 1;
+	int debug = 0;
 	csf* t = malloc_csf();
 	coo* dt = NULL; 
 	int profile = -1;
@@ -201,7 +201,7 @@ int main(int argc, char** argv)
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> diff = end-start;
             total += diff.count();
-            printf("IS is %s, %s for mode %d %lf \n",save_str,(is_atomic ? "atomic    " : "privatized"),t->modeid[mode],diff.count());
+            printf("Intermediate results save array is %s, %s for mode %d %lf \n",save_str,(is_atomic ? "atomic    " : "privatized"),t->modeid[mode],diff.count());
             // double cdiff = ((double) (cend - cstart)) / CLOCKS_PER_SEC;
             // printf("Clock time for mode %d is %lf \n",t->modeid[mode],cdiff);
             if(debug)
@@ -239,7 +239,7 @@ int main(int argc, char** argv)
 
 	//free(t->intval[1]);
 	free_csf(t);
-	free_coo(dt);
+	// free_coo(dt);
 	//rem(t);
 	//rem(dt);
 	for(i=0 ; i<nmode ; i++)
